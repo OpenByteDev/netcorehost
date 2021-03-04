@@ -10,7 +10,7 @@ license = "MIT"
 authors = ["OpenByte <development.openbyte@gmail.com>"]
 edition = "2018"
 categories = ["api-bindings", "external-ffi-bindings"]
-keywords = ["nethost", "hostfxr", ".NET Core", "bindings", "coreclr"]
+keywords = ["nethost", "hostfxr", "dotnet", "bindings", "coreclr"]
 
 [dependencies]
 dlopen = "0.1"
