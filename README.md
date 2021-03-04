@@ -1,5 +1,6 @@
-# NetCoreHost
+# netcorehost
 
+[![Build](https://github.com/OpenByteDev/netcorehost/actions/workflows/build.yml/badge.svg)](https://github.com/OpenByteDev/netcorehost/actions/workflows/build.yml)
 [![crates.io](https://img.shields.io/crates/v/netcorehost.svg)](https://crates.io/crates/netcorehost)
 [![Documentation](https://docs.rs/netcorehost/badge.svg)](https://docs.rs/netcorehost)
 [![dependency status](https://deps.rs/repo/github/openbytedev/netcorehost/status.svg)](https://deps.rs/repo/github/openbytedev/netcorehost)
