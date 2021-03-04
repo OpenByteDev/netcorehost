@@ -9,4 +9,4 @@
 A .NET Core hosting library written in Rust with included bindings for `nethost` and `hostfxr`.
 
 ## License
-Licensed under MIT license ([LICENSE](https://github.com/OpenByteDev/pancakestack/blob/master/LICENSE) or http://opensource.org/licenses/MIT)
+Licensed under MIT license ([LICENSE](https://github.com/OpenByteDev/netcorehost/blob/master/LICENSE) or http://opensource.org/licenses/MIT)
