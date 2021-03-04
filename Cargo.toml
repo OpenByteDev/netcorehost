@@ -1,0 +1,26 @@
+[package]
+name = "netcorehost"
+version = "0.1.0"
+description = "A .NET Core hosting library."
+readme = "README.md"
+repository = "https://github.com/OpenByteDev/netcorehost"
+homepage = "https://github.com/OpenByteDev/netcorehost"
+documentation = "https://docs.rs/netcorehost"
+license = "MIT"
+authors = ["OpenByte <development.openbyte@gmail.com>"]
+edition = "2018"
+categories = ["api-bindings", "external-ffi-bindings"]
+keywords = ["nethost", "hostfxr", ".NET Core", "bindings", "coreclr"]
+
+[dependencies]
+dlopen = "0.1"
+dlopen_derive = "0.1"
+widestring = "0.4"
+num_enum = "0.5"
+quick-error = "2.0"
+
+[dev-dependencies]
+path-absolutize = "3.0"
+
+[features]
+nethost_bin = []

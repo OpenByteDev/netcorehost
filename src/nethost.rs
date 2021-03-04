@@ -1,0 +1,109 @@
+use crate::{
+    bindings::{
+        consts::MAX_PATH,
+        nethost::{get_hostfxr_parameters, NethostLib},
+        type_aliases::char_t,
+    },
+    error::Error,
+    error::HostExitCode,
+    hostfxr::Hostfxr,
+};
+use dlopen::wrapper::Container;
+use std::{
+    ffi::{OsStr, OsString},
+    mem::MaybeUninit,
+    ptr,
+};
+use widestring::WideCStr;
+
+pub struct Nethost {
+    lib: Container<NethostLib>,
+}
+
+impl Nethost {
+    /// Loads the nethost library from the given path.
+    pub fn load_from_path<T: AsRef<OsStr>>(path: T) -> Result<Self, Error> {
+        Ok(Self {
+            lib: unsafe { Container::load(path)? },
+        })
+    }
+
+    #[cfg(feature = "nethost_bin")]
+    pub fn load() -> Result<Self, Error> {
+        Self::load_from_path("nethost.dll")
+    }
+
+    /// Gets the path to the hostfxr library.
+    pub fn get_hostfxr_path(&self) -> Result<OsString, Error> {
+        unsafe { self.get_hostfxr_path_with_parameters(ptr::null()) }
+    }
+
+    /// Gets the path to the hostfxr library.
+    /// Hostfxr is located as if the `assembly_path` is the apphost.
+    pub fn get_hostfxr_path_with_assembly_path<P: AsRef<WideCStr>>(
+        &self,
+        assembly_path: P,
+    ) -> Result<OsString, Error> {
+        let parameters =
+            get_hostfxr_parameters::with_assembly_path(assembly_path.as_ref().as_ptr());
+        unsafe { self.get_hostfxr_path_with_parameters(&parameters) }
+    }
+
+    /// Gets the path to the hostfxr library.
+    /// Hostfxr is located as if an application is started using 'dotnet app.dll', which means it will be
+    /// searched for under the `dotnet_root` path.
+    pub fn get_hostfxr_path_with_dotnet_root<P: AsRef<WideCStr>>(
+        &self,
+        dotnet_root: P,
+    ) -> Result<OsString, Error> {
+        let parameters = get_hostfxr_parameters::with_dotnet_root(dotnet_root.as_ref().as_ptr());
+        unsafe { self.get_hostfxr_path_with_parameters(&parameters) }
+    }
+
+    unsafe fn get_hostfxr_path_with_parameters(
+        &self,
+        parameters: *const get_hostfxr_parameters,
+    ) -> Result<OsString, Error> {
+        let mut path_buffer = MaybeUninit::uninit_array::<MAX_PATH>();
+        let mut path_length = path_buffer.len();
+
+        let result = self.lib.get_hostfxr_path(
+            path_buffer.as_mut_ptr() as *mut char_t,
+            &mut path_length,
+            parameters,
+        );
+        HostExitCode::from(result).to_result()?;
+
+        let path_slice = MaybeUninit::slice_assume_init_ref(&path_buffer[..path_length]);
+        Ok(WideCStr::from_slice_with_nul(path_slice)
+            .unwrap()
+            .to_os_string())
+    }
+
+    /// Retrieves the path to the hostfxr library and loads it.
+    pub fn load_hostfxr(&self) -> Result<Hostfxr, Error> {
+        let hostfxr_path = self.get_hostfxr_path()?;
+        Hostfxr::load_from_path(hostfxr_path)
+    }
+
+    /// Retrieves the path to the hostfxr library and loads it.
+    /// Hostfxr is located as if the `assembly_path` is the apphost.
+    pub fn load_hostfxr_with_assembly_path<P: AsRef<WideCStr>>(
+        &self,
+        assembly_path: P,
+    ) -> Result<Hostfxr, Error> {
+        let hostfxr_path = self.get_hostfxr_path_with_assembly_path(assembly_path)?;
+        Hostfxr::load_from_path(hostfxr_path)
+    }
+
+    /// Retrieves the path to the hostfxr library and loads it.
+    /// Hostfxr is located as if an application is started using 'dotnet app.dll', which means it will be
+    /// searched for under the `dotnet_root` path.
+    pub fn load_hostfxr_with_dotnet_root<P: AsRef<WideCStr>>(
+        &self,
+        dotnet_root: P,
+    ) -> Result<Hostfxr, Error> {
+        let hostfxr_path = self.get_hostfxr_path_with_dotnet_root(dotnet_root)?;
+        Hostfxr::load_from_path(hostfxr_path)
+    }
+}
