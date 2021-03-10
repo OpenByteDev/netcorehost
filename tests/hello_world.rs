@@ -1,6 +1,5 @@
 use std::{path::Path, ptr};
 
-use netcorehost::nethost::Nethost;
 use path_absolutize::Absolutize;
 use widestring::WideCString;
 
@@ -12,8 +11,7 @@ fn hello_world() -> Result<(), Box<dyn std::error::Error>> {
     let type_name = "Test.Program, Test";
     let method_name = "Hello";
 
-    let nethost = Nethost::load_from_path("src\\runtimes\\win-x64\\native\\nethost.dll")?;
-    let hostfxr = nethost.load_hostfxr()?;
+    let hostfxr = netcorehost::nethost::load_hostfxr()?;
     let context = hostfxr.initialize_for_runtime_config(&WideCString::from_os_str(
         runtime_config_path.as_os_str(),
     )?)?;

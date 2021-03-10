@@ -22,5 +22,5 @@ quick-error = "2.0"
 [dev-dependencies]
 path-absolutize = "3.0"
 
-[features]
-nethost_bin = []
+[build-dependencies]
+platforms = "1.1"

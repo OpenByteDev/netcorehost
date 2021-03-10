@@ -1,6 +1,5 @@
 use std::path::Path;
 
-use netcorehost::nethost::Nethost;
 use path_absolutize::Absolutize;
 use widestring::WideCString;
 
@@ -9,8 +8,7 @@ fn runtime_properties() -> Result<(), Box<dyn std::error::Error>> {
     let test_out_dir = Path::new("tests\\Test\\bin\\Debug\\net5.0").absolutize()?;
     let runtime_config_path = Path::join(&test_out_dir, "Test.runtimeconfig.json");
 
-    let nethost = Nethost::load_from_path("src\\runtimes\\win-x64\\native\\nethost.dll")?;
-    let hostfxr = nethost.load_hostfxr()?;
+    let hostfxr = netcorehost::nethost::load_hostfxr()?;
     let context = hostfxr.initialize_for_runtime_config(&WideCString::from_os_str(
         runtime_config_path.as_os_str(),
     )?)?;
