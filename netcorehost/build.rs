@@ -17,7 +17,7 @@ fn main() {
         (OS::Linux, Arch::ARM, _) => "linux-arm",
         (OS::Linux, Arch::AARCH64, _) => "linux-arm64",
         (OS::iOS, Arch::X86_64, _) => "osx-x64",
-        _ => panic!("plattform not supported."),
+        _ => panic!("platform not supported."),
     };
 
     println!("cargo:rustc-link-search=runtimes\\{}", target);
