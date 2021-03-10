@@ -2,7 +2,6 @@ use std::{mem::size_of, ptr};
 
 use super::type_aliases::{char_t, size_t};
 
-// #[link(name = "nethost")]
 extern "C" {
     /// Get the path to the hostfxr library
     ///

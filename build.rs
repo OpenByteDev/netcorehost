@@ -16,6 +16,6 @@ fn main() {
         _ => panic!("plattform not supported.")
     };
 
-    println!("cargo:rustc-link-lib=static=nethost");
     println!("cargo:rustc-link-search=runtimes\\{}", target);
+    println!("cargo:rustc-link-lib=libnethost");
 }
