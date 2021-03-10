@@ -22,6 +22,8 @@ jobs:
           toolchain: nightly
           override: true
     - name: Build
+      working-directory: ./netcorehost
       run: cargo build --verbose
     - name: Run tests
+      working-directory: ./netcorehost
       run: cargo test --verbose
