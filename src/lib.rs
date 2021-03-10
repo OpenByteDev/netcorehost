@@ -1,5 +1,4 @@
 #![feature(maybe_uninit_uninit_array, maybe_uninit_extra, maybe_uninit_slice)]
-#![feature(vec_into_raw_parts)]
 #![allow(clippy::missing_safety_doc)]
 
 #[macro_use]
