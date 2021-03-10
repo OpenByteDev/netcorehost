@@ -1,0 +1,1 @@
+dotnet run --project "NethostDownloader\NethostDownloader.csproj" --framework "net6.0" --configuration "Release" -- --runtimes-directory "netcorehost\runtimes" --delete-old
