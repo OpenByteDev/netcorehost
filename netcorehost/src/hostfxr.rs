@@ -7,8 +7,7 @@ use crate::{
         },
         type_aliases::char_t,
     },
-    error::Error,
-    error::{HostExitCode, KnownHostExitCode},
+    Error, HostExitCode, KnownHostExitCode,
 };
 use dlopen::wrapper::Container;
 use std::{

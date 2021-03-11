@@ -8,6 +8,11 @@ extern crate quick_error;
 
 #[allow(non_camel_case_types, dead_code)]
 pub mod bindings;
-pub mod error;
 pub mod hostfxr;
 pub mod nethost;
+
+mod host_exit_code;
+pub use host_exit_code::*;
+
+mod error;
+pub use error::*;

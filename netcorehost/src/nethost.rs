@@ -1,8 +1,8 @@
 use crate::{
     bindings::{consts::MAX_PATH, nethost::get_hostfxr_parameters, type_aliases::char_t},
     error::Error,
-    error::HostExitCode,
     hostfxr::Hostfxr,
+    HostExitCode,
 };
 use std::{ffi::OsString, mem::MaybeUninit, ptr};
 use widestring::WideCStr;
