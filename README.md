@@ -46,7 +46,7 @@ fn hello_world() {
         &WideCString::from_str("Test.Program, Test").unwrap(),
         &WideCString::from_str("Hello").unwrap(),
     );
-    let result = unsafe { hello(ptr::null(), 0) };
+    let result = unsafe { hello(std::ptr::null(), 0) };
 }
 ```
 
