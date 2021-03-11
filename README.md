@@ -17,7 +17,7 @@ use netcorehost::nethost;
 use widestring::WideCString;
 
 fn run_app() {
-    let hostfxr = netcorehost::nethost::load_hostfxr().unwrap();
+    let hostfxr = nethost::load_hostfxr().unwrap();
     
     let assembly_path = WideCString::from_str("Test.dll").unwrap();
     let args = [assembly_path.borrow()]; // first argument is the app path
@@ -34,7 +34,7 @@ use netcorehost::nethost;
 use widestring::WideCString;
 
 fn hello_world() {
-    let hostfxr = netcorehost::nethost::load_hostfxr().unwrap();
+    let hostfxr = nethost::load_hostfxr().unwrap();
 
     let context = hostfxr.initialize_for_runtime_config(
         &WideCString::from_str("Test.runtimeconfig.json").unwrap()
