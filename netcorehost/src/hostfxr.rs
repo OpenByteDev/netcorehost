@@ -3,7 +3,7 @@ use crate::{
         hostfxr::{
             component_entry_point_fn, get_function_pointer_fn, hostfxr_delegate_type,
             hostfxr_handle, hostfxr_initialize_parameters,
-            load_assembly_and_get_function_pointer_fn, HostfxrLib,
+            load_assembly_and_get_function_pointer_fn, HostfxrLib, UNMANAGED_CALLERS_ONLY_METHOD,
         },
         type_aliases::char_t,
     },
@@ -14,6 +14,7 @@ use std::{
     collections::HashMap,
     ffi::OsStr,
     iter::FromIterator,
+    marker::PhantomData,
     mem::{self, MaybeUninit},
     ptr,
 };
@@ -30,17 +31,25 @@ impl Hostfxr {
         })
     }
 
-    pub fn initialize_for_dotnet_command_line(
+    pub fn initialize_for_dotnet_command_line<P: AsRef<WideCStr>>(
+        &self,
+        app_path: P,
+    ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
+        self.initialize_for_dotnet_command_line_with_args(&[app_path.as_ref()])
+    }
+    pub fn initialize_for_dotnet_command_line_with_args(
         &self,
         args: &[&WideCStr],
-    ) -> Result<HostfxrContext, Error> {
-        unsafe { self.initialize_for_dotnet_command_line_with_parameters(args, ptr::null()) }
+    ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
+        unsafe {
+            self.initialize_for_dotnet_command_line_with_parameters(args.as_ref(), ptr::null())
+        }
     }
     pub fn initialize_for_dotnet_command_line_with_host_path<H: AsRef<WideCStr>>(
         &self,
         args: &[&WideCStr],
         host_path: H,
-    ) -> Result<HostfxrContext, Error> {
+    ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
         let parameters = hostfxr_initialize_parameters::with_host_path(host_path.as_ref().as_ptr());
         unsafe { self.initialize_for_dotnet_command_line_with_parameters(args, &parameters) }
     }
@@ -48,7 +57,7 @@ impl Hostfxr {
         &self,
         args: &[&WideCStr],
         dotnet_root: R,
-    ) -> Result<HostfxrContext, Error> {
+    ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
         let parameters =
             hostfxr_initialize_parameters::with_dotnet_root(dotnet_root.as_ref().as_ptr());
         unsafe { self.initialize_for_dotnet_command_line_with_parameters(args, &parameters) }
@@ -57,7 +66,7 @@ impl Hostfxr {
         &self,
         args: &[&WideCStr],
         parameters: *const hostfxr_initialize_parameters,
-    ) -> Result<HostfxrContext, Error> {
+    ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
         let mut hostfxr_handle = MaybeUninit::<hostfxr_handle>::uninit();
 
         let result = self.lib.hostfxr_initialize_for_dotnet_command_line(
@@ -75,7 +84,7 @@ impl Hostfxr {
     pub fn initialize_for_runtime_config<P: AsRef<WideCStr>>(
         &self,
         runtime_config_path: P,
-    ) -> Result<HostfxrContext, Error> {
+    ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, Error> {
         unsafe {
             self.initialize_for_runtime_config_with_parameters(runtime_config_path, ptr::null())
         }
@@ -84,7 +93,7 @@ impl Hostfxr {
         &self,
         runtime_config_path: P,
         host_path: H,
-    ) -> Result<HostfxrContext, Error> {
+    ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, Error> {
         let parameters = hostfxr_initialize_parameters::with_host_path(host_path.as_ref().as_ptr());
         unsafe {
             self.initialize_for_runtime_config_with_parameters(runtime_config_path, &parameters)
@@ -97,7 +106,7 @@ impl Hostfxr {
         &self,
         runtime_config_path: P,
         dotnet_root: R,
-    ) -> Result<HostfxrContext, Error> {
+    ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, Error> {
         let parameters =
             hostfxr_initialize_parameters::with_dotnet_root(dotnet_root.as_ref().as_ptr());
         unsafe {
@@ -108,7 +117,7 @@ impl Hostfxr {
         &self,
         runtime_config_path: P,
         parameters: *const hostfxr_initialize_parameters,
-    ) -> Result<HostfxrContext, Error> {
+    ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, Error> {
         let mut hostfxr_handle = MaybeUninit::uninit();
 
         let result = self.lib.hostfxr_initialize_for_runtime_config(
@@ -123,14 +132,23 @@ impl Hostfxr {
     }
 }
 
-pub struct HostfxrContext<'a> {
+type InitializedForRuntimeConfig = ();
+type InitializedForCommandLine = ();
+
+#[derive(Clone)]
+pub struct HostfxrContext<'a, I> {
     handle: hostfxr_handle,
     hostfxr: &'a Hostfxr,
+    context_type: PhantomData<&'a I>,
 }
 
-impl<'a> HostfxrContext<'a> {
+impl<'a, I> HostfxrContext<'a, I> {
     fn new(handle: hostfxr_handle, hostfxr: &'a Hostfxr) -> Self {
-        Self { handle, hostfxr }
+        Self {
+            handle,
+            hostfxr,
+            context_type: PhantomData,
+        }
     }
 
     pub fn get_runtime_property_value_owned<N: AsRef<WideCStr>>(
@@ -231,21 +249,16 @@ impl<'a> HostfxrContext<'a> {
         self.get_runtime_properties_owned()
             .map(|(keys, values)| keys.into_iter().zip(values.into_iter()).collect())
     }
-    pub unsafe fn get_runtime_properties_as_map_borrowed(
+    pub unsafe fn get_runtime_properties_borrowed_as_map(
         &self,
     ) -> Result<HashMap<&WideCStr, &WideCStr>, Error> {
         self.get_runtime_properties_borrowed()
             .map(|(keys, values)| keys.into_iter().zip(values.into_iter()).collect())
     }
-    pub fn get_runtime_properties_as_map_owned(
+    pub fn get_runtime_properties_owned_as_map(
         &self,
     ) -> Result<HashMap<WideCString, WideCString>, Error> {
         self.get_runtime_properties_collected()
-    }
-
-    pub fn run_app(&self) -> HostExitCode {
-        let result = unsafe { self.hostfxr.lib.hostfxr_run_app(self.handle) };
-        HostExitCode::from(result)
     }
 
     pub unsafe fn get_runtime_delegate(
@@ -263,7 +276,7 @@ impl<'a> HostfxrContext<'a> {
 
         Ok(delegate.assume_init())
     }
-    pub fn get_load_assembly_and_get_function_pointer_delegate(
+    fn get_load_assembly_and_get_function_pointer_delegate(
         &self,
     ) -> Result<load_assembly_and_get_function_pointer_fn, Error> {
         unsafe {
@@ -273,7 +286,7 @@ impl<'a> HostfxrContext<'a> {
             .map(|ptr| mem::transmute(ptr))
         }
     }
-    pub fn get_get_function_pointer_delegate(&self) -> Result<get_function_pointer_fn, Error> {
+    fn get_get_function_pointer_delegate(&self) -> Result<get_function_pointer_fn, Error> {
         unsafe {
             self.get_runtime_delegate(hostfxr_delegate_type::hdt_get_function_pointer)
                 .map(|ptr| mem::transmute(ptr))
@@ -300,40 +313,82 @@ impl<'a> HostfxrContext<'a> {
     }
 }
 
-impl Drop for HostfxrContext<'_> {
+impl<'a> HostfxrContext<'a, InitializedForCommandLine> {
+    pub fn run_app(&self) -> HostExitCode {
+        let result = unsafe { self.hostfxr.lib.hostfxr_run_app(self.handle) };
+        HostExitCode::from(result)
+    }
+}
+
+impl<I> Drop for HostfxrContext<'_, I> {
     fn drop(&mut self) {
         let _ = unsafe { self.close() };
     }
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct DelegateLoader {
     get_load_assembly_and_get_function_pointer: load_assembly_and_get_function_pointer_fn,
     get_function_pointer: get_function_pointer_fn,
 }
 
 impl DelegateLoader {
+    unsafe fn _load_assembly_and_get_function_pointer(
+        &self,
+        assembly_path: *const char_t,
+        type_name: *const char_t,
+        method_name: *const char_t,
+        delegate_type_name: *const char_t,
+    ) -> *const () {
+        let mut delegate = MaybeUninit::uninit();
+        (self.get_load_assembly_and_get_function_pointer)(
+            assembly_path,
+            type_name,
+            method_name,
+            delegate_type_name,
+            ptr::null(),
+            delegate.as_mut_ptr(),
+        );
+        delegate.assume_init()
+    }
+
+    unsafe fn _get_function_pointer(
+        &self,
+        type_name: *const char_t,
+        method_name: *const char_t,
+        delegate_type_name: *const char_t,
+    ) -> *const () {
+        let mut delegate = MaybeUninit::uninit();
+        (self.get_function_pointer)(
+            type_name,
+            method_name,
+            delegate_type_name,
+            ptr::null(),
+            ptr::null(),
+            delegate.as_mut_ptr(),
+        );
+        delegate.assume_init()
+    }
+
     pub fn load_assembly_and_get_function_pointer<
         A: AsRef<WideCStr>,
         T: AsRef<WideCStr>,
         M: AsRef<WideCStr>,
+        D: AsRef<WideCStr>,
     >(
         &self,
         assembly_path: A,
         type_name: T,
         method_name: M,
-        delegate_type_name: Option<&WideCStr>,
+        delegate_type_name: D,
     ) -> *const () {
         unsafe {
-            let mut delegate = MaybeUninit::uninit();
-            (self.get_load_assembly_and_get_function_pointer)(
+            self._load_assembly_and_get_function_pointer(
                 assembly_path.as_ref().as_ptr(),
                 type_name.as_ref().as_ptr(),
                 method_name.as_ref().as_ptr(),
-                delegate_type_name.map_or(ptr::null(), |e| e.as_ptr()),
-                ptr::null(),
-                delegate.as_mut_ptr(),
-            );
-            delegate.assume_init()
+                delegate_type_name.as_ref().as_ptr(),
+            )
         }
     }
 
@@ -347,32 +402,49 @@ impl DelegateLoader {
         type_name: T,
         method_name: M,
     ) -> component_entry_point_fn {
-        let fn_ptr = self.load_assembly_and_get_function_pointer(
-            assembly_path.as_ref(),
-            type_name.as_ref(),
-            method_name.as_ref(),
-            None,
-        );
-        unsafe { mem::transmute(fn_ptr) }
+        unsafe {
+            let fn_ptr = self._load_assembly_and_get_function_pointer(
+                assembly_path.as_ref().as_ptr(),
+                type_name.as_ref().as_ptr(),
+                method_name.as_ref().as_ptr(),
+                ptr::null(),
+            );
+            mem::transmute(fn_ptr)
+        }
     }
 
-    pub fn get_function_pointer<T: AsRef<WideCStr>, M: AsRef<WideCStr>>(
+    pub fn load_assembly_and_get_function_pointer_for_unmanaged_callers_only_method<
+        A: AsRef<WideCStr>,
+        T: AsRef<WideCStr>,
+        M: AsRef<WideCStr>,
+    >(
+        &self,
+        assembly_path: A,
+        type_name: T,
+        method_name: M,
+    ) -> *const () {
+        unsafe {
+            self._load_assembly_and_get_function_pointer(
+                assembly_path.as_ref().as_ptr(),
+                type_name.as_ref().as_ptr(),
+                method_name.as_ref().as_ptr(),
+                UNMANAGED_CALLERS_ONLY_METHOD,
+            )
+        }
+    }
+
+    pub fn get_function_pointer<T: AsRef<WideCStr>, M: AsRef<WideCStr>, D: AsRef<WideCStr>>(
         &self,
         type_name: T,
         method_name: M,
-        delegate_type_name: Option<&WideCStr>,
+        delegate_type_name: D,
     ) -> *const () {
         unsafe {
-            let mut delegate = MaybeUninit::uninit();
-            (self.get_function_pointer)(
+            self._get_function_pointer(
                 type_name.as_ref().as_ptr(),
                 method_name.as_ref().as_ptr(),
-                delegate_type_name.map_or(ptr::null(), |e| e.as_ptr()),
-                ptr::null(),
-                ptr::null(),
-                delegate.as_mut_ptr(),
-            );
-            delegate.assume_init()
+                delegate_type_name.as_ref().as_ptr(),
+            )
         }
     }
 
@@ -381,11 +453,35 @@ impl DelegateLoader {
         type_name: T,
         method_name: M,
     ) -> component_entry_point_fn {
-        let fn_ptr = self.get_function_pointer(type_name, method_name, None);
-        unsafe { mem::transmute(fn_ptr) }
+        unsafe {
+            let fn_ptr = self._get_function_pointer(
+                type_name.as_ref().as_ptr(),
+                method_name.as_ref().as_ptr(),
+                ptr::null(),
+            );
+            mem::transmute(fn_ptr)
+        }
+    }
+
+    pub fn get_function_pointer_for_unmanaged_callers_only_method<
+        T: AsRef<WideCStr>,
+        M: AsRef<WideCStr>,
+    >(
+        &self,
+        type_name: T,
+        method_name: M,
+    ) -> *const () {
+        unsafe {
+            self._get_function_pointer(
+                type_name.as_ref().as_ptr(),
+                method_name.as_ref().as_ptr(),
+                UNMANAGED_CALLERS_ONLY_METHOD,
+            )
+        }
     }
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct AssemblyDelegateLoader<A: AsRef<WideCStr>> {
     loader: DelegateLoader,
     assembly_path: A,
@@ -401,11 +497,11 @@ impl<A: AsRef<WideCStr>> AssemblyDelegateLoader<A> {
         }
     }
 
-    pub fn get_function_pointer<T: AsRef<WideCStr>, M: AsRef<WideCStr>>(
+    pub fn get_function_pointer<T: AsRef<WideCStr>, M: AsRef<WideCStr>, D: AsRef<WideCStr>>(
         &self,
         type_name: T,
         method_name: M,
-        delegate_type_name: Option<&WideCStr>,
+        delegate_type_name: D,
     ) -> *const () {
         if !self.assembly_loaded {
             self.loader.load_assembly_and_get_function_pointer(
@@ -435,6 +531,27 @@ impl<A: AsRef<WideCStr>> AssemblyDelegateLoader<A> {
         } else {
             self.loader
                 .get_function_pointer_with_default_signature(type_name, method_name)
+        }
+    }
+
+    pub fn get_function_pointer_for_unmanaged_callers_only_method<
+        T: AsRef<WideCStr>,
+        M: AsRef<WideCStr>,
+    >(
+        &self,
+        type_name: T,
+        method_name: M,
+    ) -> *const () {
+        if !self.assembly_loaded {
+            self.loader
+                .load_assembly_and_get_function_pointer_for_unmanaged_callers_only_method(
+                    self.assembly_path.as_ref(),
+                    type_name,
+                    method_name,
+                )
+        } else {
+            self.loader
+                .get_function_pointer_for_unmanaged_callers_only_method(type_name, method_name)
         }
     }
 }
