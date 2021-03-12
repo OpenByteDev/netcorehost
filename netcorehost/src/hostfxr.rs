@@ -38,19 +38,31 @@ impl Hostfxr {
     ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
         self.initialize_for_dotnet_command_line_with_args(&[app_path.as_ref()])
     }
-    pub fn initialize_for_dotnet_command_line_and_host_path<P: AsRef<WideCStr>, H: AsRef<WideCStr>>(
+    pub fn initialize_for_dotnet_command_line_and_host_path<
+        P: AsRef<WideCStr>,
+        H: AsRef<WideCStr>,
+    >(
         &self,
-        app_path: P,     
+        app_path: P,
         host_path: H,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
-        self.initialize_for_dotnet_command_line_with_args_and_host_path(&[app_path.as_ref()], host_path)
+        self.initialize_for_dotnet_command_line_with_args_and_host_path(
+            &[app_path.as_ref()],
+            host_path,
+        )
     }
-    pub fn initialize_for_dotnet_command_line_and_dotnet_root<P: AsRef<WideCStr>, R: AsRef<WideCStr>>(
+    pub fn initialize_for_dotnet_command_line_and_dotnet_root<
+        P: AsRef<WideCStr>,
+        R: AsRef<WideCStr>,
+    >(
         &self,
-        app_path: P,     
+        app_path: P,
         dotnet_root: R,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
-        self.initialize_for_dotnet_command_line_with_args_and_dotnet_root(&[app_path.as_ref()], dotnet_root)
+        self.initialize_for_dotnet_command_line_with_args_and_dotnet_root(
+            &[app_path.as_ref()],
+            dotnet_root,
+        )
     }
 
     pub fn initialize_for_dotnet_command_line_with_args(
@@ -129,7 +141,7 @@ impl Hostfxr {
             self.initialize_for_runtime_config_with_parameters(runtime_config_path, &parameters)
         }
     }
-    
+
     unsafe fn initialize_for_runtime_config_with_parameters<P: AsRef<WideCStr>>(
         &self,
         runtime_config_path: P,
