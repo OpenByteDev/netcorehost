@@ -16,6 +16,7 @@ use std::{
     iter::FromIterator,
     marker::PhantomData,
     mem::{self, MaybeUninit},
+    path::Path,
     ptr,
 };
 use widestring::{WideCStr, WideCString};
@@ -37,6 +38,21 @@ impl Hostfxr {
     ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
         self.initialize_for_dotnet_command_line_with_args(&[app_path.as_ref()])
     }
+    pub fn initialize_for_dotnet_command_line_and_host_path<P: AsRef<WideCStr>, H: AsRef<WideCStr>>(
+        &self,
+        app_path: P,     
+        host_path: H,
+    ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
+        self.initialize_for_dotnet_command_line_with_args_and_host_path(&[app_path.as_ref()], host_path)
+    }
+    pub fn initialize_for_dotnet_command_line_and_dotnet_root<P: AsRef<WideCStr>, R: AsRef<WideCStr>>(
+        &self,
+        app_path: P,     
+        dotnet_root: R,
+    ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
+        self.initialize_for_dotnet_command_line_with_args_and_dotnet_root(&[app_path.as_ref()], dotnet_root)
+    }
+
     pub fn initialize_for_dotnet_command_line_with_args(
         &self,
         args: &[&WideCStr],
@@ -45,7 +61,7 @@ impl Hostfxr {
             self.initialize_for_dotnet_command_line_with_parameters(args.as_ref(), ptr::null())
         }
     }
-    pub fn initialize_for_dotnet_command_line_with_host_path<H: AsRef<WideCStr>>(
+    pub fn initialize_for_dotnet_command_line_with_args_and_host_path<H: AsRef<WideCStr>>(
         &self,
         args: &[&WideCStr],
         host_path: H,
@@ -53,7 +69,7 @@ impl Hostfxr {
         let parameters = hostfxr_initialize_parameters::with_host_path(host_path.as_ref().as_ptr());
         unsafe { self.initialize_for_dotnet_command_line_with_parameters(args, &parameters) }
     }
-    pub fn initialize_for_dotnet_command_line_with_dotnet_root<R: AsRef<WideCStr>>(
+    pub fn initialize_for_dotnet_command_line_with_args_and_dotnet_root<R: AsRef<WideCStr>>(
         &self,
         args: &[&WideCStr],
         dotnet_root: R,
@@ -113,6 +129,7 @@ impl Hostfxr {
             self.initialize_for_runtime_config_with_parameters(runtime_config_path, &parameters)
         }
     }
+    
     unsafe fn initialize_for_runtime_config_with_parameters<P: AsRef<WideCStr>>(
         &self,
         runtime_config_path: P,
