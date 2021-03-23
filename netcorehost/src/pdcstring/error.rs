@@ -9,6 +9,7 @@ impl From<ffi::NulError> for NulError {
     }
 }
 
+#[cfg(windows)]
 impl From<widestring::NulError<u16>> for NulError {
     fn from(err: widestring::NulError<u16>) -> Self {
         NulError {}
