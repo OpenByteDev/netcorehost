@@ -1,7 +1,8 @@
 use std::{path::Path, ptr};
 
+use netcorehost::nethost;
+use netcorehost::PdCString;
 use path_absolutize::Absolutize;
-use widestring::WideCString;
 
 #[test]
 fn hello_world() -> Result<(), Box<dyn std::error::Error>> {
@@ -11,16 +12,15 @@ fn hello_world() -> Result<(), Box<dyn std::error::Error>> {
     let type_name = "Test.Program, Test";
     let method_name = "Hello";
 
-    let hostfxr = netcorehost::nethost::load_hostfxr()?;
+    let hostfxr = nethost::load_hostfxr()?;
 
-    let context = hostfxr.initialize_for_runtime_config(&WideCString::from_os_str(
-        runtime_config_path.as_os_str(),
-    )?)?;
-    let fn_loader = context
-        .get_delegate_loader_for_assembly(WideCString::from_os_str(assembly_path.as_os_str())?)?;
+    let context =
+        hostfxr.initialize_for_runtime_config(&PdCString::from_os_str(runtime_config_path)?)?;
+    let fn_loader =
+        context.get_delegate_loader_for_assembly(PdCString::from_os_str(assembly_path)?)?;
     let hello = fn_loader.get_function_pointer_with_default_signature(
-        &WideCString::from_str(type_name.to_owned())?,
-        &WideCString::from_str(method_name.to_owned())?,
+        &PdCString::from_str(type_name)?,
+        &PdCString::from_str(method_name)?,
     );
     let result = unsafe { hello(ptr::null(), 0) };
     assert_eq!(result, 42);

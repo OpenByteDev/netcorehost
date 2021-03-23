@@ -15,9 +15,11 @@ keywords = ["nethost", "hostfxr", "dotnet", "bindings", "coreclr"]
 [dependencies]
 dlopen = "0.1"
 dlopen_derive = "0.1"
-widestring = "0.4"
 num_enum = "0.5"
 quick-error = "2.0"
+
+[target.'cfg(windows)'.dependencies]
+widestring = "0.4"
 
 [dev-dependencies]
 path-absolutize = "3.0"

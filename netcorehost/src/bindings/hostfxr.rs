@@ -382,4 +382,4 @@ pub type get_function_pointer_fn = unsafe extern "C" fn(
 
 /// Signature of delegate returned by [`load_assembly_and_get_function_pointer_fn`] when `delegate_type_name == null` (default)
 #[allow(non_camel_case_types)]
-pub type component_entry_point_fn = unsafe fn(*const (), size_t) -> i32;
+pub type component_entry_point_fn = unsafe extern "C" fn(*const (), size_t) -> i32;

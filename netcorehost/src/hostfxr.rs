@@ -1,3 +1,4 @@
+use crate::pdcstring::{PdCStr, PdCString};
 use crate::{
     bindings::{
         hostfxr::{
@@ -16,10 +17,8 @@ use std::{
     iter::FromIterator,
     marker::PhantomData,
     mem::{self, MaybeUninit},
-    path::Path,
     ptr,
 };
-use widestring::{WideCStr, WideCString};
 
 pub struct Hostfxr {
     lib: Container<HostfxrLib>,
@@ -32,16 +31,13 @@ impl Hostfxr {
         })
     }
 
-    pub fn initialize_for_dotnet_command_line<P: AsRef<WideCStr>>(
+    pub fn initialize_for_dotnet_command_line<P: AsRef<PdCStr>>(
         &self,
         app_path: P,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
         self.initialize_for_dotnet_command_line_with_args(&[app_path.as_ref()])
     }
-    pub fn initialize_for_dotnet_command_line_and_host_path<
-        P: AsRef<WideCStr>,
-        H: AsRef<WideCStr>,
-    >(
+    pub fn initialize_for_dotnet_command_line_and_host_path<P: AsRef<PdCStr>, H: AsRef<PdCStr>>(
         &self,
         app_path: P,
         host_path: H,
@@ -52,8 +48,8 @@ impl Hostfxr {
         )
     }
     pub fn initialize_for_dotnet_command_line_and_dotnet_root<
-        P: AsRef<WideCStr>,
-        R: AsRef<WideCStr>,
+        P: AsRef<PdCStr>,
+        R: AsRef<PdCStr>,
     >(
         &self,
         app_path: P,
@@ -67,23 +63,23 @@ impl Hostfxr {
 
     pub fn initialize_for_dotnet_command_line_with_args(
         &self,
-        args: &[&WideCStr],
+        args: &[&PdCStr],
     ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
         unsafe {
             self.initialize_for_dotnet_command_line_with_parameters(args.as_ref(), ptr::null())
         }
     }
-    pub fn initialize_for_dotnet_command_line_with_args_and_host_path<H: AsRef<WideCStr>>(
+    pub fn initialize_for_dotnet_command_line_with_args_and_host_path<H: AsRef<PdCStr>>(
         &self,
-        args: &[&WideCStr],
+        args: &[&PdCStr],
         host_path: H,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
         let parameters = hostfxr_initialize_parameters::with_host_path(host_path.as_ref().as_ptr());
         unsafe { self.initialize_for_dotnet_command_line_with_parameters(args, &parameters) }
     }
-    pub fn initialize_for_dotnet_command_line_with_args_and_dotnet_root<R: AsRef<WideCStr>>(
+    pub fn initialize_for_dotnet_command_line_with_args_and_dotnet_root<R: AsRef<PdCStr>>(
         &self,
-        args: &[&WideCStr],
+        args: &[&PdCStr],
         dotnet_root: R,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
         let parameters =
@@ -92,7 +88,7 @@ impl Hostfxr {
     }
     unsafe fn initialize_for_dotnet_command_line_with_parameters(
         &self,
-        args: &[&WideCStr],
+        args: &[&PdCStr],
         parameters: *const hostfxr_initialize_parameters,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
         let mut hostfxr_handle = MaybeUninit::<hostfxr_handle>::uninit();
@@ -109,7 +105,7 @@ impl Hostfxr {
         Ok(HostfxrContext::new(hostfxr_handle.assume_init(), self))
     }
 
-    pub fn initialize_for_runtime_config<P: AsRef<WideCStr>>(
+    pub fn initialize_for_runtime_config<P: AsRef<PdCStr>>(
         &self,
         runtime_config_path: P,
     ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, Error> {
@@ -117,7 +113,7 @@ impl Hostfxr {
             self.initialize_for_runtime_config_with_parameters(runtime_config_path, ptr::null())
         }
     }
-    pub fn initialize_for_runtime_config_with_host_path<P: AsRef<WideCStr>, H: AsRef<WideCStr>>(
+    pub fn initialize_for_runtime_config_with_host_path<P: AsRef<PdCStr>, H: AsRef<PdCStr>>(
         &self,
         runtime_config_path: P,
         host_path: H,
@@ -127,10 +123,7 @@ impl Hostfxr {
             self.initialize_for_runtime_config_with_parameters(runtime_config_path, &parameters)
         }
     }
-    pub fn initialize_for_runtime_config_with_dotnet_root<
-        P: AsRef<WideCStr>,
-        R: AsRef<WideCStr>,
-    >(
+    pub fn initialize_for_runtime_config_with_dotnet_root<P: AsRef<PdCStr>, R: AsRef<PdCStr>>(
         &self,
         runtime_config_path: P,
         dotnet_root: R,
@@ -142,7 +135,7 @@ impl Hostfxr {
         }
     }
 
-    unsafe fn initialize_for_runtime_config_with_parameters<P: AsRef<WideCStr>>(
+    unsafe fn initialize_for_runtime_config_with_parameters<P: AsRef<PdCStr>>(
         &self,
         runtime_config_path: P,
         parameters: *const hostfxr_initialize_parameters,
@@ -180,16 +173,16 @@ impl<'a, I> HostfxrContext<'a, I> {
         }
     }
 
-    pub fn get_runtime_property_value_owned<N: AsRef<WideCStr>>(
+    pub fn get_runtime_property_value_owned<N: AsRef<PdCStr>>(
         &self,
         name: N,
-    ) -> Result<WideCString, Error> {
+    ) -> Result<PdCString, Error> {
         unsafe { self.get_runtime_property_value_borrowed(name) }.map(|str| str.to_owned())
     }
-    pub unsafe fn get_runtime_property_value_borrowed<N: AsRef<WideCStr>>(
+    pub unsafe fn get_runtime_property_value_borrowed<N: AsRef<PdCStr>>(
         &self,
         name: N,
-    ) -> Result<&WideCStr, Error> {
+    ) -> Result<&PdCStr, Error> {
         let mut value = MaybeUninit::uninit();
 
         let result = self.hostfxr.lib.hostfxr_get_runtime_property_value(
@@ -199,10 +192,10 @@ impl<'a, I> HostfxrContext<'a, I> {
         );
         HostExitCode::from(result).to_result()?;
 
-        Ok(WideCStr::from_ptr_str(value.assume_init()))
+        Ok(PdCStr::from_str_ptr(value.assume_init()))
     }
 
-    pub fn set_runtime_property_value<N: AsRef<WideCStr>, V: AsRef<WideCStr>>(
+    pub fn set_runtime_property_value<N: AsRef<PdCStr>, V: AsRef<PdCStr>>(
         &self,
         name: N,
         value: V,
@@ -219,7 +212,7 @@ impl<'a, I> HostfxrContext<'a, I> {
 
     pub unsafe fn get_runtime_properties_borrowed(
         &self,
-    ) -> Result<(Vec<&WideCStr>, Vec<&WideCStr>), Error> {
+    ) -> Result<(Vec<&PdCStr>, Vec<&PdCStr>), Error> {
         // get count
         let mut count = MaybeUninit::uninit();
         let result = self.hostfxr.lib.hostfxr_get_runtime_properties(
@@ -252,27 +245,22 @@ impl<'a, I> HostfxrContext<'a, I> {
         keys.set_len(count);
         values.set_len(count);
 
-        let keys = keys
-            .into_iter()
-            .map(|e| WideCStr::from_ptr_str(e))
-            .collect();
+        let keys = keys.into_iter().map(|e| PdCStr::from_str_ptr(e)).collect();
         let values = values
             .into_iter()
-            .map(|e| WideCStr::from_ptr_str(e))
+            .map(|e| PdCStr::from_str_ptr(e))
             .collect();
 
         Ok((keys, values))
     }
-    pub fn get_runtime_properties_owned(
-        &self,
-    ) -> Result<(Vec<WideCString>, Vec<WideCString>), Error> {
+    pub fn get_runtime_properties_owned(&self) -> Result<(Vec<PdCString>, Vec<PdCString>), Error> {
         unsafe { self.get_runtime_properties_borrowed() }.map(|(keys, values)| {
             let owned_keys = keys.into_iter().map(|key| key.to_owned()).collect();
             let owned_values = values.into_iter().map(|value| value.to_owned()).collect();
             (owned_keys, owned_values)
         })
     }
-    pub fn get_runtime_properties_collected<T: FromIterator<(WideCString, WideCString)>>(
+    pub fn get_runtime_properties_collected<T: FromIterator<(PdCString, PdCString)>>(
         &self,
     ) -> Result<T, Error> {
         self.get_runtime_properties_owned()
@@ -280,13 +268,13 @@ impl<'a, I> HostfxrContext<'a, I> {
     }
     pub unsafe fn get_runtime_properties_borrowed_as_map(
         &self,
-    ) -> Result<HashMap<&WideCStr, &WideCStr>, Error> {
+    ) -> Result<HashMap<&PdCStr, &PdCStr>, Error> {
         self.get_runtime_properties_borrowed()
             .map(|(keys, values)| keys.into_iter().zip(values.into_iter()).collect())
     }
     pub fn get_runtime_properties_owned_as_map(
         &self,
-    ) -> Result<HashMap<WideCString, WideCString>, Error> {
+    ) -> Result<HashMap<PdCString, PdCString>, Error> {
         self.get_runtime_properties_collected()
     }
 
@@ -328,7 +316,7 @@ impl<'a, I> HostfxrContext<'a, I> {
             get_function_pointer: self.get_get_function_pointer_delegate()?,
         })
     }
-    pub fn get_delegate_loader_for_assembly<A: AsRef<WideCStr>>(
+    pub fn get_delegate_loader_for_assembly<A: AsRef<PdCStr>>(
         &self,
         assembly_path: A,
     ) -> Result<AssemblyDelegateLoader<A>, Error> {
@@ -400,10 +388,10 @@ impl DelegateLoader {
     }
 
     pub fn load_assembly_and_get_function_pointer<
-        A: AsRef<WideCStr>,
-        T: AsRef<WideCStr>,
-        M: AsRef<WideCStr>,
-        D: AsRef<WideCStr>,
+        A: AsRef<PdCStr>,
+        T: AsRef<PdCStr>,
+        M: AsRef<PdCStr>,
+        D: AsRef<PdCStr>,
     >(
         &self,
         assembly_path: A,
@@ -422,9 +410,9 @@ impl DelegateLoader {
     }
 
     pub fn load_assembly_and_get_function_pointer_with_default_signature<
-        A: AsRef<WideCStr>,
-        T: AsRef<WideCStr>,
-        M: AsRef<WideCStr>,
+        A: AsRef<PdCStr>,
+        T: AsRef<PdCStr>,
+        M: AsRef<PdCStr>,
     >(
         &self,
         assembly_path: A,
@@ -443,9 +431,9 @@ impl DelegateLoader {
     }
 
     pub fn load_assembly_and_get_function_pointer_for_unmanaged_callers_only_method<
-        A: AsRef<WideCStr>,
-        T: AsRef<WideCStr>,
-        M: AsRef<WideCStr>,
+        A: AsRef<PdCStr>,
+        T: AsRef<PdCStr>,
+        M: AsRef<PdCStr>,
     >(
         &self,
         assembly_path: A,
@@ -462,7 +450,7 @@ impl DelegateLoader {
         }
     }
 
-    pub fn get_function_pointer<T: AsRef<WideCStr>, M: AsRef<WideCStr>, D: AsRef<WideCStr>>(
+    pub fn get_function_pointer<T: AsRef<PdCStr>, M: AsRef<PdCStr>, D: AsRef<PdCStr>>(
         &self,
         type_name: T,
         method_name: M,
@@ -477,7 +465,7 @@ impl DelegateLoader {
         }
     }
 
-    pub fn get_function_pointer_with_default_signature<T: AsRef<WideCStr>, M: AsRef<WideCStr>>(
+    pub fn get_function_pointer_with_default_signature<T: AsRef<PdCStr>, M: AsRef<PdCStr>>(
         &self,
         type_name: T,
         method_name: M,
@@ -493,8 +481,8 @@ impl DelegateLoader {
     }
 
     pub fn get_function_pointer_for_unmanaged_callers_only_method<
-        T: AsRef<WideCStr>,
-        M: AsRef<WideCStr>,
+        T: AsRef<PdCStr>,
+        M: AsRef<PdCStr>,
     >(
         &self,
         type_name: T,
@@ -511,13 +499,13 @@ impl DelegateLoader {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
-pub struct AssemblyDelegateLoader<A: AsRef<WideCStr>> {
+pub struct AssemblyDelegateLoader<A: AsRef<PdCStr>> {
     loader: DelegateLoader,
     assembly_path: A,
     assembly_loaded: bool,
 }
 
-impl<A: AsRef<WideCStr>> AssemblyDelegateLoader<A> {
+impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     pub fn new(loader: DelegateLoader, assembly_path: A) -> Self {
         Self {
             loader,
@@ -526,7 +514,7 @@ impl<A: AsRef<WideCStr>> AssemblyDelegateLoader<A> {
         }
     }
 
-    pub fn get_function_pointer<T: AsRef<WideCStr>, M: AsRef<WideCStr>, D: AsRef<WideCStr>>(
+    pub fn get_function_pointer<T: AsRef<PdCStr>, M: AsRef<PdCStr>, D: AsRef<PdCStr>>(
         &self,
         type_name: T,
         method_name: M,
@@ -545,7 +533,7 @@ impl<A: AsRef<WideCStr>> AssemblyDelegateLoader<A> {
         }
     }
 
-    pub fn get_function_pointer_with_default_signature<T: AsRef<WideCStr>, M: AsRef<WideCStr>>(
+    pub fn get_function_pointer_with_default_signature<T: AsRef<PdCStr>, M: AsRef<PdCStr>>(
         &self,
         type_name: T,
         method_name: M,
@@ -564,8 +552,8 @@ impl<A: AsRef<WideCStr>> AssemblyDelegateLoader<A> {
     }
 
     pub fn get_function_pointer_for_unmanaged_callers_only_method<
-        T: AsRef<WideCStr>,
-        M: AsRef<WideCStr>,
+        T: AsRef<PdCStr>,
+        M: AsRef<PdCStr>,
     >(
         &self,
         type_name: T,
