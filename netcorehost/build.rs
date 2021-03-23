@@ -20,6 +20,11 @@ fn main() {
         _ => panic!("platform not supported."),
     };
 
+    let lib_name = match platforms::TARGET_OS {
+        OS::Windows => "libnethost",
+        _ => "nethost"
+    };
+
     println!("cargo:rustc-link-search=runtimes\\{}", target);
-    println!("cargo:rustc-link-lib=libnethost");
+    println!("cargo:rustc-link-lib={}", lib_name);
 }
