@@ -6,7 +6,7 @@ use path_absolutize::Absolutize;
 
 #[test]
 fn run_app() -> Result<(), Box<dyn std::error::Error>> {
-    let test_out_dir = Path::new("tests\\Test\\bin\\Debug\\net5.0").absolutize()?;
+    let test_out_dir = Path::new("tests/Test/bin/Debug/net5.0").absolutize()?;
     let assembly_path = PdCString::from_os_str(Path::join(&test_out_dir, "Test.dll"))?;
 
     let hostfxr = nethost::load_hostfxr()?;

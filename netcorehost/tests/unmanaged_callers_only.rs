@@ -6,7 +6,7 @@ use path_absolutize::Absolutize;
 
 #[test]
 fn unmanaged_caller_hello_world() -> Result<(), Box<dyn std::error::Error>> {
-    let test_out_dir = Path::new("tests\\Test\\bin\\Debug\\net5.0").absolutize()?;
+    let test_out_dir = Path::new("tests/Test/bin/Debug/net5.0").absolutize()?;
     let runtime_config_path = Path::join(&test_out_dir, "Test.runtimeconfig.json");
     let assembly_path = Path::join(&test_out_dir, "Test.dll");
     let type_name = "Test.Program, Test";
