@@ -20,7 +20,7 @@ impl PdCString {
         PdCString::from_vec(s.as_bytes().to_vec())
     }
     pub fn from_vec(mut vec: Vec<u8>) -> Result<Self, NulError> {
-        if vec.last() != Some(&0) {
+        if vec.ends_with(&[0]) {
             vec.push(0);
         }
 
