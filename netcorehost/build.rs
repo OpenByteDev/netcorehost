@@ -26,7 +26,7 @@ fn main() {
         OS::Windows => {
             println!("cargo:rustc-link-lib=libnethost");
         },
-        OS:iOS => {
+        OS::iOS => {
             // untestet
             println!("cargo:rustc-link-lib=dylib=c++");
             println!("cargo:rustc-link-lib=static=nethost");
