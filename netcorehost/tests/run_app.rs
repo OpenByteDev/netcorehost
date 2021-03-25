@@ -4,8 +4,13 @@ use netcorehost::PdCString;
 use netcorehost::{nethost, HostExitCode};
 use path_absolutize::Absolutize;
 
+#[path = "common.rs"]
+mod common;
+
 #[test]
 fn run_app() -> Result<(), Box<dyn std::error::Error>> {
+    common::setup();
+
     let test_out_dir = Path::new("tests/Test/bin/Debug/net5.0").absolutize()?;
     let assembly_path = PdCString::from_os_str(Path::join(&test_out_dir, "Test.dll"))?;
 

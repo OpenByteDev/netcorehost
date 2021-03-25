@@ -4,8 +4,13 @@ use netcorehost::nethost;
 use netcorehost::PdCString;
 use path_absolutize::Absolutize;
 
+#[path = "common.rs"]
+mod common;
+
 #[test]
 fn unmanaged_caller_hello_world() -> Result<(), Box<dyn std::error::Error>> {
+    common::setup();
+
     let test_out_dir = Path::new("tests/Test/bin/Debug/net5.0").absolutize()?;
     let runtime_config_path = Path::join(&test_out_dir, "Test.runtimeconfig.json");
     let assembly_path = Path::join(&test_out_dir, "Test.dll");
