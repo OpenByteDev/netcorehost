@@ -44,7 +44,6 @@ extern "C" {
 
 /// Parameters for `get_hostfxr_path`
 #[repr(C)]
-#[allow(non_camel_case_types, dead_code)]
 pub struct get_hostfxr_parameters {
     /// Size of the struct. This is used for versioning.
     pub size: size_t,

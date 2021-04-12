@@ -341,7 +341,6 @@ pub struct HostfxrLib {
 /// [hdt_load_assembly_and_get_function_pointer]: hostfxr_delegate_type::hdt_load_assembly_and_get_function_pointer
 /// [hostfxr_get_runtime_delegate]: struct.HostfxrLib.html#method.hostfxr_get_runtime_delegate
 /// [UnmanagedCallersOnlyAttribute]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
-#[allow(non_camel_case_types)]
 pub type load_assembly_and_get_function_pointer_fn = unsafe extern "C" fn(
     assembly_path: *const char_t,
     type_name: *const char_t,
@@ -370,7 +369,6 @@ pub type load_assembly_and_get_function_pointer_fn = unsafe extern "C" fn(
 /// [hdt_get_function_pointer]: hostfxr_delegate_type::hdt_get_function_pointer
 /// [hostfxr_get_runtime_delegate]: struct.HostfxrLib.html#method.hostfxr_get_runtime_delegate
 /// [UnmanagedCallersOnlyAttribute]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
-#[allow(non_camel_case_types)]
 pub type get_function_pointer_fn = unsafe extern "C" fn(
     type_name: *const char_t,
     method_name: *const char_t,
@@ -381,5 +379,4 @@ pub type get_function_pointer_fn = unsafe extern "C" fn(
 ) -> i32;
 
 /// Signature of delegate returned by [`load_assembly_and_get_function_pointer_fn`] when `delegate_type_name == null` (default)
-#[allow(non_camel_case_types)]
 pub type component_entry_point_fn = unsafe extern "C" fn(*const (), size_t) -> i32;
