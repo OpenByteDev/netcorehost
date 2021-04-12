@@ -7,6 +7,7 @@ use std::{
 use crate::NulError;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[repr(transparent)]
 pub struct PdCString(CString);
 
 impl PdCString {
@@ -45,6 +46,7 @@ impl AsRef<PdCStr> for PdCString {
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[repr(transparent)]
 pub struct PdCStr(CStr);
 
 impl PdCStr {
