@@ -19,21 +19,22 @@ fn main() {
         (OS::iOS, Arch::X86_64, _) => "osx-x64",
         _ => panic!("platform not supported."),
     };
-    
-    println!("cargo:rustc-link-search=native=runtimes/{}", target);
-    
+
+    println!("cargo:rustc-link-search=runtimes/{}", target);
+
+    // for some reason we need the rustc argument here, but the link attribute in bindings/nethost.rs for unix.
     match platforms::TARGET_OS {
         OS::Windows => {
             println!("cargo:rustc-link-lib=libnethost");
-        },
+        }
         OS::iOS => {
             // untestet
-            println!("cargo:rustc-link-lib=dylib=c++");
-            println!("cargo:rustc-link-lib=static=nethost");
-        },
+            // println!("cargo:rustc-link-lib=dylib=c++");
+            // println!("cargo:rustc-link-lib=static=nethost");
+        }
         _ => {
-            println!("cargo:rustc-link-lib=dylib=stdc++");
-            println!("cargo:rustc-link-lib=static=nethost");
+            // println!("cargo:rustc-link-lib=dylib=stdc++");
+            // println!("cargo:rustc-link-lib=static=nethost");
         }
     }
 }
