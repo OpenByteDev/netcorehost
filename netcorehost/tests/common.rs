@@ -8,7 +8,7 @@ pub fn build_test_project() {
     if Path::new("tests/Test/bin/").exists() {
         return;
     }
-    
+
     Command::new("dotnet")
         .arg("build")
         .arg("tests/Test")
