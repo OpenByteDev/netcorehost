@@ -41,6 +41,12 @@ namespace NethostDownloader {
             runtimesDirectory.Create();
 
             foreach (var package in results.Where(package => package.Authors == "Microsoft")) {
+                var match = osFromPackageTitleRegex.Match(package.Title);
+                if (!match.Success)
+                    continue;
+                var os = match.Groups[1].Value;
+
+                Console.WriteLine(os);
                 using var packageStream = new MemoryStream();
                 await findResource.CopyNupkgToStreamAsync(
                     package.Identity.Id,
@@ -49,13 +55,6 @@ namespace NethostDownloader {
                     cache,
                     logger,
                     cancellationToken).ConfigureAwait(false);
-
-                var match = osFromPackageTitleRegex.Match(package.Title);
-                if (!match.Success)
-                    continue;
-                var os = match.Groups[1].Value;
-
-                Console.WriteLine(os);
 
                 using var packageReader = new PackageArchiveReader(packageStream);
                 var files = (await packageReader.GetItemsAsync("runtimes", cancellationToken).ConfigureAwait(false)).FirstOrDefault()?.Items;
