@@ -1,1 +1,1 @@
-netcorehost/runtimes/*.* linguist-generated
+netcorehost/runtimes/*/*.* linguist-vendored
