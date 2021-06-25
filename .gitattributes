@@ -1,1 +1,1 @@
-netcorehost/runtimes/* linguist-vendored
+netcorehost/runtimes/*/*.* linguist-vendored
