@@ -154,8 +154,8 @@ impl Hostfxr {
     }
 }
 
-type InitializedForRuntimeConfig = ();
-type InitializedForCommandLine = ();
+pub struct InitializedForRuntimeConfig;
+pub struct InitializedForCommandLine;
 
 #[derive(Clone)]
 pub struct HostfxrContext<'a, I> {
