@@ -1,20 +1,25 @@
-use std::{
-    borrow::Borrow,
-    ffi::{OsStr, OsString},
-};
+use std::ffi::{OsStr, OsString};
+use std::os::windows::ffi::OsStrExt;
 
-use widestring::{U16CStr, U16CString};
+use widestring::{MissingNulError, U16CStr, U16CString};
 
-use crate::NulError;
+use super::{NulError, PdCStr, PdCString};
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-#[repr(transparent)]
-pub struct PdCString(U16CString);
+pub(crate) type PdCStringInner = U16CString;
+pub(crate) type PdCStrInner = U16CStr;
 
+// conversions to and from inner
 impl PdCString {
     pub fn from_u16_c_string(s: U16CString) -> Self {
-        PdCString(s)
+        PdCString::from_inner(s)
     }
+    pub fn into_u16_c_string(self) -> U16CString {
+        self.into_inner()
+    }
+}
+
+// methods used by this crate
+impl PdCString {
     pub fn from_os_str<T: AsRef<OsStr>>(s: T) -> Result<Self, NulError> {
         let inner = U16CString::from_os_str(s)?;
         Ok(PdCString::from_u16_c_string(inner))
@@ -29,51 +34,52 @@ impl PdCString {
     }
 }
 
-impl Borrow<PdCStr> for PdCString {
-    fn borrow(&self) -> &PdCStr {
-        PdCStr::from_u16_c_str(self.0.borrow())
+// methods not used by this crate
+impl PdCString {
+    pub fn from_vec(vec: impl Into<Vec<u16>>) -> Result<Self, NulError> {
+        let inner = U16CString::new(vec)?;
+        Ok(PdCString::from_inner(inner))
     }
 }
 
-impl AsRef<PdCStr> for PdCString {
-    fn as_ref(&self) -> &PdCStr {
-        self.borrow()
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[repr(transparent)]
-pub struct PdCStr(U16CStr);
-
+// conversions to and from inner
 impl PdCStr {
     pub fn from_u16_c_str(s: &U16CStr) -> &Self {
-        unsafe { &*(s as *const U16CStr as *const PdCStr) }
+        PdCStr::from_inner(s)
     }
+    pub fn to_u16_c_str(&self) -> &U16CStr {
+        self.to_inner()
+    }
+}
+
+// methods used by this crate
+impl PdCStr {
     pub fn as_ptr(&self) -> *const u16 {
         self.0.as_ptr()
     }
     pub unsafe fn from_str_ptr<'a>(ptr: *const u16) -> &'a Self {
         let inner = U16CStr::from_ptr_str(ptr);
-        PdCStr::from_u16_c_str(inner)
+        PdCStr::from_inner(inner)
     }
     pub unsafe fn from_slice_with_nul_unchecked(slice: &[u16]) -> &Self {
         let inner = U16CStr::from_slice_with_nul_unchecked(slice);
-        PdCStr::from_u16_c_str(inner)
+        PdCStr::from_inner(inner)
     }
     pub fn to_os_string(&self) -> OsString {
         self.0.to_os_string()
     }
 }
 
-impl AsRef<PdCStr> for PdCStr {
-    fn as_ref(&self) -> &Self {
-        self
+// methods not used by this crate
+impl PdCStr {
+    // TODO: use abstract error type
+    pub fn from_slice_with_nul(slice: &[u16]) -> Result<&Self, MissingNulError<u16>> {
+        U16CStr::from_slice_with_nul(slice).map(|s| PdCStr::from_inner(s))
     }
-}
-
-impl ToOwned for PdCStr {
-    type Owned = PdCString;
-    fn to_owned(&self) -> Self::Owned {
-        PdCString::from_u16_c_string(self.0.to_owned())
+    pub fn to_slice(&self) -> &[u16] {
+        self.0.as_slice()
+    }
+    pub fn to_slice_with_nul(&self) -> &[u16] {
+        self.0.as_slice_with_nul()
     }
 }

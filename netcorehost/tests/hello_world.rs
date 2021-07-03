@@ -1,7 +1,7 @@
 use std::{path::Path, ptr};
 
 use netcorehost::nethost;
-use netcorehost::PdCString;
+use netcorehost::pdcstring::PdCString;
 use path_absolutize::Absolutize;
 
 #[path = "common.rs"]

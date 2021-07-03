@@ -1,12 +1,13 @@
-use crate::pdcstring::OsChar;
 use std::{error::Error, fmt};
+
+use super::PdUChar;
 
 // same definition as ffi::NulError and widestring::NulError<u16>
 #[derive(Clone, PartialEq, Eq, Debug)]
-pub struct NulError(usize, Vec<OsChar>);
+pub struct NulError(usize, Vec<PdUChar>);
 
 impl NulError {
-    pub fn new(nul_position: usize, data: Vec<OsChar>) -> Self {
+    pub fn new(nul_position: usize, data: Vec<PdUChar>) -> Self {
         Self(nul_position, data)
     }
 
@@ -18,7 +19,7 @@ impl NulError {
 
     /// Consumes this error, returning the underlying vector of bytes which
     /// generated the error in the first place.
-    pub fn into_vec(self) -> Vec<OsChar> {
+    pub fn into_vec(self) -> Vec<PdUChar> {
         self.1
     }
 }
@@ -31,8 +32,8 @@ impl From<std::ffi::NulError> for NulError {
 }
 
 #[cfg(windows)]
-impl From<widestring::NulError<OsChar>> for NulError {
-    fn from(err: widestring::NulError<OsChar>) -> Self {
+impl From<widestring::NulError<PdUChar>> for NulError {
+    fn from(err: widestring::NulError<PdUChar>) -> Self {
         Self::new(err.nul_position(), err.into_vec())
     }
 }
@@ -49,8 +50,8 @@ impl fmt::Display for NulError {
     }
 }
 
-impl Into<Vec<OsChar>> for NulError {
-    fn into(self) -> Vec<OsChar> {
-        self.into_vec()
+impl From<NulError> for Vec<PdUChar> {
+    fn from(e: NulError) -> Vec<PdUChar> {
+        e.into_vec()
     }
 }

@@ -101,11 +101,11 @@ impl KnownHostExitCode {
     pub fn value(&self) -> u32 {
         *self as u32
     }
-    fn to_result(&self) -> Result<(), Error> {
+    fn to_result(self) -> Result<(), Error> {
         if self.is_success() {
             Ok(())
         } else {
-            Err(Error::Hostfxr(HostExitCode::Known(*self)))
+            Err(Error::Hostfxr(HostExitCode::Known(self)))
         }
     }
 }
@@ -139,10 +139,10 @@ impl HostExitCode {
             HostExitCode::Unknown(code) => *code,
         }
     }
-    pub fn to_result(&self) -> Result<(), Error> {
+    pub fn to_result(self) -> Result<(), Error> {
         match self {
             HostExitCode::Known(code) => code.to_result(),
-            HostExitCode::Unknown(_) => Err(Error::Hostfxr(*self)),
+            HostExitCode::Unknown(_) => Err(Error::Hostfxr(self)),
         }
     }
 }

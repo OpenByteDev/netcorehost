@@ -1,7 +1,7 @@
 use crate::pdcstring::PdCStr;
 
 use crate::{
-    bindings::{consts::MAX_PATH, nethost::get_hostfxr_parameters, type_aliases::char_t},
+    bindings::{char_t, consts::MAX_PATH, nethost::get_hostfxr_parameters},
     error::Error,
     hostfxr::Hostfxr,
     HostExitCode,

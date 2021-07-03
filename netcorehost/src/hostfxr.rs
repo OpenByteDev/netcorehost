@@ -1,12 +1,12 @@
 use crate::pdcstring::{PdCStr, PdCString};
 use crate::{
     bindings::{
+        char_t,
         hostfxr::{
             component_entry_point_fn, get_function_pointer_fn, hostfxr_delegate_type,
             hostfxr_handle, hostfxr_initialize_parameters,
             load_assembly_and_get_function_pointer_fn, HostfxrLib, UNMANAGED_CALLERS_ONLY_METHOD,
         },
-        type_aliases::char_t,
     },
     Error, HostExitCode, KnownHostExitCode,
 };

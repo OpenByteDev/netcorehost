@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use netcorehost::PdCString;
+use netcorehost::pdcstring::PdCString;
 use netcorehost::{nethost, HostExitCode};
 use path_absolutize::Absolutize;
 
