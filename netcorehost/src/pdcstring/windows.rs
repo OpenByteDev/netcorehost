@@ -40,6 +40,12 @@ impl PdCString {
         let inner = U16CString::new(vec)?;
         Ok(PdCString::from_inner(inner))
     }
+    pub fn into_vec(self) -> Vec<u16> {
+        self.0.into_vec()
+    }
+    pub fn into_vec_with_nul(self) -> Vec<u16> {
+        self.0.into_vec_with_nul()
+    }
 }
 
 // conversions to and from inner

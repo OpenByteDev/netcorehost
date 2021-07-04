@@ -35,6 +35,12 @@ impl PdCString {
         let inner = CString::new(vec)?;
         Ok(PdCString::from_inner(inner))
     }
+    pub fn into_vec(self) -> Vec<u8> {
+        self.0.into_bytes()
+    }
+    pub fn into_vec_with_nul(self) -> Vec<u8> {
+        self.0.into_bytes_with_nul()
+    }
 }
 
 // conversions to and from inner

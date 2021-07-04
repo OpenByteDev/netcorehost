@@ -18,12 +18,6 @@ impl PdCString {
     pub(crate) fn into_inner(self) -> PdCStringInner {
         self.0
     }
-    pub fn into_vec(self) -> Vec<PdUChar> {
-        self.to_slice().to_vec()
-    }
-    pub fn into_vec_with_nul(self) -> Vec<PdUChar> {
-        self.to_slice_with_nul().to_vec()
-    }
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
