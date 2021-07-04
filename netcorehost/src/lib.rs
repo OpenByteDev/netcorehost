@@ -15,6 +15,6 @@ mod host_exit_code;
 pub use host_exit_code::*;
 
 mod error;
-pub use error::*;
+use error::*;
 
 pub mod pdcstring;

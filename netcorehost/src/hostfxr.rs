@@ -1,3 +1,4 @@
+use crate::bindings::consts::UNMANAGED_CALLERS_ONLY_METHOD;
 use crate::pdcstring::{PdCStr, PdCString};
 use crate::{
     bindings::{
@@ -5,7 +6,7 @@ use crate::{
         hostfxr::{
             component_entry_point_fn, get_function_pointer_fn, hostfxr_delegate_type,
             hostfxr_handle, hostfxr_initialize_parameters,
-            load_assembly_and_get_function_pointer_fn, HostfxrLib, UNMANAGED_CALLERS_ONLY_METHOD,
+            load_assembly_and_get_function_pointer_fn, HostfxrLib,
         },
     },
     Error, HostExitCode, KnownHostExitCode,
@@ -32,7 +33,7 @@ pub struct HostfxrHandle(NonNull<()>);
 
 impl HostfxrHandle {
     pub unsafe fn new(ptr: hostfxr_handle) -> Option<Self> {
-        NonNull::new(ptr as *mut _).map(|n| Self(n))
+        NonNull::new(ptr as *mut _).map(Self)
     }
     pub unsafe fn new_unchecked(ptr: hostfxr_handle) -> Self {
         Self(NonNull::new_unchecked(ptr as *mut _))
@@ -318,7 +319,7 @@ impl<'a, I> HostfxrContext<'a, I> {
 
         HostExitCode::from(result).to_result()?;
 
-        Ok(delegate.assume_init() )
+        Ok(delegate.assume_init())
     }
     fn get_load_assembly_and_get_function_pointer_delegate(
         &self,

@@ -1,5 +1,5 @@
 use std::ffi::{OsStr, OsString};
-use std::os::windows::ffi::OsStrExt;
+// use std::os::windows::ffi::OsStrExt;
 
 use widestring::{MissingNulError, U16CStr, U16CString};
 

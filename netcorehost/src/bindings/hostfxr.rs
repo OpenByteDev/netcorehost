@@ -15,8 +15,6 @@ pub enum hostfxr_delegate_type {
     hdt_get_function_pointer = 6,
 }
 
-pub const UNMANAGED_CALLERS_ONLY_METHOD: *const char_t = unsafe { mem::transmute(-1i64) };
-
 pub type hostfxr_error_writer_fn = unsafe extern "C" fn(message: *const char_t);
 
 pub type hostfxr_handle = *const ();
@@ -119,8 +117,8 @@ pub struct HostfxrLib {
     ///
     /// This function does not load the runtime.
     ///
-    /// [Success](super::error::KnownHostExitCode::Success)
-    /// [HostInvalidState](super::error::KnownHostExitCode::HostInvalidState)
+    /// [`Success`]: crate::KnownHostExitCode::Success
+    /// [`HostInvalidState`]: crate::KnownHostExitCode::HostInvalidState
     hostfxr_initialize_for_dotnet_command_line: unsafe extern "C" fn(
         argc: i32,
         argv: *const *const char_t,
@@ -162,10 +160,10 @@ pub struct HostfxrLib {
     /// initializations. In the case of [`Success_DifferentRuntimeProperties`], it is left to the consumer to verify that
     /// the difference in properties is acceptable.
     ///
-    /// [Success]: super::error::KnownHostExitCode::Success
-    /// [Success_HostAlreadyInitialized]: super::error::KnownHostExitCode::Success_HostAlreadyInitialized
-    /// [Success_DifferentRuntimeProperties]: super::error::KnownHostExitCode::Success_DifferentRuntimeProperties
-    /// [CoreHostIncompatibleConfig]: super::error::KnownHostExitCode::CoreHostIncompatibleConfig
+    /// [`Success`]: crate::KnownHostExitCode::Success
+    /// [`Success_HostAlreadyInitialized`]: crate::KnownHostExitCode::Success_HostAlreadyInitialized
+    /// [`Success_DifferentRuntimeProperties`]: crate::KnownHostExitCode::Success_DifferentRuntimeProperties
+    /// [`CoreHostIncompatibleConfig`]: crate::KnownHostExitCode::CoreHostIncompatibleConfig
     hostfxr_initialize_for_runtime_config: unsafe extern "C" fn(
         runtime_config_path: *const char_t,
         parameters: *const hostfxr_initialize_parameters,
@@ -195,8 +193,8 @@ pub struct HostfxrLib {
     /// If `host_context_handle` is [`null`](ptr::null()) and an active host context exists, this function will get the
     /// property value for the active host context.
     ///
-    /// [hostfxr_set_runtime_property_value]: struct.HostfxrLib.html#method.hostfxr_set_runtime_property_value
-    /// [hostfxr_close]: struct.HostfxrLib.html#method.hostfxr_close
+    /// [`hostfxr_set_runtime_property_value`]: struct.HostfxrLib.html#method.hostfxr_set_runtime_property_value
+    /// [`hostfxr_close`]: struct.HostfxrLib.html#method.hostfxr_close
     hostfxr_get_runtime_property_value: unsafe extern "C" fn(
         host_context_handle: hostfxr_handle,
         name: *const char_t,
@@ -248,11 +246,14 @@ pub struct HostfxrLib {
     /// The buffers pointed to by keys and values are owned by the host context. The lifetime of the buffers is only
     /// guaranteed until any of the below occur:
     ///  * a 'run' method is called for the host context
-    ///  * properties are changed via hostfxr_set_runtime_property_value
-    ///  * the host context is closed via 'hostfxr_close'
+    ///  * properties are changed via [`hostfxr_set_runtime_property_value`]
+    ///  * the host context is closed via [`hostfxr_close`]
     ///
     /// If host_context_handle is [`null`](ptr::null()) and an active host context exists, this function will get the
     /// properties for the active host context.
+    ///
+    /// [`hostfxr_set_runtime_property_value`]: struct.HostfxrLib.html#hostfxr_set_runtime_property_value
+    /// [`hostfxr_close`]: struct.HostfxrLib.html#method.hostfxr_closee
     hostfxr_get_runtime_properties: unsafe extern "C" fn(
         host_context_handle: hostfxr_handle,
         /*inout*/ count: *mut size_t,
@@ -274,8 +275,8 @@ pub struct HostfxrLib {
     ///
     /// This function will not return until the managed application exits.
     ///
-    /// [hostfxr_initialize_for_runtime_config]: struct.HostfxrLib.html#method.hostfxr_initialize_for_runtime_config
-    /// [hostfxr_initialize_for_dotnet_command_line]: struct.HostfxrLib.html#method.hostfxr_initialize_for_dotnet_command_line
+    /// [`hostfxr_initialize_for_runtime_config`]: struct.HostfxrLib.html#method.hostfxr_initialize_for_runtime_config
+    /// [`hostfxr_initialize_for_dotnet_command_line`]: struct.HostfxrLib.html#method.hostfxr_initialize_for_dotnet_command_line
     hostfxr_run_app: unsafe extern "C" fn(host_context_handle: hostfxr_handle) -> i32,
 
     /// Gets a typed delegate from the currently loaded CoreCLR or from a newly created one.
@@ -299,10 +300,10 @@ pub struct HostfxrLib {
     ///  * [`hdt_load_assembly_and_get_function_pointer`]
     ///  * [`hdt_get_function_pointer`]
     ///
-    /// [hdt_load_assembly_and_get_function_pointer]: hostfxr_delegate_type::hdt_load_assembly_and_get_function_pointer
-    /// [hdt_get_function_pointer]: hostfxr_delegate_type::hdt_get_function_pointer
-    /// [hostfxr_initialize_for_runtime_config]: struct.HostfxrLib.html#method.hostfxr_initialize_for_runtime_config
-    /// [hostfxr_initialize_for_dotnet_command_line]: struct.HostfxrLib.html#method.hostfxr_initialize_for_dotnet_command_line
+    /// [`hdt_load_assembly_and_get_function_pointer`]: hostfxr_delegate_type::hdt_load_assembly_and_get_function_pointer
+    /// [`hdt_get_function_pointer`]: hostfxr_delegate_type::hdt_get_function_pointer
+    /// [`hostfxr_initialize_for_runtime_config`]: struct.HostfxrLib.html#method.hostfxr_initialize_for_runtime_config
+    /// [`hostfxr_initialize_for_dotnet_command_line`]: struct.HostfxrLib.html#method.hostfxr_initialize_for_dotnet_command_line
     hostfxr_get_runtime_delegate: unsafe extern "C" fn(
         host_context_handle: hostfxr_handle,
         r#type: hostfxr_delegate_type,
@@ -338,9 +339,10 @@ pub struct HostfxrLib {
 ///  * `delegate`:
 ///     Pointer where to store the function pointer result
 ///
-/// [hdt_load_assembly_and_get_function_pointer]: hostfxr_delegate_type::hdt_load_assembly_and_get_function_pointer
-/// [hostfxr_get_runtime_delegate]: struct.HostfxrLib.html#method.hostfxr_get_runtime_delegate
-/// [UnmanagedCallersOnlyAttribute]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
+/// [`hostfxr_get_runtime_delegate`]: struct.HostfxrLib.html#method.hostfxr_get_runtime_delegate
+/// [`hdt_load_assembly_and_get_function_pointer`]: hostfxr_delegate_type::`hdt_load_assembly_and_get_function_pointer
+/// [`UNMANAGED_CALLERS_ONLY_METHOD`]: crate::bindings::consts::UNMANAGED_CALLERS_ONLY_METHOD
+/// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
 pub type load_assembly_and_get_function_pointer_fn = unsafe extern "C" fn(
     assembly_path: *const char_t,
     type_name: *const char_t,
@@ -366,9 +368,10 @@ pub type load_assembly_and_get_function_pointer_fn = unsafe extern "C" fn(
 ///  * `delegate`:
 ///     Pointer where to store the function pointer result
 ///
-/// [hdt_get_function_pointer]: hostfxr_delegate_type::hdt_get_function_pointer
-/// [hostfxr_get_runtime_delegate]: struct.HostfxrLib.html#method.hostfxr_get_runtime_delegate
-/// [UnmanagedCallersOnlyAttribute]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
+/// [`hdt_get_function_pointer`]: hostfxr_delegate_type::hdt_get_function_pointer
+/// [`hostfxr_get_runtime_delegate`]: struct.HostfxrLib.html#method.hostfxr_get_runtime_delegate
+/// [`UNMANAGED_CALLERS_ONLY_METHOD`]: crate::bindings::consts::UNMANAGED_CALLERS_ONLY_METHOD
+/// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
 pub type get_function_pointer_fn = unsafe extern "C" fn(
     type_name: *const char_t,
     method_name: *const char_t,

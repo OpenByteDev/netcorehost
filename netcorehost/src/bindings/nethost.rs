@@ -28,13 +28,11 @@ extern "C" {
     ///
     /// # Return value
     ///  * 0 on success, otherwise failure
-    ///  * 0x80008098 - `buffer` is too small ([`HostApiBufferTooSmall`])
+    ///  * 0x80008098 - `buffer` is too small ([`HostApiBufferTooSmall`](crate::KnownHostExitCode::HostApiBufferTooSmall))
     ///
     /// # Remarks
     /// The full search for the hostfxr library is done on every call. To minimize the need
-    /// to call this function multiple times, pass a large buffer (e.g. [`PATH_MAX`]).
-    ///
-    /// [HostApiBufferTooSmall](super::error::KnownHostExitCode::HostApiBufferTooSmall)
+    /// to call this function multiple times, pass a large buffer (e.g. [`PATH_MAX`](crate::bindings::consts::PATH_MAX)).
     pub fn get_hostfxr_path(
         buffer: *mut char_t,
         buffer_size: *mut size_t,

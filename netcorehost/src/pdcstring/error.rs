@@ -11,8 +11,7 @@ impl NulError {
         Self(nul_position, data)
     }
 
-    /// Returns the position of the nul byte in the slice that caused
-    /// [`PdCString::new`] to fail.
+    /// Returns the position of the nul byte in the slice.
     pub fn nul_position(&self) -> usize {
         self.0
     }
