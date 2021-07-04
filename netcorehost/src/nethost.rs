@@ -3,8 +3,7 @@ use crate::pdcstring::PdCStr;
 use crate::{
     bindings::{char_t, consts::PATH_MAX, nethost::get_hostfxr_parameters},
     error::Error,
-    hostfxr::Hostfxr,
-    HostExitCode,
+    hostfxr::{HostExitCode, Hostfxr},
 };
 use std::{ffi::OsString, mem::MaybeUninit, ptr};
 

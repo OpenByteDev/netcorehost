@@ -24,7 +24,7 @@
 //! The following code will setup the hostfxr library, load the app and run its `Main` method.
 //! ```
 //! # use netcorehost::pdcstring::PdCString;
-//! # use netcorehost::{nethost, HostExitCode};
+//! # use netcorehost::{nethost, hostfxr::HostExitCode};
 //! # use std::path::Path;
 //! # fn run_app() -> Result<(), Box<dyn std::error::Error>> {
 //! let assembly_path = PdCString::from_str("./Test.dll")?;
@@ -94,10 +94,6 @@ pub mod bindings;
 pub mod hostfxr;
 /// Module for abstractions of the nethost library.
 pub mod nethost;
-
-/// Module containing enums related to the exit codes of hostfxr operations.
-mod host_exit_code;
-pub use host_exit_code::*;
 
 /// Module containing a universal error enum for this crate.
 mod error;

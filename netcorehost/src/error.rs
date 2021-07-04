@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::HostExitCode;
+use crate::hostfxr::HostExitCode;
 
 quick_error! {
     #[derive(Debug)]
