@@ -19,7 +19,12 @@ use super::{
     KnownHostExitCode, MethodWithUnknownSignature,
 };
 
+/// A marker struct indicating that the context was initialized with a runtime config.
+/// This means that it is not possible to run the application associated with the context.
 pub struct InitializedForRuntimeConfig;
+
+/// A marker struct indicating that the context was initialized for the dotnet command line.
+/// This means that it is possible to run the application associated with the context.
 pub struct InitializedForCommandLine;
 
 #[derive(Clone)]

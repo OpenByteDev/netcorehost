@@ -1,7 +1,7 @@
 use crate::pdcstring::PdCStr;
 
 use crate::{
-    bindings::{char_t, consts::PATH_MAX, nethost::get_hostfxr_parameters},
+    bindings::{char_t, consts::MAX_PATH, nethost::get_hostfxr_parameters},
     error::Error,
     hostfxr::{HostExitCode, Hostfxr},
 };
@@ -34,7 +34,7 @@ pub fn get_hostfxr_path_with_dotnet_root<P: AsRef<PdCStr>>(
 unsafe fn get_hostfxr_path_with_parameters(
     parameters: *const get_hostfxr_parameters,
 ) -> Result<OsString, Error> {
-    let mut path_buffer = MaybeUninit::uninit_array::<PATH_MAX>();
+    let mut path_buffer = MaybeUninit::uninit_array::<MAX_PATH>();
     let mut path_length = path_buffer.len();
 
     let result = crate::bindings::nethost::get_hostfxr_path(
