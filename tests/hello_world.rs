@@ -26,7 +26,7 @@ fn hello_world() -> Result<(), Box<dyn std::error::Error>> {
     let hello = fn_loader.get_function_pointer_with_default_signature(
         PdCString::from_str(type_name)?,
         PdCString::from_str(method_name)?,
-    );
+    )?;
     let result = unsafe { hello(ptr::null(), 0) };
     assert_eq!(result, 42);
 

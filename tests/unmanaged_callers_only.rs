@@ -26,7 +26,7 @@ fn unmanaged_caller_hello_world() -> Result<(), Box<dyn std::error::Error>> {
     let hello = fn_loader.get_function_pointer_for_unmanaged_callers_only_method(
         PdCString::from_str(type_name)?,
         PdCString::from_str(method_name)?,
-    );
+    )?;
     let hello: extern "C" fn() -> i32 = unsafe { mem::transmute(hello) };
 
     let result = hello();

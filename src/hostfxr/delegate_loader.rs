@@ -8,12 +8,15 @@ use crate::{
         },
     },
     pdcstring::PdCStr,
+    Error
 };
 
 use std::{
     mem::{self, MaybeUninit},
     ptr,
 };
+
+use super::HostExitCode;
 
 pub type MethodWithDefaultSignature = component_entry_point_fn;
 pub type MethodWithUnknownSignature = *const ();
@@ -32,9 +35,10 @@ impl DelegateLoader {
         type_name: *const char_t,
         method_name: *const char_t,
         delegate_type_name: *const char_t,
-    ) -> MethodWithUnknownSignature {
+    ) -> Result<MethodWithUnknownSignature, Error> {
         let mut delegate = MaybeUninit::uninit();
-        (self.get_load_assembly_and_get_function_pointer)(
+
+        let result = (self.get_load_assembly_and_get_function_pointer)(
             assembly_path,
             type_name,
             method_name,
@@ -42,7 +46,9 @@ impl DelegateLoader {
             ptr::null(),
             delegate.as_mut_ptr(),
         );
-        delegate.assume_init()
+        HostExitCode::from(result).to_result()?;
+
+        Ok(delegate.assume_init())
     }
 
     unsafe fn _get_function_pointer(
@@ -50,9 +56,10 @@ impl DelegateLoader {
         type_name: *const char_t,
         method_name: *const char_t,
         delegate_type_name: *const char_t,
-    ) -> MethodWithUnknownSignature {
+    ) -> Result<MethodWithUnknownSignature, Error> {
         let mut delegate = MaybeUninit::uninit();
-        (self.get_function_pointer)(
+
+        let result = (self.get_function_pointer)(
             type_name,
             method_name,
             delegate_type_name,
@@ -60,7 +67,9 @@ impl DelegateLoader {
             ptr::null(),
             delegate.as_mut_ptr(),
         );
-        delegate.assume_init()
+        HostExitCode::from(result).to_result()?;
+
+        Ok(delegate.assume_init())
     }
 
     pub fn load_assembly_and_get_function_pointer(
@@ -69,7 +78,7 @@ impl DelegateLoader {
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
         delegate_type_name: impl AsRef<PdCStr>,
-    ) -> MethodWithUnknownSignature {
+    ) -> Result<MethodWithUnknownSignature, Error> {
         unsafe {
             self._load_assembly_and_get_function_pointer(
                 assembly_path.as_ref().as_ptr(),
@@ -85,15 +94,14 @@ impl DelegateLoader {
         assembly_path: impl AsRef<PdCStr>,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
-    ) -> MethodWithDefaultSignature {
+    ) -> Result<MethodWithDefaultSignature, Error> {
         unsafe {
-            let fn_ptr = self._load_assembly_and_get_function_pointer(
+            self._load_assembly_and_get_function_pointer(
                 assembly_path.as_ref().as_ptr(),
                 type_name.as_ref().as_ptr(),
                 method_name.as_ref().as_ptr(),
                 ptr::null(),
-            );
-            mem::transmute(fn_ptr)
+            ).map(|fn_ptr| mem::transmute(fn_ptr))
         }
     }
 
@@ -102,7 +110,7 @@ impl DelegateLoader {
         assembly_path: impl AsRef<PdCStr>,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
-    ) -> MethodWithUnknownSignature {
+    ) -> Result<MethodWithUnknownSignature, Error> {
         unsafe {
             self._load_assembly_and_get_function_pointer(
                 assembly_path.as_ref().as_ptr(),
@@ -118,7 +126,7 @@ impl DelegateLoader {
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
         delegate_type_name: impl AsRef<PdCStr>,
-    ) -> MethodWithUnknownSignature {
+    ) -> Result<MethodWithUnknownSignature, Error> {
         unsafe {
             self._get_function_pointer(
                 type_name.as_ref().as_ptr(),
@@ -132,7 +140,7 @@ impl DelegateLoader {
         &self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
-    ) -> MethodWithDefaultSignature {
+    ) -> Result<MethodWithDefaultSignature, Error> {
         unsafe {
             let fn_ptr = self._get_function_pointer(
                 type_name.as_ref().as_ptr(),
@@ -147,7 +155,7 @@ impl DelegateLoader {
         &self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
-    ) -> MethodWithUnknownSignature {
+    ) -> Result<MethodWithUnknownSignature, Error> {
         unsafe {
             self._get_function_pointer(
                 type_name.as_ref().as_ptr(),
@@ -179,7 +187,7 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
         delegate_type_name: impl AsRef<PdCStr>,
-    ) -> MethodWithUnknownSignature {
+    ) -> Result<MethodWithUnknownSignature, Error> {
         if !self.assembly_loaded {
             self.loader.load_assembly_and_get_function_pointer(
                 self.assembly_path.as_ref(),
@@ -197,7 +205,7 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
         &self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
-    ) -> MethodWithDefaultSignature {
+    ) -> Result<MethodWithDefaultSignature, Error> {
         if !self.assembly_loaded {
             self.loader
                 .load_assembly_and_get_function_pointer_with_default_signature(
@@ -215,7 +223,7 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
         &self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
-    ) -> MethodWithUnknownSignature {
+    ) -> Result<MethodWithUnknownSignature, Error> {
         if !self.assembly_loaded {
             self.loader
                 .load_assembly_and_get_function_pointer_for_unmanaged_callers_only_method(
