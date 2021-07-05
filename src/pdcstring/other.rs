@@ -1,5 +1,6 @@
 use std::ffi::{self, CStr, CString, OsStr, OsString};
 use std::os::unix::ffi::OsStrExt;
+use std::str::FromStr;
 
 use super::{NulError, PdCStr, PdCString};
 
@@ -21,11 +22,16 @@ impl PdCString {
     pub fn from_os_str(s: impl AsRef<OsStr>) -> Result<Self, NulError> {
         PdCString::from_vec(s.as_ref().as_bytes().to_vec())
     }
-    pub fn from_str(s: &str) -> Result<Self, NulError> {
-        PdCString::from_vec(s.as_bytes().to_vec())
-    }
     pub unsafe fn from_str_ptr(ptr: *const i8) -> Self {
         PdCStr::from_str_ptr(ptr).to_owned()
+    }
+}
+
+impl FromStr for PdCString {
+    type Err = NulError;
+
+    fn from_str(s: &str) -> Result<Self, NulError> {
+        PdCString::from_vec(s.as_bytes().to_vec())
     }
 }
 

@@ -8,7 +8,7 @@ use crate::{
         },
     },
     pdcstring::PdCStr,
-    Error
+    Error,
 };
 
 use std::{
@@ -101,7 +101,8 @@ impl DelegateLoader {
                 type_name.as_ref().as_ptr(),
                 method_name.as_ref().as_ptr(),
                 ptr::null(),
-            ).map(|fn_ptr| mem::transmute(fn_ptr))
+            )
+            .map(|fn_ptr| mem::transmute(fn_ptr))
         }
     }
 

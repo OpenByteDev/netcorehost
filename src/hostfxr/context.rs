@@ -27,6 +27,7 @@ pub struct InitializedForRuntimeConfig;
 /// This means that it is possible to run the application associated with the context.
 pub struct InitializedForCommandLine;
 
+/// State which hostfxr creates and maintains and represents a logical operation on the hosting components.
 #[derive(Clone)]
 pub struct HostfxrContext<'a, I> {
     handle: HostfxrHandle,
@@ -43,16 +44,29 @@ impl<'a, I> HostfxrContext<'a, I> {
         }
     }
 
+    /// Gets the runtime property value for the given key of this host context.
     pub fn get_runtime_property_value_owned(
         &self,
         name: impl AsRef<PdCStr>,
     ) -> Result<PdCString, Error> {
         unsafe { self.get_runtime_property_value_borrowed(name) }.map(|str| str.to_owned())
     }
+    /// Gets the runtime property value for the given key of this host context.
+    ///
+    /// # Safety
+    /// The value string is owned by the host context. The lifetime of the buffer is only
+    /// guaranteed until any of the below occur:
+    ///  * [`run_app`] is called for this host context
+    ///  * properties are changed via [`set_runtime_property_value`] or [`remove_runtime_property_value`]
+    ///  * the host context is dropped
+    ///
+    /// [`run_app`]: HostfxrContext::run_app
+    /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
+    /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
     pub unsafe fn get_runtime_property_value_borrowed(
         &self,
         name: impl AsRef<PdCStr>,
-    ) -> Result<&PdCStr, Error> {
+    ) -> Result<&'a PdCStr, Error> {
         let mut value = MaybeUninit::uninit();
 
         let result = self.hostfxr.lib.hostfxr_get_runtime_property_value(
@@ -65,6 +79,7 @@ impl<'a, I> HostfxrContext<'a, I> {
         Ok(PdCStr::from_str_ptr(value.assume_init()))
     }
 
+    /// Sets the value of a runtime property for this host context.
     pub fn set_runtime_property_value(
         &self,
         name: impl AsRef<PdCStr>,
@@ -80,9 +95,21 @@ impl<'a, I> HostfxrContext<'a, I> {
         HostExitCode::from(result).to_result().map(|_| ())
     }
 
+    /// Remove a runtime property for this host context.
+    pub fn remove_runtime_property_value(&self, name: impl AsRef<PdCStr>) -> Result<(), Error> {
+        let result = unsafe {
+            self.hostfxr.lib.hostfxr_set_runtime_property_value(
+                self.handle.as_raw(),
+                name.as_ref().as_ptr(),
+                ptr::null(),
+            )
+        };
+        HostExitCode::from(result).to_result().map(|_| ())
+    }
+
     pub unsafe fn get_runtime_properties_borrowed(
         &self,
-    ) -> Result<(Vec<&PdCStr>, Vec<&PdCStr>), Error> {
+    ) -> Result<(Vec<&'a PdCStr>, Vec<&'a PdCStr>), Error> {
         // get count
         let mut count = MaybeUninit::uninit();
         let result = self.hostfxr.lib.hostfxr_get_runtime_properties(
@@ -138,7 +165,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     }
     pub unsafe fn get_runtime_properties_borrowed_as_map(
         &self,
-    ) -> Result<HashMap<&PdCStr, &PdCStr>, Error> {
+    ) -> Result<HashMap<&'a PdCStr, &'a PdCStr>, Error> {
         self.get_runtime_properties_borrowed()
             .map(|(keys, values)| keys.into_iter().zip(values.into_iter()).collect())
     }

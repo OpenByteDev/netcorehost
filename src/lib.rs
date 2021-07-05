@@ -26,9 +26,9 @@
 //! # use netcorehost::pdcstring::PdCString;
 //! # use netcorehost::{nethost, hostfxr::HostExitCode};
 //! # use std::path::Path;
+//! # use std::str::FromStr;
 //! # fn run_app() -> Result<(), Box<dyn std::error::Error>> {
 //! let assembly_path = PdCString::from_str("./Test.dll")?;
-//!
 //! let hostfxr = nethost::load_hostfxr()?;
 //! let context = hostfxr.initialize_for_dotnet_command_line(assembly_path)?;
 //! let result = context.run_app();
@@ -54,6 +54,7 @@
 //! #
 //! # use netcorehost::nethost;
 //! # use netcorehost::pdcstring::PdCString;
+//! # use std::str::FromStr;
 //! #
 //! # fn hello_world() -> Result<(), Box<dyn std::error::Error>> {
 //! let hostfxr = nethost::load_hostfxr()?;

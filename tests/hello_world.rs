@@ -1,4 +1,5 @@
 use std::mem;
+use std::str::FromStr;
 use std::{path::Path, ptr};
 
 use netcorehost::nethost;
@@ -53,7 +54,9 @@ fn hello_world_with_custom_delegate_type() -> Result<(), Box<dyn std::error::Err
     let hello = fn_loader.get_function_pointer(
         PdCString::from_str(type_name)?,
         PdCString::from_str(method_name)?,
-        PdCString::from_str("Test.Program+HelloFunc, Test, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")?,
+        PdCString::from_str(
+            "Test.Program+HelloFunc, Test, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+        )?,
     )?;
     let hello: fn(*const (), i32) -> i32 = unsafe { mem::transmute(hello) };
     let result = hello(ptr::null(), 0);

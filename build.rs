@@ -84,9 +84,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let out_dir = env::var("OUT_DIR")?;
     let runtimes_dir = Path::new(&out_dir)
-        .parent().unwrap()
-        .parent().unwrap()
-        .parent().unwrap()
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
         .join("runtimes")
         .join(target);
     if !runtimes_dir.exists() || runtimes_dir.read_dir()?.next().is_none() {
@@ -94,7 +97,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         download_nethost(target, &runtimes_dir)?;
     }
 
-    println!("cargo:rustc-link-search={}", runtimes_dir.into_os_string().to_str().unwrap());
+    println!(
+        "cargo:rustc-link-search={}",
+        runtimes_dir.into_os_string().to_str().unwrap()
+    );
 
     // NOTE: for some reason we need the rustc argument here, but the link attribute in bindings/nethost.rs for unix.
     // For more information see https://github.com/OpenByteDev/netcorehost/issues/2.

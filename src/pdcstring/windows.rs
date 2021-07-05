@@ -1,4 +1,5 @@
 use std::ffi::{OsStr, OsString};
+use std::str::FromStr;
 // use std::os::windows::ffi::OsStrExt;
 
 use widestring::{MissingNulError, U16CStr, U16CString};
@@ -24,13 +25,18 @@ impl PdCString {
         let inner = U16CString::from_os_str(s)?;
         Ok(PdCString::from_u16_c_string(inner))
     }
-    pub fn from_str(s: &str) -> Result<Self, NulError> {
-        let inner = U16CString::from_str(s)?;
-        Ok(PdCString::from_u16_c_string(inner))
-    }
     pub unsafe fn from_str_ptr(ptr: *const u16) -> Self {
         let inner = U16CString::from_ptr_str(ptr);
         PdCString::from_u16_c_string(inner)
+    }
+}
+
+impl FromStr for PdCString {
+    type Err = NulError;
+
+    fn from_str(s: &str) -> Result<Self, NulError> {
+        let inner = U16CString::from_str(s)?;
+        Ok(PdCString::from_u16_c_string(inner))
     }
 }
 

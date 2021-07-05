@@ -32,7 +32,7 @@ extern "C" {
     ///
     /// # Remarks
     /// The full search for the hostfxr library is done on every call. To minimize the need
-    /// to call this function multiple times, pass a large buffer (e.g. [`PATH_MAX`](crate::bindings::consts::PATH_MAX)).
+    /// to call this function multiple times, pass a large buffer (e.g. [`MAX_PATH`](crate::bindings::consts::MAX_PATH)).
     pub fn get_hostfxr_path(
         buffer: *mut char_t,
         buffer_size: *mut size_t,

@@ -3,6 +3,7 @@ use std::{
     convert::TryFrom,
     fmt::{self, Debug, Display, Formatter},
     ops::{Deref, DerefMut},
+    str::FromStr,
 };
 
 use super::{NulError, PdCStrInner, PdCStringInner, PdUChar};
@@ -54,13 +55,13 @@ impl AsRef<PdCStr> for PdCString {
 impl Deref for PdCString {
     type Target = PdCStr;
 
-    fn deref(&self) -> &PdCStr {
+    fn deref(&self) -> &Self::Target {
         self.borrow()
     }
 }
 
 impl DerefMut for PdCString {
-    fn deref_mut(&mut self) -> &mut PdCStr {
+    fn deref_mut(&mut self) -> &mut Self::Target {
         self.borrow_mut()
     }
 }
@@ -84,7 +85,7 @@ impl From<PdCStringInner> for PdCString {
 }
 
 impl From<PdCString> for PdCStringInner {
-    fn from(s: PdCString) -> PdCStringInner {
+    fn from(s: PdCString) -> Self {
         s.into_inner()
     }
 }
@@ -92,7 +93,7 @@ impl From<PdCString> for PdCStringInner {
 impl<'a> TryFrom<&'a str> for PdCString {
     type Error = NulError;
 
-    fn try_from(s: &'a str) -> Result<Self, NulError> {
+    fn try_from(s: &'a str) -> Result<Self, Self::Error> {
         Self::from_str(s)
     }
 }
@@ -100,7 +101,7 @@ impl<'a> TryFrom<&'a str> for PdCString {
 impl TryFrom<Vec<PdUChar>> for PdCString {
     type Error = NulError;
 
-    fn try_from(vec: Vec<PdUChar>) -> Result<Self, NulError> {
+    fn try_from(vec: Vec<PdUChar>) -> Result<Self, Self::Error> {
         Self::from_vec(vec)
     }
 }
