@@ -48,8 +48,6 @@ namespace Test {
 The following code will setup the hostfxr library, load the app and call the `Hello` method.
 The method has the default signature which avoids having to specify it. It accepts a ptr to some data and the size of said data.
 ```rust
-#
-#
 let hostfxr = nethost::load_hostfxr()?;
 let context =
     hostfxr.initialize_for_runtime_config(PdCString::from_str("Test.runtimeconfig.json")?)?;
@@ -60,7 +58,6 @@ let hello = fn_loader.get_function_pointer_with_default_signature(
     PdCString::from_str("Hello")?,
 );
 let result = unsafe { hello(ptr::null(), 0) };
-#
 ```
 
 Alternatively it is possible to call a method with any signature if it is annotated with [`UnmanagedCallersOnly`] (loaded with
