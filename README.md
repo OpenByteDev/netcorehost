@@ -6,7 +6,7 @@
 [![dependency status](https://deps.rs/repo/github/openbytedev/netcorehost/status.svg)](https://deps.rs/repo/github/openbytedev/netcorehost)
 [![MIT](https://img.shields.io/crates/l/netcorehost.svg)](https://github.com/OpenByteDev/netcorehost/blob/master/LICENSE)
 
-A Rust library for hosting .NET Core application.
+A Rust library for hosting .NET Core applications.
 
 This crate allows a .NET Core app to be run inside the current process or to load it and call a contained method directly.
 
