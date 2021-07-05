@@ -58,6 +58,11 @@ struct PackageInfoCatalogEntry<'a> {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    if cfg!(feature = "private-docs-rs") {
+        println!("Returning early because private-docs-rs feature was enabled");
+        return Ok(());
+    }
+
     let target = match (
         platforms::TARGET_OS,
         platforms::TARGET_ARCH,

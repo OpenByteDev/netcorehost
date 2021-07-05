@@ -31,3 +31,10 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 semver = "0.11"
 zip = "0.5"
+
+[features]
+private-docs-rs = [] # DO NOT RELY ON THIS
+
+# Prevent downloading nethost lib when building docs on docs.rs.
+[package.metadata.docs.rs]
+features = ["private-docs-rs"]
