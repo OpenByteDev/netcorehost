@@ -20,7 +20,7 @@ impl PdCString {
 
 // methods used by this crate
 impl PdCString {
-    pub fn from_os_str<T: AsRef<OsStr>>(s: T) -> Result<Self, NulError> {
+    pub fn from_os_str(s: impl AsRef<OsStr>) -> Result<Self, NulError> {
         let inner = U16CString::from_os_str(s)?;
         Ok(PdCString::from_u16_c_string(inner))
     }

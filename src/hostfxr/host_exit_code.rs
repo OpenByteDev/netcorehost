@@ -101,7 +101,7 @@ impl KnownHostExitCode {
     pub fn value(&self) -> u32 {
         *self as u32
     }
-    fn to_result(self) -> Result<(), Error> {
+    pub fn to_result(self) -> Result<(), Error> {
         if self.is_success() {
             Ok(())
         } else {

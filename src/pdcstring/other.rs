@@ -18,7 +18,7 @@ impl PdCString {
 
 // methods used by this crate
 impl PdCString {
-    pub fn from_os_str<T: AsRef<OsStr>>(s: T) -> Result<Self, NulError> {
+    pub fn from_os_str(s: impl AsRef<OsStr>) -> Result<Self, NulError> {
         PdCString::from_vec(s.as_ref().as_bytes().to_vec())
     }
     pub fn from_str(s: &str) -> Result<Self, NulError> {

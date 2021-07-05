@@ -22,7 +22,7 @@ pub fn get_hostfxr_path_with_assembly_path<P: AsRef<PdCStr>>(
 }
 
 /// Gets the path to the hostfxr library.
-/// Hostfxr is located as if an application is started using 'dotnet app.dll', which means it will be
+/// Hostfxr is located as if an application is started using `dotnet app.dll`, which means it will be
 /// searched for under the `dotnet_root` path.
 pub fn get_hostfxr_path_with_dotnet_root<P: AsRef<PdCStr>>(
     dotnet_root: P,
@@ -64,7 +64,7 @@ pub fn load_hostfxr_with_assembly_path<P: AsRef<PdCStr>>(
 }
 
 /// Retrieves the path to the hostfxr library and loads it.
-/// Hostfxr is located as if an application is started using 'dotnet app.dll', which means it will be
+/// Hostfxr is located as if an application is started using `dotnet app.dll`, which means it will be
 /// searched for under the `dotnet_root` path.
 pub fn load_hostfxr_with_dotnet_root<P: AsRef<PdCStr>>(dotnet_root: P) -> Result<Hostfxr, Error> {
     let hostfxr_path = get_hostfxr_path_with_dotnet_root(dotnet_root)?;

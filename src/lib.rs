@@ -97,7 +97,7 @@ pub mod nethost;
 
 /// Module containing a universal error enum for this crate.
 mod error;
-use error::*;
+pub use error::*;
 
 /// Module for a platform dependent c-like string type.
 pub mod pdcstring;
