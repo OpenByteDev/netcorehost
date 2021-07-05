@@ -122,7 +122,7 @@ fn download_nethost(target: &str, target_path: &Path) -> Result<(), Box<dyn Erro
     let index = client
         .get("https://api.nuget.org/v3/index.json")
         .send()
-        .expect("Failed to query nuget.org index.")
+        .expect("Failed to query nuget.org index for nethost package. Are you connected to the internet?")
         .json::<ResourceIndex>()
         .expect("Failed to parse json response from nuget.org2.");
     let registrations_base_url = index
