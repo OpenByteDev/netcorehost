@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Test {
     public static class Program {
+        public delegate int HelloFunc(IntPtr arg, int argLength);
         public static int Hello(IntPtr arg, int argLength) {
             Console.WriteLine("Hello from C#!");
             return 42;
