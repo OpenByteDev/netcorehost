@@ -1,6 +1,7 @@
 use crate::{
     bindings::hostfxr::{
-        get_function_pointer_fn, hostfxr_delegate_type, load_assembly_and_get_function_pointer_fn,
+        get_function_pointer_fn, hostfxr_delegate_type, hostfxr_handle,
+        load_assembly_and_get_function_pointer_fn,
     },
     pdcstring::{PdCStr, PdCString},
     Error,
@@ -8,15 +9,14 @@ use crate::{
 
 use std::{
     collections::HashMap,
-    iter::FromIterator,
     marker::PhantomData,
     mem::{self, MaybeUninit},
-    ptr,
+    ptr::{self, NonNull},
 };
 
 use super::{
-    AssemblyDelegateLoader, DelegateLoader, HostExitCode, Hostfxr, HostfxrHandle,
-    KnownHostExitCode, MethodWithUnknownSignature,
+    AssemblyDelegateLoader, DelegateLoader, HostExitCode, Hostfxr, KnownHostExitCode,
+    MethodWithUnknownSignature,
 };
 
 /// A marker struct indicating that the context was initialized with a runtime config.
@@ -26,6 +26,28 @@ pub struct InitializedForRuntimeConfig;
 /// A marker struct indicating that the context was initialized for the dotnet command line.
 /// This means that it is possible to run the application associated with the context.
 pub struct InitializedForCommandLine;
+
+/// Handle of a loaded [`HostfxrContext`].
+#[derive(Debug, Clone, Copy)]
+pub struct HostfxrHandle(NonNull<()>);
+
+impl HostfxrHandle {
+    pub fn new(ptr: hostfxr_handle) -> Option<Self> {
+        NonNull::new(ptr as *mut _).map(Self)
+    }
+    pub unsafe fn new_unchecked(ptr: hostfxr_handle) -> Self {
+        Self(NonNull::new_unchecked(ptr as *mut _))
+    }
+    pub fn as_raw(&self) -> hostfxr_handle {
+        self.0.as_ptr()
+    }
+}
+
+impl From<HostfxrHandle> for hostfxr_handle {
+    fn from(handle: HostfxrHandle) -> Self {
+        handle.as_raw()
+    }
+}
 
 /// State which hostfxr creates and maintains and represents a logical operation on the hosting components.
 #[derive(Clone)]
@@ -51,6 +73,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     ) -> Result<PdCString, Error> {
         unsafe { self.get_runtime_property_value_borrowed(name) }.map(|str| str.to_owned())
     }
+
     /// Gets the runtime property value for the given key of this host context.
     ///
     /// # Safety
@@ -107,6 +130,18 @@ impl<'a, I> HostfxrContext<'a, I> {
         HostExitCode::from(result).to_result().map(|_| ())
     }
 
+    /// Get all runtime properties for this host context.
+    ///
+    /// # Safety
+    /// The strings returned are owned by the host context. The lifetime of the buffers is only
+    /// guaranteed until any of the below occur:
+    ///  * [`run_app`] is called for this host context
+    ///  * properties are changed via [`set_runtime_property_value`] or [`remove_runtime_property_value`]
+    ///  * the host context is dropped
+    ///
+    /// [`run_app`]: HostfxrContext::run_app
+    /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
+    /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
     pub unsafe fn get_runtime_properties_borrowed(
         &self,
     ) -> Result<(Vec<&'a PdCStr>, Vec<&'a PdCStr>), Error> {
@@ -150,6 +185,8 @@ impl<'a, I> HostfxrContext<'a, I> {
 
         Ok((keys, values))
     }
+
+    /// Get all runtime properties for this host context as owned strings.
     pub fn get_runtime_properties_owned(&self) -> Result<(Vec<PdCString>, Vec<PdCString>), Error> {
         unsafe { self.get_runtime_properties_borrowed() }.map(|(keys, values)| {
             let owned_keys = keys.into_iter().map(|key| key.to_owned()).collect();
@@ -157,38 +194,94 @@ impl<'a, I> HostfxrContext<'a, I> {
             (owned_keys, owned_values)
         })
     }
-    pub fn collect_runtime_properties<T: FromIterator<(PdCString, PdCString)>>(
+
+    /// Get all runtime properties for this host context as an iterator over borrowed key-value pairs.
+    ///
+    /// # Safety
+    /// The strings returned are owned by the host context. The lifetime of the buffers is only
+    /// guaranteed until any of the below occur:
+    ///  * [`run_app`] is called for this host context
+    ///  * properties are changed via [`set_runtime_property_value`] or [`remove_runtime_property_value`]
+    ///  * the host context is dropped
+    ///
+    /// [`run_app`]: HostfxrContext::run_app
+    /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
+    /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
+    pub unsafe fn get_runtime_properties_iter_borrowed(
         &self,
-    ) -> Result<T, Error> {
-        self.get_runtime_properties_owned()
-            .map(|(keys, values)| keys.into_iter().zip(values.into_iter()).collect())
+    ) -> Result<impl Iterator<Item = (&'a PdCStr, &'a PdCStr)>, Error> {
+        self.get_runtime_properties_borrowed()
+            .map(|(keys, values)| keys.into_iter().zip(values.into_iter()))
     }
+
+    /// Get all runtime properties for this host context as an iterator over owned key-value pairs.
+    pub fn get_runtime_properties_iter_owned(
+        &self,
+    ) -> Result<impl Iterator<Item = (PdCString, PdCString)>, Error> {
+        self.get_runtime_properties_owned()
+            .map(|(keys, values)| keys.into_iter().zip(values.into_iter()))
+    }
+
+    /// Get all runtime properties for this host context as an hashmap of borrowed strings.
+    ///
+    /// # Safety
+    /// The strings returned are owned by the host context. The lifetime of the buffers is only
+    /// guaranteed until any of the below occur:
+    ///  * [`run_app`] is called for this host context
+    ///  * properties are changed via [`set_runtime_property_value`] or [`remove_runtime_property_value`]
+    ///  * the host context is dropped
+    ///
+    /// [`run_app`]: HostfxrContext::run_app
+    /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
+    /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
     pub unsafe fn get_runtime_properties_borrowed_as_map(
         &self,
     ) -> Result<HashMap<&'a PdCStr, &'a PdCStr>, Error> {
         self.get_runtime_properties_borrowed()
             .map(|(keys, values)| keys.into_iter().zip(values.into_iter()).collect())
     }
+
+    /// Get all runtime properties for this host context as an hashmap of owned strings.
     pub fn get_runtime_properties_owned_as_map(
         &self,
     ) -> Result<HashMap<PdCString, PdCString>, Error> {
-        self.collect_runtime_properties()
+        self.get_runtime_properties_iter_owned()
+            .map(|iter| iter.collect())
     }
 
-    pub unsafe fn get_runtime_delegate(
+    /// Gets a typed delegate from the currently loaded CoreCLR or from a newly created one.
+    /// You propably want to use [`get_delegate_loader`] or [`get_delegate_loader_for_assembly`]
+    /// instead of this function if you want to load function pointers.
+    ///
+    /// # Remarks
+    /// If the context was initialized using [`initialize_for_runtime_config`], then all delegate types are supported.
+    /// If the host_context_handle was initialized using [`initialize_for_dotnet_command_line`], then only the following
+    /// delegate types are currently supported:
+    ///  * [`hdt_load_assembly_and_get_function_pointer`]
+    ///  * [`hdt_get_function_pointer`]
+    ///
+    /// [`get_delegate_loader`]: HostfxrContext::get_delegate_loader
+    /// [`get_delegate_loader_for_assembly`]: HostfxrContext::get_delegate_loader_for_assembly
+    /// [`hdt_load_assembly_and_get_function_pointer`]: hostfxr_delegate_type::hdt_load_assembly_and_get_function_pointer
+    /// [`hdt_get_function_pointer`]: hostfxr_delegate_type::hdt_get_function_pointer
+    /// [`initialize_for_runtime_config`]: Hostfxr::initialize_for_runtime_config
+    /// [`initialize_for_dotnet_command_line`]: Hostfxr::initialize_for_dotnet_command_line
+    pub fn get_runtime_delegate(
         &self,
         r#type: hostfxr_delegate_type,
     ) -> Result<MethodWithUnknownSignature, Error> {
         let mut delegate = MaybeUninit::uninit();
-        let result = self.hostfxr.lib.hostfxr_get_runtime_delegate(
-            self.handle.as_raw(),
-            r#type,
-            delegate.as_mut_ptr(),
-        );
+        let result = unsafe {
+            self.hostfxr.lib.hostfxr_get_runtime_delegate(
+                self.handle.as_raw(),
+                r#type,
+                delegate.as_mut_ptr(),
+            )
+        };
 
         HostExitCode::from(result).to_result()?;
 
-        Ok(delegate.assume_init())
+        Ok(unsafe { delegate.assume_init() })
     }
     fn get_load_assembly_and_get_function_pointer_delegate(
         &self,
@@ -206,6 +299,8 @@ impl<'a, I> HostfxrContext<'a, I> {
                 .map(|ptr| mem::transmute(ptr))
         }
     }
+
+    /// Gets a delegate loader for loading an assembly and contained function pointers.
     pub fn get_delegate_loader(&self) -> Result<DelegateLoader, Error> {
         Ok(DelegateLoader {
             get_load_assembly_and_get_function_pointer: self
@@ -213,6 +308,9 @@ impl<'a, I> HostfxrContext<'a, I> {
             get_function_pointer: self.get_get_function_pointer_delegate()?,
         })
     }
+
+    /// Gets a delegate loader for loading function pointers of the assembly with the given path.
+    /// The assembly will be loaded lazily when the first function pointer is loaded.
     pub fn get_delegate_loader_for_assembly<A: AsRef<PdCStr>>(
         &self,
         assembly_path: A,
@@ -228,6 +326,10 @@ impl<'a, I> HostfxrContext<'a, I> {
 }
 
 impl<'a> HostfxrContext<'a, InitializedForCommandLine> {
+    /// Load CoreCLR and run the application.
+    ///
+    /// # Return value
+    /// If the app was successfully run, the exit code of the application. Otherwise, the error code result.
     pub fn run_app(&self) -> HostExitCode {
         let result = unsafe { self.hostfxr.lib.hostfxr_run_app(self.handle.as_raw()) };
         HostExitCode::from(result)

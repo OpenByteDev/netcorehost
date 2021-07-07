@@ -3,56 +3,66 @@ use crate::{
         char_t,
         hostfxr::{hostfxr_handle, hostfxr_initialize_parameters, HostfxrLib},
     },
+    nethost,
     pdcstring::PdCStr,
     Error,
 };
 use dlopen::wrapper::Container;
-use std::{
-    ffi::OsStr,
-    mem::MaybeUninit,
-    ptr::{self, NonNull},
+use std::{ffi::OsStr, mem::MaybeUninit, ptr};
+
+use super::{
+    HostExitCode, HostfxrContext, HostfxrHandle, InitializedForCommandLine,
+    InitializedForRuntimeConfig,
 };
 
-use super::{HostExitCode, HostfxrContext, InitializedForCommandLine, InitializedForRuntimeConfig};
-
+/// A struct representing a loaded hostfxr library.
 pub struct Hostfxr {
     pub(crate) lib: Container<HostfxrLib>,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct HostfxrHandle(NonNull<()>);
-
-impl HostfxrHandle {
-    pub unsafe fn new(ptr: hostfxr_handle) -> Option<Self> {
-        NonNull::new(ptr as *mut _).map(Self)
-    }
-    pub unsafe fn new_unchecked(ptr: hostfxr_handle) -> Self {
-        Self(NonNull::new_unchecked(ptr as *mut _))
-    }
-    pub fn as_raw(&self) -> hostfxr_handle {
-        self.0.as_ptr()
-    }
-}
-
-impl From<HostfxrHandle> for hostfxr_handle {
-    fn from(handle: HostfxrHandle) -> Self {
-        handle.as_raw()
-    }
-}
+impl !Sync for Hostfxr {}
+impl !Send for Hostfxr {}
 
 impl Hostfxr {
+    /// Loads the hostfxr library from the given path.
     pub fn load_from_path(path: impl AsRef<OsStr>) -> Result<Self, Error> {
         Ok(Self {
             lib: unsafe { Container::load(path)? },
         })
     }
 
+    /// Locates the hostfxr library using [`nethost`] and loads it.
+    pub fn load_with_nethost() -> Result<Self, Error> {
+        nethost::load_hostfxr()
+    }
+
+    /// Initializes the hosting components for a dotnet command line running an application
+    ///
+    /// # Remarks
+    /// This function parses the specified command-line arguments to determine the application to run. It will
+    /// then find the corresponding `.runtimeconfig.json` and `.deps.json` with which to resolve frameworks and
+    /// dependencies and prepare everything needed to load the runtime.
+    ///
+    /// This function only supports arguments for running an application. It does not support SDK commands.
+    ///
+    /// This function does not load the runtime.
     pub fn initialize_for_dotnet_command_line(
         &self,
         app_path: impl AsRef<PdCStr>,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
         self.initialize_for_dotnet_command_line_with_args(&[app_path.as_ref()])
     }
+
+    /// Initializes the hosting components for a dotnet command line running an application
+    ///
+    /// # Remarks
+    /// This function parses the specified command-line arguments to determine the application to run. It will
+    /// then find the corresponding `.runtimeconfig.json` and `.deps.json` with which to resolve frameworks and
+    /// dependencies and prepare everything needed to load the runtime.
+    ///
+    /// This function only supports arguments for running an application. It does not support SDK commands.
+    ///
+    /// This function does not load the runtime.
     pub fn initialize_for_dotnet_command_line_and_host_path(
         &self,
         app_path: impl AsRef<PdCStr>,

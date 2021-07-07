@@ -18,9 +18,14 @@ use std::{
 
 use super::HostExitCode;
 
+/// A function pointer for a method with the default signature.
 pub type MethodWithDefaultSignature = component_entry_point_fn;
+/// A function pointer for a method with an unknown signature.
 pub type MethodWithUnknownSignature = *const ();
 
+/// A struct for loading pointers to managed functions for a given [`HostfxrContext`].
+///
+/// [`HostfxrContext`]: super::HostfxrContext
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct DelegateLoader {
     pub(crate) get_load_assembly_and_get_function_pointer:

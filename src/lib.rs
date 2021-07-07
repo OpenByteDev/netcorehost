@@ -1,4 +1,9 @@
-#![feature(maybe_uninit_uninit_array, maybe_uninit_extra, maybe_uninit_slice)]
+#![feature(
+    maybe_uninit_uninit_array,
+    maybe_uninit_extra,
+    maybe_uninit_slice,
+    negative_impls
+)]
 #![allow(clippy::missing_safety_doc)]
 
 //! A Rust library for hosting .NET Core application.

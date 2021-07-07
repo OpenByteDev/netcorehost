@@ -40,7 +40,7 @@ extern "C" {
     ) -> i32;
 }
 
-/// Parameters for `get_hostfxr_path`
+/// Parameters for [`get_hostfxr_path`]
 #[repr(C)]
 pub struct get_hostfxr_parameters {
     /// Size of the struct. This is used for versioning.
@@ -50,12 +50,14 @@ pub struct get_hostfxr_parameters {
     pub assembly_path: *const char_t,
     /// Path to directory containing the dotnet executable.
     /// If specified, hostfxr is located as if an application is started using
-    /// 'dotnet app.dll', which means it will be searched for under the `dotnet_root`
+    /// `dotnet app.dll`, which means it will be searched for under the `dotnet_root`
     /// path and the `assembly_path` is ignored.
     pub dotnet_root: *const char_t,
 }
 
 impl get_hostfxr_parameters {
+    /// Creates a new instance of [`get_hostfxr_parameters`] with the given `dotnet_root`.
+    /// The `size` field is set accordingly to the size of the struct and `assembly_path` to [`ptr::null()`].
     pub fn with_dotnet_root(dotnet_root: *const char_t) -> get_hostfxr_parameters {
         get_hostfxr_parameters {
             size: size_of::<get_hostfxr_parameters>(),
@@ -63,6 +65,8 @@ impl get_hostfxr_parameters {
             dotnet_root,
         }
     }
+    /// Creates a new instance of [`get_hostfxr_parameters`] with the given `assembly_path`.
+    /// The `size` field is set accordingly to the size of the struct and `dotnet_root` to [`ptr::null()`].
     pub fn with_assembly_path(assembly_path: *const char_t) -> get_hostfxr_parameters {
         get_hostfxr_parameters {
             size: size_of::<get_hostfxr_parameters>(),

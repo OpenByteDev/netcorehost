@@ -1,6 +1,6 @@
 use super::{char_t, size_t};
 
-/// The maximum path length on windows
+/// The maximum path length on windows platforms.
 // not really - https://stackoverflow.com/a/837855/6304917
 pub const MAX_PATH: size_t = 260;
 

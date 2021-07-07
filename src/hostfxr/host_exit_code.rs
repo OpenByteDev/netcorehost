@@ -1,8 +1,14 @@
+use std::{
+    convert::{TryFrom, TryInto},
+    num::TryFromIntError,
+};
+
 use crate::Error;
 use num_enum::TryFromPrimitive;
-use std::convert::TryInto;
 
-// from https://github.com/dotnet/runtime/blob/main/docs/design/features/host-error-codes.md
+/// The special error or exit codes for hostfxr operations.
+///
+/// Source: [https://github.com/dotnet/runtime/blob/main/docs/design/features/host-error-codes.md](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-error-codes.md)
 #[allow(non_camel_case_types)]
 #[non_exhaustive]
 #[derive(Debug, PartialEq, Eq, Clone, Copy, TryFromPrimitive)]
@@ -87,6 +93,7 @@ pub enum KnownHostExitCode {
 }
 
 impl KnownHostExitCode {
+    /// Returns a value indicating whether the exit code represents a successful operation.
     pub fn is_success(&self) -> bool {
         matches!(
             self,
@@ -95,13 +102,18 @@ impl KnownHostExitCode {
                 | KnownHostExitCode::Success_HostAlreadyInitialized
         )
     }
+
+    /// Returns a value indicating whether the exit code represents an error.
     pub fn is_error(&self) -> bool {
         !self.is_success()
     }
+
+    /// Returns the underlying exit code value.
     pub fn value(&self) -> u32 {
         *self as u32
     }
-    pub fn to_result(self) -> Result<(), Error> {
+
+    pub(crate) fn to_result(self) -> Result<(), Error> {
         if self.is_success() {
             Ok(())
         } else {
@@ -110,6 +122,22 @@ impl KnownHostExitCode {
     }
 }
 
+impl From<KnownHostExitCode> for i32 {
+    fn from(code: KnownHostExitCode) -> Self {
+        code.value() as i32
+    }
+}
+
+impl From<KnownHostExitCode> for u32 {
+    fn from(code: KnownHostExitCode) -> Self {
+        code.value()
+    }
+}
+
+/// Represents an exit code from a hostfxr operation.
+/// This may be one of the special code from [`KnownHostExitCode`],
+/// the exit code of the application or an error code resulting from violating
+/// some unchecked hostfxr constraint.
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum HostExitCode {
     Known(KnownHostExitCode),
@@ -117,6 +145,7 @@ pub enum HostExitCode {
 }
 
 impl HostExitCode {
+    /// Constructs a new instance from the given value.
     pub fn new(value: u32) -> Self {
         match value.try_into() {
             Ok(known) => HostExitCode::Known(known),
@@ -124,22 +153,28 @@ impl HostExitCode {
         }
     }
 
+    /// Returns a value indicating whether the exit code represents a successful operation.
     pub fn is_success(&self) -> bool {
         match self {
             HostExitCode::Known(code) => code.is_success(),
             HostExitCode::Unknown(_) => false,
         }
     }
+
+    /// Returns a value indicating whether the exit code represents an error.
     pub fn is_error(&self) -> bool {
         !self.is_success()
     }
+
+    /// Returns the underlying exit code value.
     pub fn value(&self) -> u32 {
         match self {
             HostExitCode::Known(code) => code.value(),
             HostExitCode::Unknown(code) => *code,
         }
     }
-    pub fn to_result(self) -> Result<(), Error> {
+
+    pub(crate) fn to_result(self) -> Result<(), Error> {
         match self {
             HostExitCode::Known(code) => code.to_result(),
             HostExitCode::Unknown(_) => Err(Error::Hostfxr(self)),
@@ -156,5 +191,19 @@ impl From<i32> for HostExitCode {
 impl From<u32> for HostExitCode {
     fn from(value: u32) -> Self {
         HostExitCode::new(value)
+    }
+}
+
+impl TryFrom<HostExitCode> for i32 {
+    type Error = TryFromIntError;
+
+    fn try_from(code: HostExitCode) -> Result<Self, Self::Error> {
+        Self::try_from(code.value())
+    }
+}
+
+impl From<HostExitCode> for u32 {
+    fn from(code: HostExitCode) -> Self {
+        code.value()
     }
 }

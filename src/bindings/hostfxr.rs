@@ -19,14 +19,30 @@ pub type hostfxr_error_writer_fn = unsafe extern "C" fn(message: *const char_t);
 
 pub type hostfxr_handle = *const ();
 
+/// A structure that stores parameters which are common to all forms of initialization.
 #[repr(C)]
 pub struct hostfxr_initialize_parameters {
-    size: size_t,
-    host_path: *const char_t,
-    dotnet_root: *const char_t,
+    /// The size of the structure.
+    /// This is used for versioning.
+    /// Should be set to `mem::size_of::<hostfxr_initialize_parameters>()`.
+    pub size: size_t,
+    /// Path to the native host (typically the `.exe`).
+    /// This value is not used for anything by the hosting components.
+    /// It's just passed to the CoreCLR as the path to the executable.
+    /// It can point to a file which is not executable itself, if such file doesn't exist
+    /// (for example in COM activation scenarios this points to the `comhost.dll`).
+    /// This is used by PAL (Platform Abstraction Layer) to initialize internal command line structures, process name and so on.
+    pub host_path: *const char_t,
+    /// Path to the root of the .NET Core installation in use.
+    /// This typically points to the install location from which the hostfxr has been loaded.
+    /// For example on Windows this would typically point to `C:\Program Files\dotnet`.
+    /// The path is used to search for shared frameworks and potentially SDKs.
+    pub dotnet_root: *const char_t,
 }
 
 impl hostfxr_initialize_parameters {
+    /// Creates a new instance of [`hostfxr_initialize_parameters`] with the given `host_path`.
+    /// The `size` field is set accordingly to the size of the struct and `dotnet_root` to [`ptr::null()`].
     pub fn with_host_path(host_path: *const char_t) -> hostfxr_initialize_parameters {
         hostfxr_initialize_parameters {
             size: mem::size_of::<hostfxr_initialize_parameters>(),
@@ -34,6 +50,8 @@ impl hostfxr_initialize_parameters {
             dotnet_root: ptr::null(),
         }
     }
+    /// Creates a new instance of [`hostfxr_initialize_parameters`] with the given `dotnet_root`.
+    /// The `size` field is set accordingly to the size of the struct and `host_path` to [`ptr::null()`].
     pub fn with_dotnet_root(dotnet_root: *const char_t) -> hostfxr_initialize_parameters {
         hostfxr_initialize_parameters {
             size: mem::size_of::<hostfxr_initialize_parameters>(),

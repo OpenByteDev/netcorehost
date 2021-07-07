@@ -3,6 +3,7 @@ use std::io;
 use crate::hostfxr::HostExitCode;
 
 quick_error! {
+    /// An error struct encompassing all possible errors of this crate.
     #[derive(Debug)]
     pub enum Error {
         DlOpen(err: dlopen::Error) {
