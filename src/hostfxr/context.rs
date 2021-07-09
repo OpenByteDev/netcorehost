@@ -29,16 +29,16 @@ pub struct InitializedForCommandLine;
 
 /// Handle of a loaded [`HostfxrContext`].
 #[derive(Debug, Clone, Copy)]
-pub struct HostfxrHandle(NonNull<()>);
+pub(crate) struct HostfxrHandle(NonNull<()>);
 
 impl HostfxrHandle {
-    pub fn new(ptr: hostfxr_handle) -> Option<Self> {
-        NonNull::new(ptr as *mut _).map(Self)
-    }
-    pub unsafe fn new_unchecked(ptr: hostfxr_handle) -> Self {
+    // pub(crate) fn new(ptr: hostfxr_handle) -> Option<Self> {
+    //     NonNull::new(ptr as *mut _).map(Self)
+    // }
+    pub(crate) unsafe fn new_unchecked(ptr: hostfxr_handle) -> Self {
         Self(NonNull::new_unchecked(ptr as *mut _))
     }
-    pub fn as_raw(&self) -> hostfxr_handle {
+    pub(crate) fn as_raw(&self) -> hostfxr_handle {
         self.0.as_ptr()
     }
 }
