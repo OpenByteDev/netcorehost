@@ -64,7 +64,7 @@ impl hostfxr_initialize_parameters {
 #[derive(WrapperApi)]
 pub struct HostfxrLib {
     /// Run an application.
-    /// 
+    ///
     /// # Arguments
     ///  * `argv` - command-line arguments
     ///
@@ -74,7 +74,7 @@ pub struct HostfxrLib {
     hostfxr_main: unsafe extern "C" fn(argc: i32, argv: *const *const char_t) -> i32,
 
     /// Run an application.
-    /// 
+    ///
     /// # Arguments
     ///  * `argv`
     ///     command-line arguments
@@ -88,7 +88,6 @@ pub struct HostfxrLib {
     /// This function does not return until the application completes execution.
     /// It will shutdown CoreCLR after the application executes.
     /// If the application is successfully executed, this value will return the exit code of the application. Otherwise, it will return an error code indicating the failure.
-    
     hostfxr_main_startupinfo: unsafe extern "C" fn(
         argc: i32,
         argv: *const *const char_t,

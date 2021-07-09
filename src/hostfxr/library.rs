@@ -43,9 +43,9 @@ impl Hostfxr {
     /// * Resolve framework references and find actual frameworks
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
-    /// 
+    ///
     /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
-    /// 
+    ///
     /// # Arguments
     ///  * `app_path`:
     ///     The path to the target application.
@@ -68,9 +68,9 @@ impl Hostfxr {
     /// * Resolve framework references and find actual frameworks
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
-    /// 
+    ///
     /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
-    /// 
+    ///
     /// # Arguments
     ///  * `app_path`:
     ///     The path to the target application.
@@ -95,7 +95,7 @@ impl Hostfxr {
             host_path,
         )
     }
-    
+
     /// Initializes the hosting components for a dotnet command line running an application
     ///
     /// Like all the other `initialize` functions, this function will
@@ -103,9 +103,9 @@ impl Hostfxr {
     /// * Resolve framework references and find actual frameworks
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
-    /// 
+    ///
     /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
-    /// 
+    ///
     /// # Arguments
     ///  * `app_path`:
     ///     The path to the target application.
@@ -137,9 +137,9 @@ impl Hostfxr {
     /// * Resolve framework references and find actual frameworks
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
-    /// 
+    ///
     /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
-    /// 
+    ///
     /// # Arguments
     ///  * `args`:
     ///     The command line for running a managed application.
@@ -158,7 +158,7 @@ impl Hostfxr {
             self.initialize_for_dotnet_command_line_with_parameters(args.as_ref(), ptr::null())
         }
     }
-    
+
     /// Initializes the hosting components for a dotnet command line running an application
     ///
     /// Like all the other `initialize` functions, this function will
@@ -166,9 +166,9 @@ impl Hostfxr {
     /// * Resolve framework references and find actual frameworks
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
-    /// 
+    ///
     /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
-    /// 
+    ///
     /// # Arguments
     ///  * `args`:
     ///     The command line for running a managed application.
@@ -193,7 +193,7 @@ impl Hostfxr {
         let parameters = hostfxr_initialize_parameters::with_host_path(host_path.as_ref().as_ptr());
         unsafe { self.initialize_for_dotnet_command_line_with_parameters(args, &parameters) }
     }
-    
+
     /// Initializes the hosting components for a dotnet command line running an application
     ///
     /// Like all the other `initialize` functions, this function will
@@ -201,9 +201,9 @@ impl Hostfxr {
     /// * Resolve framework references and find actual frameworks
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
-    /// 
+    ///
     /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
-    /// 
+    ///
     /// # Arguments
     ///  * `args`:
     ///     The command line for running a managed application.
@@ -260,10 +260,10 @@ impl Hostfxr {
     /// * Resolve framework references and find actual frameworks
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
-    /// 
+    ///
     /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
-    /// 
-    /// # Arguments 
+    ///
+    /// # Arguments
     ///  * `runtime_config_path`:
     ///     Path to the `.runtimeconfig.json` file to process.
     ///     Unlike with [`initialize_for_dotnet_command_line`], any `.deps.json` from the app/component will not be processed by the hosting layers.
@@ -277,7 +277,7 @@ impl Hostfxr {
             self.initialize_for_runtime_config_with_parameters(runtime_config_path, ptr::null())
         }
     }
-    
+
     /// This function loads the specified `.runtimeconfig.json`, resolve all frameworks, resolve all the assets from those frameworks and
     /// then prepare runtime initialization where the TPA contains only frameworks.
     /// Note that this case does **NOT** consume any `.deps.json` from the app/component (only processes the framework's `.deps.json`).
@@ -287,10 +287,10 @@ impl Hostfxr {
     /// * Resolve framework references and find actual frameworks
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
-    /// 
+    ///
     /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
-    /// 
-    /// # Arguments 
+    ///
+    /// # Arguments
     ///  * `runtime_config_path`:
     ///     Path to the `.runtimeconfig.json` file to process.
     ///     Unlike with [`initialize_for_dotnet_command_line`], any `.deps.json` from the app/component will not be processed by the hosting layers.
@@ -321,10 +321,10 @@ impl Hostfxr {
     /// * Resolve framework references and find actual frameworks
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
-    /// 
+    ///
     /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
-    /// 
-    /// # Arguments 
+    ///
+    /// # Arguments
     ///  * `runtime_config_path`:
     ///     Path to the `.runtimeconfig.json` file to process.
     ///     Unlike with [`initialize_for_dotnet_command_line`], any `.deps.json` from the app/component will not be processed by the hosting layers.

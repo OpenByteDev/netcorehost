@@ -30,8 +30,7 @@ pub type MethodWithUnknownSignature = *const ();
 pub struct DelegateLoader {
     pub(crate) get_load_assembly_and_get_function_pointer:
         load_assembly_and_get_function_pointer_fn,
-    pub(crate) get_function_pointer:
-        get_function_pointer_fn,
+    pub(crate) get_function_pointer: get_function_pointer_fn,
 }
 
 impl DelegateLoader {
@@ -79,8 +78,8 @@ impl DelegateLoader {
     }
 
     /// Calling this function will load the specified assembly in isolation (into its own `AssemblyLoadContext`)
-    /// and it will use `AssemblyDependencyResolver` on it to provide dependency resolution. 
-    /// Once loaded it will find the specified type and method and return a native function pointer 
+    /// and it will use `AssemblyDependencyResolver` on it to provide dependency resolution.
+    /// Once loaded it will find the specified type and method and return a native function pointer
     /// to that method.
     ///
     /// # Arguments
@@ -112,8 +111,8 @@ impl DelegateLoader {
     }
 
     /// Calling this function will load the specified assembly in isolation (into its own `AssemblyLoadContext`)
-    /// and it will use `AssemblyDependencyResolver` on it to provide dependency resolution. 
-    /// Once loaded it will find the specified type and method and return a native function pointer 
+    /// and it will use `AssemblyDependencyResolver` on it to provide dependency resolution.
+    /// Once loaded it will find the specified type and method and return a native function pointer
     /// to that method.
     ///
     /// # Arguments
@@ -144,8 +143,8 @@ impl DelegateLoader {
     }
 
     /// Calling this function will load the specified assembly in isolation (into its own `AssemblyLoadContext`)
-    /// and it will use `AssemblyDependencyResolver` on it to provide dependency resolution. 
-    /// Once loaded it will find the specified type and method and return a native function pointer 
+    /// and it will use `AssemblyDependencyResolver` on it to provide dependency resolution.
+    /// Once loaded it will find the specified type and method and return a native function pointer
     /// to that method. The target method has to be annotated with the [`UnmanagedCallersOnlyAttribute`].
     ///
     /// # Arguments
@@ -263,7 +262,7 @@ pub struct AssemblyDelegateLoader<A: AsRef<PdCStr>> {
 }
 
 impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
-    /// Creates a new [`AssemblyDelegateLoader`] wrapping the given [`DelegateLoader`] loading the assembly 
+    /// Creates a new [`AssemblyDelegateLoader`] wrapping the given [`DelegateLoader`] loading the assembly
     /// from the given path on the first access.
     pub fn new(loader: DelegateLoader, assembly_path: A) -> Self {
         Self {
@@ -273,9 +272,9 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
         }
     }
 
-    /// If this is the first loaded function pointer, calling this function will load the specified assembly in 
-    /// isolation (into its own `AssemblyLoadContext`) and it will use `AssemblyDependencyResolver` on it to provide 
-    /// dependency resolution. 
+    /// If this is the first loaded function pointer, calling this function will load the specified assembly in
+    /// isolation (into its own `AssemblyLoadContext`) and it will use `AssemblyDependencyResolver` on it to provide
+    /// dependency resolution.
     /// Otherwise or once loaded it will find the specified type and method and return a native function pointer to that method.
     /// Calling this function will find the specified type and method and return a native function pointer to that method.
     ///
@@ -305,9 +304,9 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
         }
     }
 
-    /// If this is the first loaded function pointer, calling this function will load the specified assembly in 
-    /// isolation (into its own `AssemblyLoadContext`) and it will use `AssemblyDependencyResolver` on it to provide 
-    /// dependency resolution. 
+    /// If this is the first loaded function pointer, calling this function will load the specified assembly in
+    /// isolation (into its own `AssemblyLoadContext`) and it will use `AssemblyDependencyResolver` on it to provide
+    /// dependency resolution.
     /// Otherwise or once loaded it will find the specified type and method and return a native function pointer to that method.
     /// Calling this function will find the specified type and method and return a native function pointer to that method.
     ///
@@ -335,9 +334,9 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
         }
     }
 
-    /// If this is the first loaded function pointer, calling this function will load the specified assembly in 
-    /// isolation (into its own `AssemblyLoadContext`) and it will use `AssemblyDependencyResolver` on it to provide 
-    /// dependency resolution. 
+    /// If this is the first loaded function pointer, calling this function will load the specified assembly in
+    /// isolation (into its own `AssemblyLoadContext`) and it will use `AssemblyDependencyResolver` on it to provide
+    /// dependency resolution.
     /// Otherwise or once loaded it will find the specified type and method and return a native function pointer to that method.
     /// Calling this function will find the specified type and method and return a native function pointer to that method.
     ///
