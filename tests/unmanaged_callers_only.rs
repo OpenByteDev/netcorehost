@@ -22,7 +22,7 @@ fn unmanaged_caller_hello_world() -> Result<(), Box<dyn std::error::Error>> {
 
     let context =
         hostfxr.initialize_for_runtime_config(PdCString::from_os_str(runtime_config_path)?)?;
-    let fn_loader =
+    let mut fn_loader =
         context.get_delegate_loader_for_assembly(PdCString::from_os_str(assembly_path)?)?;
     let hello = fn_loader.get_function_pointer_for_unmanaged_callers_only_method(
         PdCString::from_str(type_name)?,

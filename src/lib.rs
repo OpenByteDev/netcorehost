@@ -65,7 +65,7 @@
 //! let hostfxr = nethost::load_hostfxr()?;
 //! let context =
 //!     hostfxr.initialize_for_runtime_config(PdCString::from_str("Test.runtimeconfig.json")?)?;
-//! let fn_loader =
+//! let mut fn_loader =
 //!     context.get_delegate_loader_for_assembly(PdCString::from_str("Test.dll")?)?;
 //! let hello = fn_loader.get_function_pointer_with_default_signature(
 //!     PdCString::from_str("Test.Program, Test")?,

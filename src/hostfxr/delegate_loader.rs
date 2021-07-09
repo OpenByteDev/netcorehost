@@ -257,8 +257,7 @@ impl DelegateLoader {
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct AssemblyDelegateLoader<A: AsRef<PdCStr>> {
     loader: DelegateLoader,
-    assembly_path: A,
-    assembly_loaded: bool,
+    assembly_path: Option<A>,
 }
 
 impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
@@ -267,8 +266,7 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     pub fn new(loader: DelegateLoader, assembly_path: A) -> Self {
         Self {
             loader,
-            assembly_path,
-            assembly_loaded: false,
+            assembly_path: Some(assembly_path),
         }
     }
 
@@ -286,14 +284,14 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     ///  * `delegate_type_name`:
     ///     Assembly qualified delegate type name for the method signature.
     pub fn get_function_pointer(
-        &self,
+        &mut self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
         delegate_type_name: impl AsRef<PdCStr>,
     ) -> Result<MethodWithUnknownSignature, Error> {
-        if !self.assembly_loaded {
+        if let Some(assembly_path) = self.assembly_path.take() {
             self.loader.load_assembly_and_get_function_pointer(
-                self.assembly_path.as_ref(),
+                assembly_path,
                 type_name,
                 method_name,
                 delegate_type_name,
@@ -317,14 +315,14 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
     ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
     pub fn get_function_pointer_with_default_signature(
-        &self,
+        &mut self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
     ) -> Result<MethodWithDefaultSignature, Error> {
-        if !self.assembly_loaded {
+        if let Some(assembly_path) = self.assembly_path.take() {
             self.loader
                 .load_assembly_and_get_function_pointer_with_default_signature(
-                    self.assembly_path.as_ref(),
+                    assembly_path,
                     type_name,
                     method_name,
                 )
@@ -349,14 +347,14 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     /// [`\[UnmanagedCallersOnly\]`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     pub fn get_function_pointer_for_unmanaged_callers_only_method(
-        &self,
+        &mut self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
     ) -> Result<MethodWithUnknownSignature, Error> {
-        if !self.assembly_loaded {
+        if let Some(assembly_path) = self.assembly_path.take() {
             self.loader
                 .load_assembly_and_get_function_pointer_for_unmanaged_callers_only_method(
-                    self.assembly_path.as_ref(),
+                    assembly_path,
                     type_name,
                     method_name,
                 )
