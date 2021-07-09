@@ -11,9 +11,9 @@ A Rust library for hosting .NET Core applications.
 This crate allows a .NET Core app to be run inside the current process or to load it and call a contained method directly.
 
 ## Basic Usage
-The first step is to load the hostfxr library with handles the hosting. This can be done with [`nethost::load_hostfxr()`]
-which automatically locates the library on your system. The returned instance of [`Hostfxr`] can then be used to initialize
-a new [`HostfxrContext`] through one of the `initialize_*` methods like [`initialize_for_dotnet_command_line`]
+The first step is to load the hostfxr library with handles the hosting. This can be done with `nethost::load_hostfxr()`
+which automatically locates the library on your system. The returned instance of `Hostfxr` can then be used to initialize
+a new `HostfxrContext` through one of the `initialize_*` methods like `initialize_for_dotnet_command_line`
 which in turn be used to run the app associated with the context or to load a pointer to a function od the loaded library.
 
 ## Examples
@@ -60,15 +60,13 @@ let hello = fn_loader.get_function_pointer_with_default_signature(
 let result = unsafe { hello(ptr::null(), 0) };
 ```
 
-Alternatively it is possible to call a method with any signature if it is annotated with [`UnmanagedCallersOnly`] (loaded with
-[`get_function_pointer_for_unmanaged_callers_only_method`]) or if the signature is passed to [`get_function_pointer`].
+Alternatively it is possible to call a method with any signature if it is annotated with `UnmanagedCallersOnly` (loaded with
+`get_function_pointer_for_unmanaged_callers_only_method`) or if the signature is passed to `get_function_pointer`.
 
-[`Hostfxr`]: crate::hostfxr::Hostfxr
-[`HostfxrContext`]: crate::hostfxr::HostfxrContext
-[`initialize_for_dotnet_command_line`]: crate::hostfxr::Hostfxr::initialize_for_dotnet_command_line
-[`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
-[`get_function_pointer_for_unmanaged_callers_only_method`]: crate::hostfxr::AssemblyDelegateLoader::get_function_pointer_for_unmanaged_callers_only_method
-[`get_function_pointer`]: crate::hostfxr::AssemblyDelegateLoader::get_function_pointer
+## Additional Information
+- [Hosting layer APIs](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/hosting-layer-apis.md)
+- [Native hosting](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/native-hosting.md#runtime-properties)
+- [Write a custom .NET Core host to control the .NET runtime from your native code](https://docs.microsoft.com/en-us/dotnet/core/tutorials/netcore-hosting)
 
 ## License
 Licensed under MIT license ([LICENSE](https://github.com/OpenByteDev/netcorehost/blob/master/LICENSE) or http://opensource.org/licenses/MIT)

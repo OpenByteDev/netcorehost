@@ -30,7 +30,8 @@ pub type MethodWithUnknownSignature = *const ();
 pub struct DelegateLoader {
     pub(crate) get_load_assembly_and_get_function_pointer:
         load_assembly_and_get_function_pointer_fn,
-    pub(crate) get_function_pointer: get_function_pointer_fn,
+    pub(crate) get_function_pointer:
+        get_function_pointer_fn,
 }
 
 impl DelegateLoader {
@@ -77,6 +78,22 @@ impl DelegateLoader {
         Ok(delegate.assume_init())
     }
 
+    /// Calling this function will load the specified assembly in isolation (into its own `AssemblyLoadContext`)
+    /// and it will use `AssemblyDependencyResolver` on it to provide dependency resolution. 
+    /// Once loaded it will find the specified type and method and return a native function pointer 
+    /// to that method.
+    ///
+    /// # Arguments
+    ///  * `assembly_path`:
+    ///     Path to the assembly to load.
+    ///     In case of complex component, this should be the main assembly of the component (the one with the .deps.json next to it).
+    ///     Note that this does not have to be the assembly from which the `type_name` and `method_name` are.
+    ///  * `type_name`:
+    ///     Assembly qualified type name to find
+    ///  * `method_name`:
+    ///     Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
+    ///  * `delegate_type_name`:
+    ///     Assembly qualified delegate type name for the method signature.
     pub fn load_assembly_and_get_function_pointer(
         &self,
         assembly_path: impl AsRef<PdCStr>,
@@ -94,6 +111,21 @@ impl DelegateLoader {
         }
     }
 
+    /// Calling this function will load the specified assembly in isolation (into its own `AssemblyLoadContext`)
+    /// and it will use `AssemblyDependencyResolver` on it to provide dependency resolution. 
+    /// Once loaded it will find the specified type and method and return a native function pointer 
+    /// to that method.
+    ///
+    /// # Arguments
+    ///  * `assembly_path`:
+    ///     Path to the assembly to load.
+    ///     In case of complex component, this should be the main assembly of the component (the one with the .deps.json next to it).
+    ///     Note that this does not have to be the assembly from which the `type_name` and `method_name` are.
+    ///  * `type_name`:
+    ///     Assembly qualified type name to find
+    ///  * `method_name`:
+    ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
+    ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
     pub fn load_assembly_and_get_function_pointer_with_default_signature(
         &self,
         assembly_path: impl AsRef<PdCStr>,
@@ -111,6 +143,23 @@ impl DelegateLoader {
         }
     }
 
+    /// Calling this function will load the specified assembly in isolation (into its own `AssemblyLoadContext`)
+    /// and it will use `AssemblyDependencyResolver` on it to provide dependency resolution. 
+    /// Once loaded it will find the specified type and method and return a native function pointer 
+    /// to that method. The target method has to be annotated with the [`UnmanagedCallersOnlyAttribute`].
+    ///
+    /// # Arguments
+    ///  * `assembly_path`:
+    ///     Path to the assembly to load.
+    ///     In case of complex component, this should be the main assembly of the component (the one with the .deps.json next to it).
+    ///     Note that this does not have to be the assembly from which the `type_name` and `method_name` are.
+    ///  * `type_name`:
+    ///     Assembly qualified type name to find
+    ///  * `method_name`:
+    ///     Name of the method on the `type_name` to find. The method must be static and must match be annotated with [`\[UnmanagedCallersOnly\]`].
+    ///
+    /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
+    /// [`\[UnmanagedCallersOnly\]`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     pub fn load_assembly_and_get_function_pointer_for_unmanaged_callers_only_method(
         &self,
         assembly_path: impl AsRef<PdCStr>,
@@ -127,6 +176,16 @@ impl DelegateLoader {
         }
     }
 
+    /// Calling this function will find the specified type and method and return a native function pointer to that method.
+    /// This will **NOT** load the containing assembly.
+    ///
+    /// # Arguments
+    ///  * `type_name`:
+    ///     Assembly qualified type name to find
+    ///  * `method_name`:
+    ///     Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
+    ///  * `delegate_type_name`:
+    ///     Assembly qualified delegate type name for the method signature.
     pub fn get_function_pointer(
         &self,
         type_name: impl AsRef<PdCStr>,
@@ -142,6 +201,15 @@ impl DelegateLoader {
         }
     }
 
+    /// Calling this function will find the specified type and method and return a native function pointer to that method.
+    /// This will **NOT** load the containing assembly.
+    ///
+    /// # Arguments
+    ///  * `type_name`:
+    ///     Assembly qualified type name to find
+    ///  * `method_name`:
+    ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
+    ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
     pub fn get_function_pointer_with_default_signature(
         &self,
         type_name: impl AsRef<PdCStr>,
@@ -157,6 +225,17 @@ impl DelegateLoader {
         }
     }
 
+    /// Calling this function will find the specified type and method and return a native function pointer to that method.
+    /// This will **NOT** load the containing assembly.
+    ///
+    /// # Arguments
+    ///  * `type_name`:
+    ///     Assembly qualified type name to find
+    ///  * `method_name`:
+    ///     Name of the method on the `type_name` to find. The method must be static and must match be annotated with [`\[UnmanagedCallersOnly\]`].
+    ///
+    /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
+    /// [`\[UnmanagedCallersOnly\]`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     pub fn get_function_pointer_for_unmanaged_callers_only_method(
         &self,
         type_name: impl AsRef<PdCStr>,
@@ -172,6 +251,10 @@ impl DelegateLoader {
     }
 }
 
+/// A struct for loading pointers to managed functions for a given [`HostfxrContext`] which automatically loads the
+/// assembly from the given path on the first access.
+///
+/// [`HostfxrContext`]: super::HostfxrContext
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct AssemblyDelegateLoader<A: AsRef<PdCStr>> {
     loader: DelegateLoader,
@@ -180,6 +263,8 @@ pub struct AssemblyDelegateLoader<A: AsRef<PdCStr>> {
 }
 
 impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
+    /// Creates a new [`AssemblyDelegateLoader`] wrapping the given [`DelegateLoader`] loading the assembly 
+    /// from the given path on the first access.
     pub fn new(loader: DelegateLoader, assembly_path: A) -> Self {
         Self {
             loader,
@@ -188,6 +273,19 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
         }
     }
 
+    /// If this is the first loaded function pointer, calling this function will load the specified assembly in 
+    /// isolation (into its own `AssemblyLoadContext`) and it will use `AssemblyDependencyResolver` on it to provide 
+    /// dependency resolution. 
+    /// Otherwise or once loaded it will find the specified type and method and return a native function pointer to that method.
+    /// Calling this function will find the specified type and method and return a native function pointer to that method.
+    ///
+    /// # Arguments
+    ///  * `type_name`:
+    ///     Assembly qualified type name to find
+    ///  * `method_name`:
+    ///     Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
+    ///  * `delegate_type_name`:
+    ///     Assembly qualified delegate type name for the method signature.
     pub fn get_function_pointer(
         &self,
         type_name: impl AsRef<PdCStr>,
@@ -207,6 +305,18 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
         }
     }
 
+    /// If this is the first loaded function pointer, calling this function will load the specified assembly in 
+    /// isolation (into its own `AssemblyLoadContext`) and it will use `AssemblyDependencyResolver` on it to provide 
+    /// dependency resolution. 
+    /// Otherwise or once loaded it will find the specified type and method and return a native function pointer to that method.
+    /// Calling this function will find the specified type and method and return a native function pointer to that method.
+    ///
+    /// # Arguments
+    ///  * `type_name`:
+    ///     Assembly qualified type name to find
+    ///  * `method_name`:
+    ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
+    ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
     pub fn get_function_pointer_with_default_signature(
         &self,
         type_name: impl AsRef<PdCStr>,
@@ -225,6 +335,20 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
         }
     }
 
+    /// If this is the first loaded function pointer, calling this function will load the specified assembly in 
+    /// isolation (into its own `AssemblyLoadContext`) and it will use `AssemblyDependencyResolver` on it to provide 
+    /// dependency resolution. 
+    /// Otherwise or once loaded it will find the specified type and method and return a native function pointer to that method.
+    /// Calling this function will find the specified type and method and return a native function pointer to that method.
+    ///
+    /// # Arguments
+    ///  * `type_name`:
+    ///     Assembly qualified type name to find
+    ///  * `method_name`:
+    ///     Name of the method on the `type_name` to find. The method must be static and must match be annotated with [`\[UnmanagedCallersOnly\]`].
+    ///
+    /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
+    /// [`\[UnmanagedCallersOnly\]`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     pub fn get_function_pointer_for_unmanaged_callers_only_method(
         &self,
         type_name: impl AsRef<PdCStr>,
