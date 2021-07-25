@@ -83,7 +83,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let out_dir = env::var("OUT_DIR")?;
-    let runtimes_dir = Path::new(&out_dir)
+    let runtime_dir = Path::new(&out_dir)
         .parent()
         .unwrap()
         .parent()
@@ -92,14 +92,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap()
         .join("runtimes")
         .join(target);
-    if !runtimes_dir.exists() || runtimes_dir.read_dir()?.next().is_none() {
-        create_dir_all(&runtimes_dir)?;
-        download_nethost(target, &runtimes_dir)?;
+    if !runtime_dir.exists() || runtime_dir.read_dir()?.next().is_none() {
+        create_dir_all(&runtime_dir)?;
+        download_nethost(target, &runtime_dir)?;
     }
 
     println!(
         "cargo:rustc-link-search={}",
-        runtimes_dir.into_os_string().to_str().unwrap()
+        runtime_dir.to_str().unwrap()
     );
 
     // NOTE: for some reason we need the rustc argument here, but the link attribute in bindings/nethost.rs for unix.
