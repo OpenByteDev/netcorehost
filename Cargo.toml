@@ -29,7 +29,7 @@ platforms = "1.1"
 reqwest = { version = "0.11", features = ["blocking", "json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-semver = "0.11"
+semver = "1.0"
 zip = "0.5"
 
 [features]
