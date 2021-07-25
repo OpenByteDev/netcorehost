@@ -20,6 +20,10 @@ quick-error = "2.0"
 
 [target.'cfg(windows)'.dependencies]
 widestring = "0.4"
+wchar = "0.10"
+
+[target.'cfg(not(windows))'.dependencies]
+cstr = "0.2"
 
 [dev-dependencies]
 path-absolutize = "3.0"

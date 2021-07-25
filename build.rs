@@ -97,10 +97,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         download_nethost(target, &runtime_dir)?;
     }
 
-    println!(
-        "cargo:rustc-link-search={}",
-        runtime_dir.to_str().unwrap()
-    );
+    println!("cargo:rustc-link-search={}", runtime_dir.to_str().unwrap());
 
     // NOTE: for some reason we need the rustc argument here, but the link attribute in bindings/nethost.rs for unix.
     // For more information see https://github.com/OpenByteDev/netcorehost/issues/2.

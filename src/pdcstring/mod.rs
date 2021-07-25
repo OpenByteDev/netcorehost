@@ -19,3 +19,19 @@ use other::*;
 
 mod shared;
 pub use shared::*;
+
+#[cfg(windows)]
+#[macro_export]
+macro_rules! pdcstr {
+    ($expression:expr) => {
+        $crate::pdcstring::PdCStr::from_slice_with_nul(wchar::wchz!(u16, $expression)).unwrap()
+    };
+}
+
+#[cfg(not(windows))]
+#[macro_export]
+macro_rules! pdcstr {
+    ($expression:expr) => {
+        $crate::pdcstring::PdCStr::from_c_str(cstr::cstr!($expression))
+    };
+}
