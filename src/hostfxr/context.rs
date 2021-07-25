@@ -255,7 +255,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     ///
     /// # Remarks
     /// If the context was initialized using [`initialize_for_runtime_config`], then all delegate types are supported.
-    /// If the host_context_handle was initialized using [`initialize_for_dotnet_command_line`], then only the following
+    /// If it was initialized using [`initialize_for_dotnet_command_line`], then only the following
     /// delegate types are currently supported:
     ///  * [`hdt_load_assembly_and_get_function_pointer`]
     ///  * [`hdt_get_function_pointer`]
