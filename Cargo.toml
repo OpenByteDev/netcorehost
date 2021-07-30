@@ -9,6 +9,7 @@ documentation = "https://docs.rs/netcorehost"
 license = "MIT"
 authors = ["OpenByte <development.openbyte@gmail.com>"]
 edition = "2018"
+links = "nethost"
 categories = ["api-bindings", "external-ffi-bindings"]
 keywords = ["nethost", "hostfxr", "dotnet", "bindings", "coreclr"]
 

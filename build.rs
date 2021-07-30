@@ -58,27 +58,28 @@ struct PackageInfoCatalogEntry<'a> {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // we cannot (and don't really need to) download nethost when building on docs.rs so we exit early.
     if cfg!(feature = "private-docs-rs") {
         println!("Returning early because private-docs-rs feature was enabled");
         return Ok(());
     }
 
     let target = match (
-        platforms::TARGET_OS,
-        platforms::TARGET_ARCH,
-        platforms::TARGET_ENV,
+        env::var("CARGO_CFG_TARGET_OS").unwrap().as_ref(),
+        env::var("CARGO_CFG_TARGET_ARCH").unwrap().as_ref(),
+        env::var("CARGO_CFG_TARGET_ENV").unwrap().as_ref(),
     ) {
-        (OS::Windows, Arch::X86, _) => "win-x86",
-        (OS::Windows, Arch::X86_64, _) => "win-x64",
-        (OS::Windows, Arch::ARM, _) => "win-arm",
-        (OS::Windows, Arch::AARCH64, _) => "win-arm64",
-        (OS::Linux, Arch::X86_64, Some(Env::Musl)) => "linux-musl-x64",
-        (OS::Linux, Arch::ARM, Some(Env::Musl)) => "linux-musl-arm",
-        (OS::Linux, Arch::AARCH64, Some(Env::Musl)) => "linux-musl-arm64",
-        (OS::Linux, Arch::X86_64, _) => "linux-x64",
-        (OS::Linux, Arch::ARM, _) => "linux-arm",
-        (OS::Linux, Arch::AARCH64, _) => "linux-arm64",
-        (OS::iOS, Arch::X86_64, _) => "osx-x64",
+        ("windows", "x86",     _) => "win-x86",
+        ("windows", "x86_64",  _) => "win-x64",
+        ("windows", "arm",     _) => "win-arm",
+        ("windows", "aarch64", _) => "win-arm64",
+        ("linux",   "x86_64",  "musl") => "linux-musl-x64",
+        ("linux",   "arm",     "musl") => "linux-musl-arm",
+        ("linux",   "aarch64", "musl") => "linux-musl-arm64",
+        ("linux",   "x86_64",  _) => "linux-x64",
+        ("linux",   "arm",     _) => "linux-arm",
+        ("linux",   "aarch64", _) => "linux-arm64",
+        ("macos",   "x86_64",  _) => "osx-x64",
         _ => panic!("platform not supported."),
     };
 
@@ -90,13 +91,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap()
         .parent()
         .unwrap()
-        .join("runtimes")
+        .join("nethost")
         .join(target);
     if !runtime_dir.exists() || runtime_dir.read_dir()?.next().is_none() {
         create_dir_all(&runtime_dir)?;
         download_nethost(target, &runtime_dir)?;
     }
 
+    println!("cargo:rerun-if-changed={}", runtime_dir.to_str().unwrap());
     println!("cargo:rustc-link-search={}", runtime_dir.to_str().unwrap());
 
     // NOTE: for some reason we need the rustc argument here, but the link attribute in bindings/nethost.rs for unix.
