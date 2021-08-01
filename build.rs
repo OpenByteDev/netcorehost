@@ -8,7 +8,7 @@ use std::{
     str::FromStr,
 };
 
-use platforms::target::*;
+use build_target::{Arch, Env, Os};
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use zip::ZipArchive;
@@ -64,22 +64,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
 
-    let target = match (
-        env::var("CARGO_CFG_TARGET_OS").unwrap().as_ref(),
-        env::var("CARGO_CFG_TARGET_ARCH").unwrap().as_ref(),
-        env::var("CARGO_CFG_TARGET_ENV").unwrap().as_ref(),
-    ) {
-        ("windows", "x86",     _) => "win-x86",
-        ("windows", "x86_64",  _) => "win-x64",
-        ("windows", "arm",     _) => "win-arm",
-        ("windows", "aarch64", _) => "win-arm64",
-        ("linux",   "x86_64",  "musl") => "linux-musl-x64",
-        ("linux",   "arm",     "musl") => "linux-musl-arm",
-        ("linux",   "aarch64", "musl") => "linux-musl-arm64",
-        ("linux",   "x86_64",  _) => "linux-x64",
-        ("linux",   "arm",     _) => "linux-arm",
-        ("linux",   "aarch64", _) => "linux-arm64",
-        ("macos",   "x86_64",  _) => "osx-x64",
+    let os = Os::target().unwrap();
+    let arch = Arch::target().unwrap();
+    let env = Env::target().unwrap();
+
+    let target = match (&os, arch, env) {
+        (Os::Windows, Arch::X86,     _) => "win-x86",
+        (Os::Windows, Arch::X86_64,  _) => "win-x64",
+        (Os::Windows, Arch::ARM,     _) => "win-arm",
+        (Os::Windows, Arch::AARCH64, _) => "win-arm64",
+        (Os::Linux,   Arch::X86_64,  Env::Musl) => "linux-musl-x64",
+        (Os::Linux,   Arch::ARM,     Env::Musl) => "linux-musl-arm",
+        (Os::Linux,   Arch::AARCH64, Env::Musl) => "linux-musl-arm64",
+        (Os::Linux,   Arch::X86_64,  _) => "linux-x64",
+        (Os::Linux,   Arch::ARM,     _) => "linux-arm",
+        (Os::Linux,   Arch::AARCH64, _) => "linux-arm64",
+        (Os::MacOs,   Arch::X86_64,  _) => "osx-x64",
         _ => panic!("platform not supported."),
     };
 
@@ -103,11 +103,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // NOTE: for some reason we need the rustc argument here, but the link attribute in bindings/nethost.rs for unix.
     // For more information see https://github.com/OpenByteDev/netcorehost/issues/2.
-    match platforms::TARGET_OS {
-        OS::Windows => {
+    match os {
+        Os::Windows => {
             println!("cargo:rustc-link-lib=libnethost");
         }
-        OS::iOS => {
+        Os::MacOs => {
             // untestet
             // println!("cargo:rustc-link-lib=dylib=c++");
             // println!("cargo:rustc-link-lib=static=nethost");
