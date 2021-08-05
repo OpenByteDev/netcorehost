@@ -90,6 +90,18 @@ impl From<PdCString> for PdCStringInner {
     }
 }
 
+impl <'a> From<&'a PdCStrInner> for &'a PdCStr {
+    fn from(s: &'a PdCStrInner) -> Self {
+        PdCStr::from_inner(s)
+    }
+}
+
+impl <'a> From<&'a PdCStr> for &'a PdCStrInner {
+    fn from(s: &'a PdCStr) -> Self {
+        s.to_inner()
+    }
+}
+
 impl<'a> TryFrom<&'a str> for PdCString {
     type Error = NulError;
 
