@@ -72,7 +72,7 @@ impl Default for PdCString {
     }
 }
 
-impl Display for PdCString {
+impl Display for PdCStr {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
     }
