@@ -9,6 +9,15 @@ use super::{NulError, PdCStr, PdCString};
 pub(crate) type PdCStringInner = U16CString;
 pub(crate) type PdCStrInner = U16CStr;
 
+pub extern crate u16cstr;
+
+#[macro_export]
+macro_rules! pdcstr {
+    ($expression:expr) => {
+        $crate::pdcstring::PdCStr::from_u16_c_str(::u16cstr::u16cstr!($expression))
+    };
+}
+
 // conversions to and from inner
 impl PdCString {
     pub fn from_u16_c_string(s: U16CString) -> Self {

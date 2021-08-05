@@ -7,6 +7,15 @@ use super::{NulError, PdCStr, PdCString};
 pub(crate) type PdCStringInner = CString;
 pub(crate) type PdCStrInner = CStr;
 
+pub extern crate cstr;
+
+#[macro_export]
+macro_rules! pdcstr {
+    ($expression:expr) => {
+        $crate::pdcstring::PdCStr::from_c_str(::cstr::cstr!($expression))
+    };
+}
+
 // conversions to and from inner
 impl PdCString {
     pub fn from_c_string(s: CString) -> Self {

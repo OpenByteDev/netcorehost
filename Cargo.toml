@@ -21,7 +21,7 @@ quick-error = "2.0"
 
 [target.'cfg(windows)'.dependencies]
 widestring = "0.4"
-wchar = "0.10"
+u16cstr = "0.2"
 
 [target.'cfg(not(windows))'.dependencies]
 cstr = "0.2"
