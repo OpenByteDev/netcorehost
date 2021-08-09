@@ -19,7 +19,7 @@ fn hello_world() -> Result<(), Box<dyn std::error::Error>> {
 
     let context =
         hostfxr.initialize_for_runtime_config(PdCString::from_os_str(runtime_config_path)?)?;
-    let mut fn_loader =
+    let fn_loader =
         context.get_delegate_loader_for_assembly(PdCString::from_os_str(assembly_path)?)?;
     let hello = fn_loader.get_function_pointer_with_default_signature(
         pdcstr!("Test.Program, Test"),

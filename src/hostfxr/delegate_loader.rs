@@ -14,6 +14,7 @@ use crate::{
 use std::{
     mem::{self, MaybeUninit},
     ptr,
+    cell::Cell
 };
 
 use super::HostExitCode;
@@ -254,10 +255,9 @@ impl DelegateLoader {
 /// assembly from the given path on the first access.
 ///
 /// [`HostfxrContext`]: super::HostfxrContext
-#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct AssemblyDelegateLoader<A: AsRef<PdCStr>> {
     loader: DelegateLoader,
-    assembly_path: Option<A>,
+    assembly_path: Cell<Option<A>>,
 }
 
 impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
@@ -266,7 +266,7 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     pub fn new(loader: DelegateLoader, assembly_path: A) -> Self {
         Self {
             loader,
-            assembly_path: Some(assembly_path),
+            assembly_path: Cell::new(Some(assembly_path)),
         }
     }
 
@@ -284,7 +284,7 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     ///  * `delegate_type_name`:
     ///     Assembly qualified delegate type name for the method signature.
     pub fn get_function_pointer(
-        &mut self,
+        &self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
         delegate_type_name: impl AsRef<PdCStr>,
@@ -315,7 +315,7 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
     ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
     pub fn get_function_pointer_with_default_signature(
-        &mut self,
+        &self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
     ) -> Result<MethodWithDefaultSignature, Error> {
@@ -347,7 +347,7 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     /// [`\[UnmanagedCallersOnly\]`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     pub fn get_function_pointer_for_unmanaged_callers_only_method(
-        &mut self,
+        &self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
     ) -> Result<MethodWithUnknownSignature, Error> {
