@@ -1,6 +1,6 @@
 use std::ffi::{self, CStr, CString, OsStr, OsString};
 use std::os::unix::ffi::OsStrExt;
-use std::str::FromStr;
+use std::str::{self, FromStr};
 
 use super::{NulError, PdCStr, PdCString};
 
@@ -100,5 +100,14 @@ impl PdCStr {
     }
     pub fn to_slice_with_nul(&self) -> &[u8] {
         self.0.to_bytes_with_nul()
+    }
+    pub fn len(&self) -> usize {
+        self.0.to_bytes().len()
+    }
+    pub fn to_string(&self) -> Result<String, str::Utf8Error> {
+        self.0.to_str().map(|s| s.to_string())
+    }
+    pub fn to_string_lossy(&self) -> String {
+        self.0.to_string_lossy().to_string()
     }
 }

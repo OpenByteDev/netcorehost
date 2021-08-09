@@ -1,8 +1,9 @@
 use std::ffi::{OsStr, OsString};
 use std::str::FromStr;
+use std::string;
 // use std::os::windows::ffi::OsStrExt;
 
-use widestring::{MissingNulError, U16CStr, U16CString};
+use widestring::{U16CStr, U16CString};
 
 use super::{NulError, PdCStr, PdCString};
 
@@ -94,7 +95,7 @@ impl PdCStr {
 // methods not used by this crate
 impl PdCStr {
     // TODO: use abstract error type
-    pub fn from_slice_with_nul(slice: &[u16]) -> Result<&Self, MissingNulError<u16>> {
+    pub fn from_slice_with_nul(slice: &[u16]) -> Result<&Self, widestring::MissingNulError<u16>> {
         U16CStr::from_slice_with_nul(slice).map(|s| PdCStr::from_inner(s))
     }
     pub fn to_slice(&self) -> &[u16] {
@@ -102,5 +103,14 @@ impl PdCStr {
     }
     pub fn to_slice_with_nul(&self) -> &[u16] {
         self.0.as_slice_with_nul()
+    }
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+    pub fn to_string(&self) -> Result<String, string::FromUtf16Error> {
+        self.0.to_string()
+    }
+    pub fn to_string_lossy(&self) -> String {
+        self.0.to_string_lossy()
     }
 }
