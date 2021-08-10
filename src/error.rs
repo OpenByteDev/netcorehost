@@ -17,9 +17,5 @@ quick_error! {
             source(err)
         }
         Hostfxr(error_code: HostExitCode)
-        UnsupportedOS
-        Other(descr: &'static str) {
-            display("error: {}", descr)
-        }
     }
 }
