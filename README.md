@@ -29,7 +29,7 @@ public static class Program {
 The following code will setup the hostfxr library, load the app and run its `Main` method.
 ```rust
 let hostfxr = nethost::load_hostfxr()?;
-let context = hostfxr.initialize_for_dotnet_command_line(pdcstr!("Test.dll")?)?;
+let context = hostfxr.initialize_for_dotnet_command_line(pdcstr!("Test.dll"))?;
 let result = context.run_app();
 ```
 ### Calling a managed function
@@ -48,9 +48,9 @@ The method has the default signature which avoids having to specify it. It accep
 ```rust
 let hostfxr = nethost::load_hostfxr()?;
 let context =
-    hostfxr.initialize_for_runtime_config(pdcstr!("Test.runtimeconfig.json")?)?;
+    hostfxr.initialize_for_runtime_config(pdcstr!("Test.runtimeconfig.json"))?;
 let fn_loader =
-    context.get_delegate_loader_for_assembly(pdcstr!("Test.dll")?)?;
+    context.get_delegate_loader_for_assembly(pdcstr!("Test.dll"))?;
 let hello = fn_loader.get_function_pointer_with_default_signature(
     pdcstr!("Test.Program, Test")?,
     pdcstr!("Hello")?,
