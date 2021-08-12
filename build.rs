@@ -190,6 +190,14 @@ fn download_nethost(target: &str, target_path: &Path) -> Result<(), Box<dyn Erro
             continue;
         }
 
+        if let Some(name) = out_path.file_stem() {
+            if !name.to_string_lossy().contains("nethost") {
+                continue;
+            }
+        } else {
+            continue;
+        }
+
         let mut out_file = File::create(target_path.join(out_path.components().last().unwrap()))?;
         io::copy(&mut file, &mut out_file)?;
     }
