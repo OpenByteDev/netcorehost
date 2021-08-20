@@ -1,19 +1,20 @@
-use std::{path::Path, process::Command};
+use std::process::Command;
+use glob::glob;
 
 pub fn setup() {
     build_test_project();
 }
 
 pub fn build_test_project() {
-    if Path::new("tests/Test/bin/").exists() {
+    if glob("tests/Test/bin/**/Test.runtimeconfig.json").unwrap().next().is_some() {
         return;
     }
 
     Command::new("dotnet")
         .arg("build")
-        .arg("tests/Test")
+        .current_dir("tests/Test")
         .spawn()
         .expect("dotnet build failed")
         .wait()
-        .unwrap();
+        .expect("dotnet build failed");
 }
