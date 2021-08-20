@@ -14,7 +14,6 @@ use crate::{
 use std::{
     mem::{self, MaybeUninit},
     ptr,
-    cell::Cell
 };
 
 use super::HostExitCode;
@@ -257,7 +256,7 @@ impl DelegateLoader {
 /// [`HostfxrContext`]: super::HostfxrContext
 pub struct AssemblyDelegateLoader<A: AsRef<PdCStr>> {
     loader: DelegateLoader,
-    assembly_path: Cell<Option<A>>,
+    assembly_path: A,
 }
 
 impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
@@ -266,7 +265,7 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     pub fn new(loader: DelegateLoader, assembly_path: A) -> Self {
         Self {
             loader,
-            assembly_path: Cell::new(Some(assembly_path)),
+            assembly_path: assembly_path,
         }
     }
 
@@ -289,17 +288,12 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
         method_name: impl AsRef<PdCStr>,
         delegate_type_name: impl AsRef<PdCStr>,
     ) -> Result<MethodWithUnknownSignature, Error> {
-        if let Some(assembly_path) = self.assembly_path.take() {
-            self.loader.load_assembly_and_get_function_pointer(
-                assembly_path,
-                type_name,
-                method_name,
-                delegate_type_name,
-            )
-        } else {
-            self.loader
-                .get_function_pointer(type_name, method_name, delegate_type_name)
-        }
+        self.loader.load_assembly_and_get_function_pointer(
+            self.assembly_path.as_ref(),
+            type_name,
+            method_name,
+            delegate_type_name,
+        )
     }
 
     /// If this is the first loaded function pointer, calling this function will load the specified assembly in
@@ -319,17 +313,12 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
     ) -> Result<MethodWithDefaultSignature, Error> {
-        if let Some(assembly_path) = self.assembly_path.take() {
-            self.loader
-                .load_assembly_and_get_function_pointer_with_default_signature(
-                    assembly_path,
-                    type_name,
-                    method_name,
-                )
-        } else {
-            self.loader
-                .get_function_pointer_with_default_signature(type_name, method_name)
-        }
+        self.loader
+            .load_assembly_and_get_function_pointer_with_default_signature(
+                self.assembly_path.as_ref(),
+                type_name,
+                method_name,
+            )
     }
 
     /// If this is the first loaded function pointer, calling this function will load the specified assembly in
@@ -351,16 +340,10 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
     ) -> Result<MethodWithUnknownSignature, Error> {
-        if let Some(assembly_path) = self.assembly_path.take() {
-            self.loader
-                .load_assembly_and_get_function_pointer_for_unmanaged_callers_only_method(
-                    assembly_path,
-                    type_name,
-                    method_name,
-                )
-        } else {
-            self.loader
-                .get_function_pointer_for_unmanaged_callers_only_method(type_name, method_name)
-        }
+        self.loader.load_assembly_and_get_function_pointer_for_unmanaged_callers_only_method(
+            self.assembly_path.as_ref(),
+            type_name,
+            method_name,
+        )
     }
 }

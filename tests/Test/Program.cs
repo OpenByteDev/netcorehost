@@ -8,6 +8,10 @@ namespace Test {
             Console.WriteLine("Hello from C#!");
             return 42;
         }
+        public static int Hello2(IntPtr arg, int argLength) {
+            Console.WriteLine("Hello again?");
+            return 0;
+        }
 
         [UnmanagedCallersOnly]
         public static int UnmanagedHello() {
