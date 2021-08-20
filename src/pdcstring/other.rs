@@ -7,12 +7,13 @@ use super::{NulError, PdCStr, PdCString};
 pub(crate) type PdCStringInner = CString;
 pub(crate) type PdCStrInner = CStr;
 
+#[doc(hidden)]
 pub extern crate cstr;
 
 #[macro_export]
 macro_rules! pdcstr {
     ($expression:expr) => {
-        $crate::pdcstring::PdCStr::from_c_str(::cstr::cstr!($expression))
+        $crate::pdcstring::PdCStr::from_c_str($crate::pdcstring::cstr::cstr!($expression))
     };
 }
 

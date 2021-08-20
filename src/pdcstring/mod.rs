@@ -10,12 +10,12 @@ pub type PdUChar = u8;
 #[cfg(windows)]
 mod windows;
 #[cfg(windows)]
-use windows::*;
+pub use windows::*;
 
 #[cfg(not(windows))]
 mod other;
 #[cfg(not(windows))]
-use other::*;
+pub use other::*;
 
 mod shared;
 pub use shared::*;

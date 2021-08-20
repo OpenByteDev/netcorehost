@@ -1,0 +1,23 @@
+error: C-style string cannot contain nul characters
+ --> $DIR/pdcstr-compile-fail.rs:3:26
+  |
+3 |     netcorehost::pdcstr!("\0");
+  |                          ^^^^
+
+error: C-style string cannot contain nul characters
+ --> $DIR/pdcstr-compile-fail.rs:4:26
+  |
+4 |     netcorehost::pdcstr!("somerandomteststring\0");
+  |                          ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: C-style string cannot contain nul characters
+ --> $DIR/pdcstr-compile-fail.rs:5:26
+  |
+5 |     netcorehost::pdcstr!("somerandomteststring\0somerandomteststring");
+  |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: C-style string cannot contain nul characters
+ --> $DIR/pdcstr-compile-fail.rs:6:26
+  |
+6 |     netcorehost::pdcstr!("somerandomteststring\0somerandomteststring");
+  |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
