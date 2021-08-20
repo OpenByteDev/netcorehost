@@ -1,12 +1,16 @@
-use std::process::Command;
 use glob::glob;
+use std::process::Command;
 
 pub fn setup() {
     build_test_project();
 }
 
 pub fn build_test_project() {
-    if glob("tests/Test/bin/**/Test.runtimeconfig.json").unwrap().next().is_some() {
+    if glob("tests/Test/bin/**/Test.runtimeconfig.json")
+        .unwrap()
+        .next()
+        .is_some()
+    {
         return;
     }
 

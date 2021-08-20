@@ -11,7 +11,10 @@ use crate::{
     Error,
 };
 
-use std::{mem::{self, MaybeUninit}, ptr};
+use std::{
+    mem::{self, MaybeUninit},
+    ptr,
+};
 
 use super::HostExitCode;
 
@@ -268,7 +271,7 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     pub fn new(loader: DelegateLoader, assembly_path: A) -> Self {
         Self {
             loader,
-            assembly_path: assembly_path,
+            assembly_path,
         }
     }
 
@@ -343,10 +346,11 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
     ) -> Result<MethodWithUnknownSignature, Error> {
-        self.loader.load_assembly_and_get_function_pointer_for_unmanaged_callers_only_method(
-            self.assembly_path.as_ref(),
-            type_name,
-            method_name,
-        )
+        self.loader
+            .load_assembly_and_get_function_pointer_for_unmanaged_callers_only_method(
+                self.assembly_path.as_ref(),
+                type_name,
+                method_name,
+            )
     }
 }
