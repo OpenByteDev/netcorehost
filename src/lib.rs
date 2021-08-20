@@ -5,6 +5,7 @@
     negative_impls
 )]
 #![allow(clippy::missing_safety_doc)]
+#![warn(unsafe_op_in_unsafe_fn)]
 
 //! A Rust library for hosting .NET Core application.
 //!

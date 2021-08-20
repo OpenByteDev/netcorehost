@@ -42,14 +42,16 @@ impl DelegateLoader {
     ) -> Result<MethodWithUnknownSignature, Error> {
         let mut delegate = MaybeUninit::uninit();
 
-        let result = (self.get_load_assembly_and_get_function_pointer)(
-            assembly_path,
-            type_name,
-            method_name,
-            delegate_type_name,
-            ptr::null(),
-            delegate.as_mut_ptr(),
-        );
+        let result = unsafe {
+            (self.get_load_assembly_and_get_function_pointer)(
+                assembly_path,
+                type_name,
+                method_name,
+                delegate_type_name,
+                ptr::null(),
+                delegate.as_mut_ptr(),
+            )
+        };
         HostExitCode::from(result).to_result()?;
 
         Ok(unsafe { mem::transmute(delegate.assume_init()) })
@@ -63,14 +65,16 @@ impl DelegateLoader {
     ) -> Result<MethodWithUnknownSignature, Error> {
         let mut delegate = MaybeUninit::uninit();
 
-        let result = (self.get_function_pointer)(
-            type_name,
-            method_name,
-            delegate_type_name,
-            ptr::null(),
-            ptr::null(),
-            delegate.as_mut_ptr(),
-        );
+        let result = unsafe {
+            (self.get_function_pointer)(
+                type_name,
+                method_name,
+                delegate_type_name,
+                ptr::null(),
+                ptr::null(),
+                delegate.as_mut_ptr(),
+            )
+        };
         HostExitCode::from(result).to_result()?;
 
         Ok(unsafe { mem::transmute(delegate.assume_init()) })

@@ -1,7 +1,7 @@
 use crate::pdcstring::PdCStr;
 
 use crate::{
-    bindings::{char_t, consts::MAX_PATH, nethost::get_hostfxr_parameters},
+    bindings::{consts::MAX_PATH, nethost::get_hostfxr_parameters},
     error::Error,
     hostfxr::{HostExitCode, Hostfxr},
 };
@@ -37,15 +37,17 @@ unsafe fn get_hostfxr_path_with_parameters(
     let mut path_buffer = MaybeUninit::uninit_array::<MAX_PATH>();
     let mut path_length = path_buffer.len();
 
-    let result = crate::bindings::nethost::get_hostfxr_path(
-        path_buffer.as_mut_ptr() as *mut char_t,
-        &mut path_length,
-        parameters,
-    );
+    let result = unsafe {
+        crate::bindings::nethost::get_hostfxr_path(
+            path_buffer.as_mut_ptr().cast(),
+            &mut path_length,
+            parameters,
+        )
+    };
     HostExitCode::from(result).to_result()?;
 
-    let path_slice = MaybeUninit::slice_assume_init_ref(&path_buffer[..path_length]);
-    Ok(PdCStr::from_slice_with_nul_unchecked(path_slice).to_os_string())
+    let path_slice = unsafe { MaybeUninit::slice_assume_init_ref(&path_buffer[..path_length]) };
+    Ok(unsafe { PdCStr::from_slice_with_nul_unchecked(path_slice) }.to_os_string())
 }
 
 /// Retrieves the path to the hostfxr library and loads it.

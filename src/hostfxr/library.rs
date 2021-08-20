@@ -236,17 +236,19 @@ impl Hostfxr {
     ) -> Result<HostfxrContext<InitializedForCommandLine>, Error> {
         let mut hostfxr_handle = MaybeUninit::<hostfxr_handle>::uninit();
 
-        let result = self.lib.hostfxr_initialize_for_dotnet_command_line(
-            args.len() as i32,
-            args.as_ptr() as *const *const char_t,
-            parameters,
-            hostfxr_handle.as_mut_ptr(),
-        );
+        let result = unsafe {
+            self.lib.hostfxr_initialize_for_dotnet_command_line(
+                args.len() as i32,
+                args.as_ptr() as *const *const char_t,
+                parameters,
+                hostfxr_handle.as_mut_ptr(),
+            )
+        };
 
         HostExitCode::from(result).to_result()?;
 
         Ok(HostfxrContext::new(
-            HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()),
+            unsafe { HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()) },
             self,
         ))
     }
@@ -354,16 +356,18 @@ impl Hostfxr {
     ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, Error> {
         let mut hostfxr_handle = MaybeUninit::uninit();
 
-        let result = self.lib.hostfxr_initialize_for_runtime_config(
-            runtime_config_path.as_ref().as_ptr(),
-            parameters,
-            hostfxr_handle.as_mut_ptr(),
-        );
+        let result = unsafe {
+            self.lib.hostfxr_initialize_for_runtime_config(
+                runtime_config_path.as_ref().as_ptr(),
+                parameters,
+                hostfxr_handle.as_mut_ptr(),
+            )
+        };
 
         HostExitCode::from(result).to_result()?;
 
         Ok(HostfxrContext::new(
-            HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()),
+            unsafe { HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()) },
             self,
         ))
     }

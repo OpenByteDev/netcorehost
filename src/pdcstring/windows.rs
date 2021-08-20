@@ -37,7 +37,7 @@ impl PdCString {
         Ok(PdCString::from_u16_c_string(inner))
     }
     pub unsafe fn from_str_ptr(ptr: *const u16) -> Self {
-        let inner = U16CString::from_ptr_str(ptr);
+        let inner = unsafe { U16CString::from_ptr_str(ptr) };
         PdCString::from_u16_c_string(inner)
     }
 }
@@ -81,11 +81,11 @@ impl PdCStr {
         self.0.as_ptr()
     }
     pub unsafe fn from_str_ptr<'a>(ptr: *const u16) -> &'a Self {
-        let inner = U16CStr::from_ptr_str(ptr);
+        let inner = unsafe { U16CStr::from_ptr_str(ptr) };
         PdCStr::from_inner(inner)
     }
     pub unsafe fn from_slice_with_nul_unchecked(slice: &[u16]) -> &Self {
-        let inner = U16CStr::from_slice_with_nul_unchecked(slice);
+        let inner = unsafe { U16CStr::from_slice_with_nul_unchecked(slice) };
         PdCStr::from_inner(inner)
     }
     pub fn to_os_string(&self) -> OsString {

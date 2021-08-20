@@ -36,7 +36,7 @@ impl HostfxrHandle {
     //     NonNull::new(ptr as *mut _).map(Self)
     // }
     pub(crate) unsafe fn new_unchecked(ptr: hostfxr_handle) -> Self {
-        Self(NonNull::new_unchecked(ptr as *mut _))
+        Self(unsafe { NonNull::new_unchecked(ptr as *mut _) })
     }
     pub(crate) fn as_raw(&self) -> hostfxr_handle {
         self.0.as_ptr()
@@ -92,14 +92,16 @@ impl<'a, I> HostfxrContext<'a, I> {
     ) -> Result<&'a PdCStr, Error> {
         let mut value = MaybeUninit::uninit();
 
-        let result = self.hostfxr.lib.hostfxr_get_runtime_property_value(
-            self.handle.as_raw(),
-            name.as_ref().as_ptr(),
-            value.as_mut_ptr(),
-        );
+        let result = unsafe {
+            self.hostfxr.lib.hostfxr_get_runtime_property_value(
+                self.handle.as_raw(),
+                name.as_ref().as_ptr(),
+                value.as_mut_ptr(),
+            )
+        };
         HostExitCode::from(result).to_result()?;
 
-        Ok(PdCStr::from_str_ptr(value.assume_init()))
+        Ok(unsafe { PdCStr::from_str_ptr(value.assume_init()) })
     }
 
     /// Sets the value of a runtime property for this host context.
@@ -147,12 +149,14 @@ impl<'a, I> HostfxrContext<'a, I> {
     ) -> Result<(Vec<&'a PdCStr>, Vec<&'a PdCStr>), Error> {
         // get count
         let mut count = MaybeUninit::uninit();
-        let result = self.hostfxr.lib.hostfxr_get_runtime_properties(
-            self.handle.as_raw(),
-            count.as_mut_ptr(),
-            ptr::null_mut(),
-            ptr::null_mut(),
-        );
+        let result = unsafe {
+            self.hostfxr.lib.hostfxr_get_runtime_properties(
+                self.handle.as_raw(),
+                count.as_mut_ptr(),
+                ptr::null_mut(),
+                ptr::null_mut(),
+            )
+        };
 
         // ignore buffer too small error
         match HostExitCode::from(result).to_result() {
@@ -163,24 +167,29 @@ impl<'a, I> HostfxrContext<'a, I> {
         }?;
 
         // get values / fill buffer
-        let mut count = count.assume_init();
+        let mut count = unsafe { count.assume_init() };
         let mut keys = Vec::with_capacity(count);
         let mut values = Vec::with_capacity(count);
-        let result = self.hostfxr.lib.hostfxr_get_runtime_properties(
-            self.handle.as_raw(),
-            &mut count,
-            keys.as_mut_ptr(),
-            values.as_mut_ptr(),
-        );
+        let result = unsafe {
+            self.hostfxr.lib.hostfxr_get_runtime_properties(
+                self.handle.as_raw(),
+                &mut count,
+                keys.as_mut_ptr(),
+                values.as_mut_ptr(),
+            )
+        };
         HostExitCode::from(result).to_result()?;
 
-        keys.set_len(count);
-        values.set_len(count);
+        unsafe { keys.set_len(count) };
+        unsafe { values.set_len(count) };
 
-        let keys = keys.into_iter().map(|e| PdCStr::from_str_ptr(e)).collect();
+        let keys = keys
+            .into_iter()
+            .map(|e| unsafe { PdCStr::from_str_ptr(e) })
+            .collect();
         let values = values
             .into_iter()
-            .map(|e| PdCStr::from_str_ptr(e))
+            .map(|e| unsafe { PdCStr::from_str_ptr(e) })
             .collect();
 
         Ok((keys, values))
@@ -210,7 +219,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     pub unsafe fn get_runtime_properties_iter_borrowed(
         &self,
     ) -> Result<impl Iterator<Item = (&'a PdCStr, &'a PdCStr)>, Error> {
-        self.get_runtime_properties_borrowed()
+        unsafe { self.get_runtime_properties_borrowed() }
             .map(|(keys, values)| keys.into_iter().zip(values.into_iter()))
     }
 
@@ -237,7 +246,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     pub unsafe fn get_runtime_properties_borrowed_as_map(
         &self,
     ) -> Result<HashMap<&'a PdCStr, &'a PdCStr>, Error> {
-        self.get_runtime_properties_borrowed()
+        unsafe { self.get_runtime_properties_borrowed() }
             .map(|(keys, values)| keys.into_iter().zip(values.into_iter()).collect())
     }
 
@@ -320,7 +329,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     }
 
     unsafe fn close(&self) -> Result<(), Error> {
-        self.hostfxr.lib.hostfxr_close(self.handle.as_raw());
+        unsafe { self.hostfxr.lib.hostfxr_close(self.handle.as_raw()) };
         Ok(())
     }
 }
