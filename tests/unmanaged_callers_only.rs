@@ -25,7 +25,7 @@ fn unmanaged_caller_hello_world() -> Result<(), Box<dyn std::error::Error>> {
         pdcstr!("Test.Program, Test"),
         pdcstr!("UnmanagedHello"),
     )?;
-    let hello: extern "C" fn() -> i32 = unsafe { mem::transmute(hello) };
+    let hello: extern "stdcall" fn() -> i32 = unsafe { mem::transmute(hello) };
 
     let result = hello();
     assert_eq!(result, 42);

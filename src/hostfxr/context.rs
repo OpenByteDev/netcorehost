@@ -281,7 +281,7 @@ impl<'a, I> HostfxrContext<'a, I> {
 
         HostExitCode::from(result).to_result()?;
 
-        Ok(unsafe { delegate.assume_init() })
+        Ok(unsafe { mem::transmute(delegate.assume_init()) })
     }
     fn get_load_assembly_and_get_function_pointer_delegate(
         &self,

@@ -11,17 +11,16 @@ use crate::{
     Error,
 };
 
-use std::{
-    mem::{self, MaybeUninit},
-    ptr,
-};
+use std::{mem::{self, MaybeUninit}, ptr};
 
 use super::HostExitCode;
 
 /// A function pointer for a method with the default signature.
 pub type MethodWithDefaultSignature = component_entry_point_fn;
+pub enum UnknownArguments {}
+pub enum UnknownReturn {}
 /// A function pointer for a method with an unknown signature.
-pub type MethodWithUnknownSignature = *const ();
+pub type MethodWithUnknownSignature = unsafe extern "stdcall" fn(UnknownArguments) -> UnknownReturn;
 
 /// A struct for loading pointers to managed functions for a given [`HostfxrContext`].
 ///
@@ -53,7 +52,7 @@ impl DelegateLoader {
         );
         HostExitCode::from(result).to_result()?;
 
-        Ok(delegate.assume_init())
+        Ok(unsafe { mem::transmute(delegate.assume_init()) })
     }
 
     unsafe fn _get_function_pointer(
@@ -74,7 +73,7 @@ impl DelegateLoader {
         );
         HostExitCode::from(result).to_result()?;
 
-        Ok(delegate.assume_init())
+        Ok(unsafe { mem::transmute(delegate.assume_init()) })
     }
 
     /// Calling this function will load the specified assembly in isolation (into its own `AssemblyLoadContext`)

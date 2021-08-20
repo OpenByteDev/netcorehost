@@ -1,4 +1,4 @@
-use std::{mem, ptr};
+use std::{ffi::c_void, mem, ptr};
 
 use dlopen::wrapper::WrapperApi;
 
@@ -390,7 +390,7 @@ pub type load_assembly_and_get_function_pointer_fn = unsafe extern "C" fn(
     method_name: *const char_t,
     delegate_type_name: *const char_t,
     reserved: *const (),
-    /*out*/ delegate: *mut *const (),
+    /*out*/ delegate: *mut *const c_void,
 ) -> i32;
 
 /// Signature of delegate returned by [`hostfxr_get_runtime_delegate`] for type [`hdt_get_function_pointer`]
@@ -417,10 +417,10 @@ pub type get_function_pointer_fn = unsafe extern "C" fn(
     type_name: *const char_t,
     method_name: *const char_t,
     delegate_type_name: *const char_t,
-    load_context: *const (),
-    reserved: *const (),
-    /*out*/ delegate: *mut *const (),
+    load_context: *const c_void,
+    reserved: *const c_void,
+    /*out*/ delegate: *mut *const c_void,
 ) -> i32;
 
 /// Signature of delegate returned by [`load_assembly_and_get_function_pointer_fn`] when `delegate_type_name == null` (default)
-pub type component_entry_point_fn = unsafe extern "C" fn(*const (), size_t) -> i32;
+pub type component_entry_point_fn = unsafe extern "stdcall" fn(*const c_void, size_t) -> i32;

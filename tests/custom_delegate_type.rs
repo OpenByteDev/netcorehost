@@ -29,7 +29,7 @@ fn hello_world_with_custom_delegate_type() -> Result<(), Box<dyn std::error::Err
             "Test.Program+HelloFunc, Test, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
         ),
     )?;
-    let hello: fn(*const (), i32) -> i32 = unsafe { mem::transmute(hello) };
+    let hello: extern "stdcall" fn(*const (), i32) -> i32 = unsafe { mem::transmute(hello) };
     let result = hello(ptr::null(), 0);
     assert_eq!(result, 42);
 
