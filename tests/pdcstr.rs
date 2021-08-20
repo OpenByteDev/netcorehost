@@ -5,9 +5,13 @@ fn try_build() {
     // as different macros are used depending on the os -> copy the correct contents to the .stderr fil.
     let family = if cfg!(windows) { "windows" } else { "other" };
     fs::copy(
-        format!("tests/macro-build-tests/pdcstr-compile-fail.{}.stderr", family),
-        "tests/macro-build-tests/pdcstr-compile-fail.stderr"
-    ).unwrap();  
+        format!(
+            "tests/macro-build-tests/pdcstr-compile-fail.{}.stderr",
+            family
+        ),
+        "tests/macro-build-tests/pdcstr-compile-fail.stderr",
+    )
+    .unwrap();
 
     let t = trybuild::TestCases::new();
     t.pass("tests/macro-build-tests/pdcstr-pass.rs");
