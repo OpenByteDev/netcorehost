@@ -218,12 +218,12 @@ impl DelegateLoader {
         method_name: impl AsRef<PdCStr>,
     ) -> Result<MethodWithDefaultSignature, Error> {
         unsafe {
-            let fn_ptr = self._get_function_pointer(
+            self._get_function_pointer(
                 type_name.as_ref().as_ptr(),
                 method_name.as_ref().as_ptr(),
                 ptr::null(),
-            );
-            mem::transmute(fn_ptr)
+            )
+            .map(|fn_ptr| mem::transmute(fn_ptr))
         }
     }
 
