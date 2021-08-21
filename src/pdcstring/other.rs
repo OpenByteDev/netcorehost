@@ -33,7 +33,7 @@ impl PdCString {
         PdCString::from_vec(s.as_ref().as_bytes().to_vec())
     }
     pub unsafe fn from_str_ptr(ptr: *const i8) -> Self {
-        PdCStr::from_str_ptr(ptr).to_owned()
+        unsafe { PdCStr::from_str_ptr(ptr) }.to_owned()
     }
 }
 
@@ -75,11 +75,11 @@ impl PdCStr {
         self.0.as_ptr()
     }
     pub unsafe fn from_str_ptr<'a>(ptr: *const i8) -> &'a Self {
-        let inner = CStr::from_ptr(ptr);
+        let inner = unsafe { CStr::from_ptr(ptr) };
         PdCStr::from_inner(inner)
     }
     pub unsafe fn from_slice_with_nul_unchecked(slice: &[u8]) -> &Self {
-        let inner = CStr::from_bytes_with_nul_unchecked(slice);
+        let inner = unsafe { CStr::from_bytes_with_nul_unchecked(slice) };
         PdCStr::from_inner(inner)
     }
     pub fn to_os_string(&self) -> OsString {
