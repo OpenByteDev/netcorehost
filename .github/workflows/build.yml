@@ -25,7 +25,6 @@ jobs:
             target: i686-pc-windows-msvc
           - os: macos-latest
             target: x86_64-apple-darwin
-
     steps:
     - uses: actions/checkout@v2
     - name: Install latest nightly
@@ -35,13 +34,12 @@ jobs:
           toolchain: nightly
           override: true
     - name: Build
-      run: cargo build --verbose
+      run: cargo build --target ${{ matrix.target }}
     - name: Test
-      run: cargo test --verbose
+      run: cargo test --target ${{ matrix.target }} --all-targets
 
   examples:
     runs-on: ubuntu-latest
-    
     steps:
     - uses: actions/checkout@v2
     - name: Install latest nightly
@@ -50,15 +48,14 @@ jobs:
           toolchain: nightly
           override: true
     - name: Run example 'run-app'
-      run: cargo run --example run-app --verbose
+      run: cargo run --example run-app
     - name: Run example 'call-managed-function'
-      run: cargo run --example call-managed-function --verbose
+      run: cargo run --example call-managed-function
     - name: Run example 'passing-parameters'
-      run: cargo run --example passing-parameters --verbose
+      run: cargo run --example passing-parameters
 
   check-doc:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Install latest nightly
