@@ -27,7 +27,6 @@ u16cstr = "0.2"
 cstr = "0.2"
 
 [dev-dependencies]
-path-absolutize = "3.0"
 trybuild = "1.0"
 platforms = "1.1"
 glob = "0.3"
