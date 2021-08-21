@@ -27,3 +27,9 @@ jobs:
       run: cargo build --verbose
     - name: Test
       run: cargo test --verbose
+    - name: Run example 'run-app'
+      run: cargo run --example run-app --verbose
+    - name: Run example 'call-managed-function'
+      run: cargo run --example call-managed-function --verbose
+    - name: Run example 'passing-parameters'
+      run: cargo run --example passing-parameters --verbose
