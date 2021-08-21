@@ -1,4 +1,4 @@
-name: Build
+name: CI
 
 on:
   push:
@@ -8,14 +8,42 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-
+      
 jobs:
-  build:
+  test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-latest
+            target: i686-unknown-linux-gnu
+          - os: macos-latest
+            target: x86_64-apple-darwin
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
 
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install latest nightly
+      uses: actions-rs/toolchain@v1
+      with:
+          target: ${{ matrix.target }}
+          toolchain: nightly
+          override: true
+    - name: Build
+      run: cargo build --verbose
+    - name: Test
+      run: cargo test --verbose
+
+
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+    
     steps:
     - uses: actions/checkout@v2
     - name: Install latest nightly
@@ -23,13 +51,27 @@ jobs:
       with:
           toolchain: nightly
           override: true
-    - name: Build
-      run: cargo build --verbose
-    - name: Test
-      run: cargo test --verbose
     - name: Run example 'run-app'
       run: cargo run --example run-app --verbose
     - name: Run example 'call-managed-function'
       run: cargo run --example call-managed-function --verbose
     - name: Run example 'passing-parameters'
       run: cargo run --example passing-parameters --verbose
+
+
+jobs:
+  check-doc:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install latest nightly
+      uses: actions-rs/toolchain@v1
+      with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+    - name: Install cargo-deadlinks
+      run: cargo install cargo-deadlinks
+    - name: Check dead links in doc
+      run: cargo deadlinks
