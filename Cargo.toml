@@ -31,6 +31,7 @@ path-absolutize = "3.0"
 trybuild = "1.0"
 platforms = "1.1"
 glob = "0.3"
+widestring = "0.4"
 
 [build-dependencies]
 build-target = "0.1"
