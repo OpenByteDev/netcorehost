@@ -1,8 +1,4 @@
-use std::path::Path;
-
-use netcorehost::pdcstring::PdCString;
 use netcorehost::{nethost, pdcstr};
-use path_absolutize::Absolutize;
 
 #[path = "common.rs"]
 mod common;
@@ -11,12 +7,10 @@ mod common;
 fn runtime_properties() -> Result<(), Box<dyn std::error::Error>> {
     common::setup();
 
-    let test_out_dir = Path::new("tests/Test/bin/Debug/net5.0").absolutize()?;
-    let runtime_config_path = Path::join(&test_out_dir, "Test.runtimeconfig.json");
-
     let hostfxr = nethost::load_hostfxr()?;
-    let context =
-        hostfxr.initialize_for_runtime_config(&PdCString::from_os_str(runtime_config_path)?)?;
+    let context = hostfxr.initialize_for_runtime_config(pdcstr!(
+        "tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json"
+    ))?;
 
     let test_property_name = pdcstr!("TEST_PROPERTY");
     let test_property_value = pdcstr!("TEST_VALUE");

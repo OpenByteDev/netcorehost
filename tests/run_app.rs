@@ -1,8 +1,4 @@
-use std::path::Path;
-
-use netcorehost::pdcstring::PdCString;
-use netcorehost::{hostfxr::HostExitCode, nethost};
-use path_absolutize::Absolutize;
+use netcorehost::{hostfxr::HostExitCode, nethost, pdcstr};
 
 #[path = "common.rs"]
 mod common;
@@ -11,11 +7,9 @@ mod common;
 fn run_app() -> Result<(), Box<dyn std::error::Error>> {
     common::setup();
 
-    let test_out_dir = Path::new("tests/Test/bin/Debug/net5.0").absolutize()?;
-    let assembly_path = PdCString::from_os_str(Path::join(&test_out_dir, "Test.dll"))?;
-
     let hostfxr = nethost::load_hostfxr()?;
-    let context = hostfxr.initialize_for_dotnet_command_line(assembly_path)?;
+    let context = hostfxr
+        .initialize_for_dotnet_command_line(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll"))?;
     let result = context.run_app();
     assert_eq!(result, HostExitCode::from(42));
 
