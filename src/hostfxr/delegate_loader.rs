@@ -20,10 +20,9 @@ use super::HostExitCode;
 
 /// A function pointer for a method with the default signature.
 pub type MethodWithDefaultSignature = component_entry_point_fn;
-pub enum UnknownArguments {}
-pub enum UnknownReturn {}
+pub enum SomeMethod {}
 /// A function pointer for a method with an unknown signature.
-pub type MethodWithUnknownSignature = unsafe extern "stdcall" fn(UnknownArguments) -> UnknownReturn;
+pub type MethodWithUnknownSignature = *const SomeMethod;
 
 /// A struct for loading pointers to managed functions for a given [`HostfxrContext`].
 ///
