@@ -72,7 +72,7 @@ impl<'a, I> HostfxrContext<'a, I> {
         &self,
         name: impl AsRef<PdCStr>,
     ) -> Result<PdCString, Error> {
-        unsafe { self.get_runtime_property_value_borrowed(name) }.map(|str| str.to_owned())
+        unsafe { self.get_runtime_property_value_borrowed(name) }.map(PdCStr::to_owned)
     }
 
     /// Gets the runtime property value for the given key of this host context.
@@ -118,7 +118,7 @@ impl<'a, I> HostfxrContext<'a, I> {
                 value.as_ref().as_ptr(),
             )
         };
-        HostExitCode::from(result).to_result().map(|_| ())
+        HostExitCode::from(result).to_result()
     }
 
     /// Remove a runtime property for this host context.
@@ -130,7 +130,7 @@ impl<'a, I> HostfxrContext<'a, I> {
                 ptr::null(),
             )
         };
-        HostExitCode::from(result).to_result().map(|_| ())
+        HostExitCode::from(result).to_result()
     }
 
     /// Get all runtime properties for this host context.
