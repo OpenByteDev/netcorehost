@@ -9,6 +9,7 @@ use crate::{
 
 use std::{
     collections::HashMap,
+    ffi::c_void,
     marker::PhantomData,
     mem::{self, MaybeUninit},
     ptr::{self, NonNull},
@@ -29,7 +30,7 @@ pub struct InitializedForCommandLine;
 
 /// Handle of a loaded [`HostfxrContext`].
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct HostfxrHandle(NonNull<()>);
+pub(crate) struct HostfxrHandle(NonNull<c_void>);
 
 impl HostfxrHandle {
     // pub(crate) fn new(ptr: hostfxr_handle) -> Option<Self> {

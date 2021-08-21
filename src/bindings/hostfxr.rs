@@ -17,7 +17,7 @@ pub enum hostfxr_delegate_type {
 
 pub type hostfxr_error_writer_fn = unsafe extern "C" fn(message: *const char_t);
 
-pub type hostfxr_handle = *const ();
+pub type hostfxr_handle = *const c_void;
 
 /// A structure that stores parameters which are common to all forms of initialization.
 #[repr(C)]
@@ -389,7 +389,7 @@ pub type load_assembly_and_get_function_pointer_fn = unsafe extern "C" fn(
     type_name: *const char_t,
     method_name: *const char_t,
     delegate_type_name: *const char_t,
-    reserved: *const (),
+    reserved: *const c_void,
     /*out*/ delegate: *mut *const c_void,
 ) -> i32;
 
