@@ -105,6 +105,9 @@ impl PdCStr {
     pub fn to_slice_with_nul(&self) -> &[u16] {
         self.0.as_slice_with_nul()
     }
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
     pub fn len(&self) -> usize {
         self.0.len()
     }
