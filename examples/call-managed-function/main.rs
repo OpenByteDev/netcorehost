@@ -21,7 +21,7 @@ fn main() {
             pdcstr!("ExampleProject.Program+HelloWorld1Delegate, ExampleProject"),
         )
         .unwrap();
-    let hello_world1: unsafe extern "stdcall" fn() = unsafe { std::mem::transmute(hello_world1) };
+    let hello_world1: unsafe extern "system" fn() = unsafe { std::mem::transmute(hello_world1) };
     unsafe { hello_world1() };
 
     let hello_world2 = delegate_loader
@@ -30,7 +30,7 @@ fn main() {
             pdcstr!("HelloWorld2"),
         )
         .unwrap();
-    let hello_world2: unsafe extern "stdcall" fn() = unsafe { std::mem::transmute(hello_world2) };
+    let hello_world2: unsafe extern "system" fn() = unsafe { std::mem::transmute(hello_world2) };
     unsafe { hello_world2() };
 
     let hello_world3 = delegate_loader

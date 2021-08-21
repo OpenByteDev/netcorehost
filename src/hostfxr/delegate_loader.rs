@@ -27,7 +27,7 @@ pub type MethodWithUnknownSignature = *const SomeMethod;
 /// A struct for loading pointers to managed functions for a given [`HostfxrContext`].
 ///
 /// [`HostfxrContext`]: super::HostfxrContext
-#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
+#[derive(Copy, Clone)]
 pub struct DelegateLoader {
     pub(crate) get_load_assembly_and_get_function_pointer:
         load_assembly_and_get_function_pointer_fn,

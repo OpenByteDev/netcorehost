@@ -10,7 +10,7 @@ use super::type_aliases::{char_t, size_t};
     link(name = "stdc++", kind = "dylib")
 )]
 #[cfg_attr(target_os = "macos", link(name = "c++", kind = "dylib"))]
-extern "C" {
+extern "system" {
     /// Get the path to the hostfxr library
     ///
     /// # Arguments

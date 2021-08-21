@@ -20,7 +20,7 @@ fn unmanaged_caller_hello_world() {
         pdcstr!("Test.Program, Test"),
         pdcstr!("UnmanagedHello"),
     ).unwrap();
-    let hello: extern "stdcall" fn() -> i32 = unsafe { mem::transmute(hello) };
+    let hello: extern "system" fn() -> i32 = unsafe { mem::transmute(hello) };
 
     let result = hello();
     assert_eq!(result, 42);

@@ -384,7 +384,7 @@ pub struct HostfxrLib {
 /// [`hdt_load_assembly_and_get_function_pointer`]: hostfxr_delegate_type::`hdt_load_assembly_and_get_function_pointer
 /// [`UNMANAGED_CALLERS_ONLY_METHOD`]: crate::bindings::consts::UNMANAGED_CALLERS_ONLY_METHOD
 /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
-pub type load_assembly_and_get_function_pointer_fn = unsafe extern "C" fn(
+pub type load_assembly_and_get_function_pointer_fn = unsafe extern "system" fn(
     assembly_path: *const char_t,
     type_name: *const char_t,
     method_name: *const char_t,
@@ -413,7 +413,7 @@ pub type load_assembly_and_get_function_pointer_fn = unsafe extern "C" fn(
 /// [`hostfxr_get_runtime_delegate`]: struct.HostfxrLib.html#method.hostfxr_get_runtime_delegate
 /// [`UNMANAGED_CALLERS_ONLY_METHOD`]: crate::bindings::consts::UNMANAGED_CALLERS_ONLY_METHOD
 /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
-pub type get_function_pointer_fn = unsafe extern "C" fn(
+pub type get_function_pointer_fn = unsafe extern "system" fn(
     type_name: *const char_t,
     method_name: *const char_t,
     delegate_type_name: *const char_t,
@@ -423,4 +423,4 @@ pub type get_function_pointer_fn = unsafe extern "C" fn(
 ) -> i32;
 
 /// Signature of delegate returned by [`load_assembly_and_get_function_pointer_fn`] when `delegate_type_name == null` (default)
-pub type component_entry_point_fn = unsafe extern "stdcall" fn(*const c_void, size_t) -> i32;
+pub type component_entry_point_fn = unsafe extern "system" fn(*const c_void, size_t) -> i32;

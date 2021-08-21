@@ -27,7 +27,7 @@ fn print_utf8_example<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoader
             pdcstr!("PrintUtf8"),
         )
         .unwrap();
-    let print_utf8: unsafe extern "stdcall" fn(text_ptr: *const u8, text_length: i32) =
+    let print_utf8: unsafe extern "system" fn(text_ptr: *const u8, text_length: i32) =
         unsafe { std::mem::transmute(print_utf8) };
     let test_string = "Hello World!";
     unsafe { print_utf8(test_string.as_ptr(), test_string.len() as i32) };
@@ -40,7 +40,7 @@ fn print_utf16_example<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoade
             pdcstr!("PrintUtf16"),
         )
         .unwrap();
-    let print_utf16: unsafe extern "stdcall" fn(text_ptr: *const u16, text_length: i32) =
+    let print_utf16: unsafe extern "system" fn(text_ptr: *const u16, text_length: i32) =
         unsafe { std::mem::transmute(print_utf16) };
     let test_string = widestring::U16String::from_str("Hello World!");
     unsafe { print_utf16(test_string.as_ptr(), test_string.len() as i32) };
@@ -53,7 +53,7 @@ fn is_palindrom_example<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoad
             pdcstr!("IsPalindrom"),
         )
         .unwrap();
-    let is_palindrom: unsafe extern "stdcall" fn(text_ptr: *const u16, text_length: i32) -> i32 =
+    let is_palindrom: unsafe extern "system" fn(text_ptr: *const u16, text_length: i32) -> i32 =
         unsafe { std::mem::transmute(is_palindrom) };
     for s in ["Racecar", "stats", "hello", "test"].iter() {
         let widestring = widestring::U16String::from_str(s);
@@ -74,7 +74,7 @@ fn get_length_example<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoader
             pdcstr!("GetLength"),
         )
         .unwrap();
-    let get_length: unsafe extern "stdcall" fn(text_ptr: *const Vector2f) -> f32 =
+    let get_length: unsafe extern "system" fn(text_ptr: *const Vector2f) -> f32 =
         unsafe { std::mem::transmute(get_length) };
     let vec = Vector2f {
         x: 3.0f32,

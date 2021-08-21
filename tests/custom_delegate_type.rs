@@ -21,7 +21,7 @@ fn hello_world_with_custom_delegate_type() {
         pdcstr!("Hello"),
         pdcstr!("Test.Program+HelloFunc, Test"),
     ).unwrap();
-    let hello: extern "stdcall" fn(*const (), i32) -> i32 = unsafe { mem::transmute(hello) };
+    let hello: extern "system" fn(*const (), i32) -> i32 = unsafe { mem::transmute(hello) };
     let result = hello(ptr::null(), 0);
     assert_eq!(result, 42);
 }
