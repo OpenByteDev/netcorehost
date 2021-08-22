@@ -12,6 +12,7 @@ edition = "2018"
 links = "nethost"
 categories = ["api-bindings", "external-ffi-bindings"]
 keywords = ["nethost", "hostfxr", "dotnet", "bindings", "coreclr"]
+resolver = "2"
 build = "build/mod.rs"
 
 [dependencies]
