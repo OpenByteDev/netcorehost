@@ -97,6 +97,7 @@ pub mod bindings;
 /// Module for abstractions of the hostfxr library.
 pub mod hostfxr;
 /// Module for abstractions of the nethost library.
+#[cfg(feature = "nethost")]
 pub mod nethost;
 
 /// Module containing a universal error enum for this crate.

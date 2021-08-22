@@ -57,7 +57,7 @@ struct PackageInfoCatalogEntry<'a> {
     version: Cow<'a, str>,
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+pub fn download_and_link_nethost() -> Result<(), Box<dyn std::error::Error>> {
     // we cannot (and don't really need to) download nethost when building on docs.rs so we exit early.
     if cfg!(feature = "private-docs-rs") {
         println!("Returning early because private-docs-rs feature was enabled");
@@ -121,7 +121,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn download_nethost(target: &str, target_path: &Path) -> Result<(), Box<dyn Error>> {
+pub fn download_nethost(target: &str, target_path: &Path) -> Result<(), Box<dyn Error>> {
     let client = reqwest::blocking::Client::new();
 
     let index = client

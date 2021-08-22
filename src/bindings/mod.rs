@@ -5,6 +5,7 @@ pub mod consts;
 pub mod hostfxr;
 
 /// Module containing the raw bindings for nethost.
+#[cfg(feature = "nethost")]
 pub mod nethost;
 
 mod type_aliases;

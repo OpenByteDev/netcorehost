@@ -3,7 +3,6 @@ use crate::{
         char_t,
         hostfxr::{hostfxr_handle, hostfxr_initialize_parameters, HostfxrLib},
     },
-    nethost,
     pdcstring::PdCStr,
     Error,
 };
@@ -31,9 +30,10 @@ impl Hostfxr {
         })
     }
 
+    #[cfg(feature = "nethost")]
     /// Locates the hostfxr library using [`nethost`] and loads it.
     pub fn load_with_nethost() -> Result<Self, Error> {
-        nethost::load_hostfxr()
+        crate::nethost::load_hostfxr()
     }
 
     /// Initializes the hosting components for a dotnet command line running an application
