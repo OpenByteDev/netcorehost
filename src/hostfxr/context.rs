@@ -340,7 +340,7 @@ impl<'a> HostfxrContext<'a, InitializedForCommandLine> {
     ///
     /// # Return value
     /// If the app was successfully run, the exit code of the application. Otherwise, the error code result.
-    pub fn run_app(&self) -> HostExitCode {
+    pub fn run_app(self) -> HostExitCode {
         let result = unsafe { self.hostfxr.lib.hostfxr_run_app(self.handle.as_raw()) };
         HostExitCode::from(result)
     }
