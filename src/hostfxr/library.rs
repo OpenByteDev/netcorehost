@@ -30,8 +30,8 @@ impl Hostfxr {
         })
     }
 
+    /// Locates the hostfxr library using [`nethost`](crate::nethost) and loads it.
     #[cfg(feature = "nethost")]
-    /// Locates the hostfxr library using [`nethost`] and loads it.
     pub fn load_with_nethost() -> Result<Self, Error> {
         crate::nethost::load_hostfxr()
     }
