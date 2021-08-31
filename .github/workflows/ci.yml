@@ -8,6 +8,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  RUSTDOCFLAGS: "--deny warnings"
       
 jobs:
   test:
@@ -62,6 +63,8 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
+    - name: Generate documentation
+      run: cargo doc --all-features
     - name: Install cargo-deadlinks
       run: cargo install cargo-deadlinks
     - name: Check dead links in doc
