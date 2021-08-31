@@ -4,7 +4,6 @@ use crate::{
         load_assembly_and_get_function_pointer_fn,
     },
     pdcstring::{PdCStr, PdCString},
-    Error,
 };
 
 use std::{
@@ -15,10 +14,7 @@ use std::{
     ptr::{self, NonNull},
 };
 
-use super::{
-    AssemblyDelegateLoader, DelegateLoader, HostExitCode, Hostfxr, KnownHostExitCode,
-    MethodWithUnknownSignature,
-};
+use super::{AssemblyDelegateLoader, DelegateLoader, Hostfxr, HostingErrorExitCode, HostingExitCode, HostingSuccessExitCode, MethodWithUnknownSignature};
 
 /// A marker struct indicating that the context was initialized with a runtime config.
 /// This means that it is not possible to run the application associated with the context.
@@ -33,9 +29,6 @@ pub struct InitializedForCommandLine;
 pub(crate) struct HostfxrHandle(NonNull<c_void>);
 
 impl HostfxrHandle {
-    // pub(crate) fn new(ptr: hostfxr_handle) -> Option<Self> {
-    //     NonNull::new(ptr as *mut _).map(Self)
-    // }
     pub(crate) unsafe fn new_unchecked(ptr: hostfxr_handle) -> Self {
         Self(unsafe { NonNull::new_unchecked(ptr as *mut _) })
     }
@@ -71,7 +64,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     pub fn get_runtime_property_value_owned(
         &self,
         name: impl AsRef<PdCStr>,
-    ) -> Result<PdCString, Error> {
+    ) -> Result<PdCString, HostingErrorExitCode> {
         unsafe { self.get_runtime_property_value_borrowed(name) }.map(PdCStr::to_owned)
     }
 
@@ -82,15 +75,14 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// guaranteed until any of the below occur:
     ///  * [`run_app`] is called for this host context
     ///  * properties are changed via [`set_runtime_property_value`] or [`remove_runtime_property_value`]
-    ///  * the host context is dropped
     ///
     /// [`run_app`]: HostfxrContext::run_app
     /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
     /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
     pub unsafe fn get_runtime_property_value_borrowed(
-        &self,
+        &'a self,
         name: impl AsRef<PdCStr>,
-    ) -> Result<&'a PdCStr, Error> {
+    ) -> Result<&'a PdCStr, HostingErrorExitCode> {
         let mut value = MaybeUninit::uninit();
 
         let result = unsafe {
@@ -100,7 +92,7 @@ impl<'a, I> HostfxrContext<'a, I> {
                 value.as_mut_ptr(),
             )
         };
-        HostExitCode::from(result).to_result()?;
+        HostingExitCode::from(result).to_result_assume_unknown_is_error()?;
 
         Ok(unsafe { PdCStr::from_str_ptr(value.assume_init()) })
     }
@@ -110,7 +102,7 @@ impl<'a, I> HostfxrContext<'a, I> {
         &self,
         name: impl AsRef<PdCStr>,
         value: impl AsRef<PdCStr>,
-    ) -> Result<(), Error> {
+    ) -> Result<HostingSuccessExitCode, HostingErrorExitCode> {
         let result = unsafe {
             self.hostfxr.lib.hostfxr_set_runtime_property_value(
                 self.handle.as_raw(),
@@ -118,11 +110,11 @@ impl<'a, I> HostfxrContext<'a, I> {
                 value.as_ref().as_ptr(),
             )
         };
-        HostExitCode::from(result).to_result()
+        HostingExitCode::from(result).to_result_assume_unknown_is_error()
     }
 
     /// Remove a runtime property for this host context.
-    pub fn remove_runtime_property_value(&self, name: impl AsRef<PdCStr>) -> Result<(), Error> {
+    pub fn remove_runtime_property_value(&self, name: impl AsRef<PdCStr>) -> Result<HostingSuccessExitCode, HostingErrorExitCode> {
         let result = unsafe {
             self.hostfxr.lib.hostfxr_set_runtime_property_value(
                 self.handle.as_raw(),
@@ -130,7 +122,7 @@ impl<'a, I> HostfxrContext<'a, I> {
                 ptr::null(),
             )
         };
-        HostExitCode::from(result).to_result()
+        HostingExitCode::from(result).to_result_assume_unknown_is_error()
     }
 
     /// Get all runtime properties for this host context.
@@ -146,8 +138,8 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
     /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
     pub unsafe fn get_runtime_properties_borrowed(
-        &self,
-    ) -> Result<(Vec<&'a PdCStr>, Vec<&'a PdCStr>), Error> {
+        &'a self,
+    ) -> Result<(Vec<&'a PdCStr>, Vec<&'a PdCStr>), HostingErrorExitCode> {
         // get count
         let mut count = MaybeUninit::uninit();
         let result = unsafe {
@@ -159,13 +151,11 @@ impl<'a, I> HostfxrContext<'a, I> {
             )
         };
 
-        // ignore buffer too small error
-        match HostExitCode::from(result).to_result() {
-            Err(Error::Hostfxr(HostExitCode::Known(KnownHostExitCode::HostApiBufferTooSmall))) => {
-                Ok(())
-            }
-            res => res,
-        }?;
+        // ignore buffer too small error as the first call is only to get the required buffer size.
+        match HostingExitCode::from(result).to_result_assume_unknown_is_error() {
+            Ok(_) | Err(HostingErrorExitCode::HostApiBufferTooSmall) => {}
+            Err(e) => return Err(e),
+        };
 
         // get values / fill buffer
         let mut count = unsafe { count.assume_init() };
@@ -179,7 +169,7 @@ impl<'a, I> HostfxrContext<'a, I> {
                 values.as_mut_ptr(),
             )
         };
-        HostExitCode::from(result).to_result()?;
+        HostingExitCode::from(result).to_result_assume_unknown_is_error()?;
 
         unsafe { keys.set_len(count) };
         unsafe { values.set_len(count) };
@@ -197,7 +187,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     }
 
     /// Get all runtime properties for this host context as owned strings.
-    pub fn get_runtime_properties_owned(&self) -> Result<(Vec<PdCString>, Vec<PdCString>), Error> {
+    pub fn get_runtime_properties_owned(&self) -> Result<(Vec<PdCString>, Vec<PdCString>), HostingErrorExitCode> {
         unsafe { self.get_runtime_properties_borrowed() }.map(|(keys, values)| {
             let owned_keys = keys.into_iter().map(|key| key.to_owned()).collect();
             let owned_values = values.into_iter().map(|value| value.to_owned()).collect();
@@ -218,8 +208,8 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
     /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
     pub unsafe fn get_runtime_properties_iter_borrowed(
-        &self,
-    ) -> Result<impl Iterator<Item = (&'a PdCStr, &'a PdCStr)>, Error> {
+        &'a self,
+    ) -> Result<impl Iterator<Item = (&'a PdCStr, &'a PdCStr)>, HostingErrorExitCode> {
         unsafe { self.get_runtime_properties_borrowed() }
             .map(|(keys, values)| keys.into_iter().zip(values.into_iter()))
     }
@@ -227,7 +217,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// Get all runtime properties for this host context as an iterator over owned key-value pairs.
     pub fn get_runtime_properties_iter_owned(
         &self,
-    ) -> Result<impl Iterator<Item = (PdCString, PdCString)>, Error> {
+    ) -> Result<impl Iterator<Item = (PdCString, PdCString)>, HostingErrorExitCode> {
         self.get_runtime_properties_owned()
             .map(|(keys, values)| keys.into_iter().zip(values.into_iter()))
     }
@@ -245,8 +235,8 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
     /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
     pub unsafe fn get_runtime_properties_borrowed_as_map(
-        &self,
-    ) -> Result<HashMap<&'a PdCStr, &'a PdCStr>, Error> {
+        &'a self,
+    ) -> Result<HashMap<&'a PdCStr, &'a PdCStr>, HostingErrorExitCode> {
         unsafe { self.get_runtime_properties_borrowed() }
             .map(|(keys, values)| keys.into_iter().zip(values.into_iter()).collect())
     }
@@ -254,7 +244,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// Get all runtime properties for this host context as an hashmap of owned strings.
     pub fn get_runtime_properties_owned_as_map(
         &self,
-    ) -> Result<HashMap<PdCString, PdCString>, Error> {
+    ) -> Result<HashMap<PdCString, PdCString>, HostingErrorExitCode> {
         self.get_runtime_properties_iter_owned()
             .map(|iter| iter.collect())
     }
@@ -279,7 +269,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     pub fn get_runtime_delegate(
         &self,
         r#type: hostfxr_delegate_type,
-    ) -> Result<MethodWithUnknownSignature, Error> {
+    ) -> Result<MethodWithUnknownSignature, HostingErrorExitCode> {
         let mut delegate = MaybeUninit::uninit();
         let result = unsafe {
             self.hostfxr.lib.hostfxr_get_runtime_delegate(
@@ -289,13 +279,13 @@ impl<'a, I> HostfxrContext<'a, I> {
             )
         };
 
-        HostExitCode::from(result).to_result()?;
+        HostingExitCode::from(result).to_result_assume_unknown_is_error()?;
 
         Ok(unsafe { mem::transmute(delegate.assume_init()) })
     }
     fn get_load_assembly_and_get_function_pointer_delegate(
         &self,
-    ) -> Result<load_assembly_and_get_function_pointer_fn, Error> {
+    ) -> Result<load_assembly_and_get_function_pointer_fn, HostingErrorExitCode> {
         unsafe {
             self.get_runtime_delegate(
                 hostfxr_delegate_type::hdt_load_assembly_and_get_function_pointer,
@@ -303,7 +293,7 @@ impl<'a, I> HostfxrContext<'a, I> {
             .map(|ptr| mem::transmute(ptr))
         }
     }
-    fn get_get_function_pointer_delegate(&self) -> Result<get_function_pointer_fn, Error> {
+    fn get_get_function_pointer_delegate(&self) -> Result<get_function_pointer_fn, HostingErrorExitCode> {
         unsafe {
             self.get_runtime_delegate(hostfxr_delegate_type::hdt_get_function_pointer)
                 .map(|ptr| mem::transmute(ptr))
@@ -311,7 +301,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     }
 
     /// Gets a delegate loader for loading an assembly and contained function pointers.
-    pub fn get_delegate_loader(&self) -> Result<DelegateLoader, Error> {
+    pub fn get_delegate_loader(&self) -> Result<DelegateLoader, HostingErrorExitCode> {
         Ok(DelegateLoader {
             get_load_assembly_and_get_function_pointer: self
                 .get_load_assembly_and_get_function_pointer_delegate()?,
@@ -324,14 +314,22 @@ impl<'a, I> HostfxrContext<'a, I> {
     pub fn get_delegate_loader_for_assembly<A: AsRef<PdCStr>>(
         &self,
         assembly_path: A,
-    ) -> Result<AssemblyDelegateLoader<A>, Error> {
+    ) -> Result<AssemblyDelegateLoader<A>, HostingErrorExitCode> {
         self.get_delegate_loader()
             .map(|loader| AssemblyDelegateLoader::new(loader, assembly_path))
     }
+    
+    /// Closes an initialized host context.
+    /// 
+    /// This method is automatically called on drop, but can be explicitely called to handle errors during closing.
+    pub fn close(self) -> Result<HostingSuccessExitCode, HostingErrorExitCode> {
+        unsafe { self._close() }
+    }
 
-    unsafe fn close(&self) -> Result<(), Error> {
-        unsafe { self.hostfxr.lib.hostfxr_close(self.handle.as_raw()) };
-        Ok(())
+    /// Internal non-consuming version of [`close`](HostfxrContext::close)
+    unsafe fn _close(&self) -> Result<HostingSuccessExitCode, HostingErrorExitCode> {
+        let result = unsafe { self.hostfxr.lib.hostfxr_close(self.handle.as_raw()) };
+        HostingExitCode::from(result).to_result_assume_unknown_is_error()
     }
 }
 
@@ -340,14 +338,39 @@ impl<'a> HostfxrContext<'a, InitializedForCommandLine> {
     ///
     /// # Return value
     /// If the app was successfully run, the exit code of the application. Otherwise, the error code result.
-    pub fn run_app(self) -> HostExitCode {
+    pub fn run_app(self) -> AppOrHostingExitCode {
         let result = unsafe { self.hostfxr.lib.hostfxr_run_app(self.handle.as_raw()) };
-        HostExitCode::from(result)
+        AppOrHostingExitCode::from(result)
     }
 }
 
 impl<I> Drop for HostfxrContext<'_, I> {
     fn drop(&mut self) {
-        let _ = unsafe { self.close() };
+        let _ = unsafe { self._close() };
+    }
+}
+
+/// Either the exit code of the app if it ran successful, otherwise the error from the hosting components.
+#[repr(transparent)]
+pub struct AppOrHostingExitCode(i32);
+
+impl AppOrHostingExitCode {
+    pub fn value(self) -> i32 {
+        self.0
+    }
+    pub fn as_hosting_exit_code(self) -> HostingExitCode {
+        HostingExitCode::from(self.0)
+    }
+}
+
+impl From<AppOrHostingExitCode> for i32 {
+    fn from(code: AppOrHostingExitCode) -> Self {
+        code.value()
+    }
+}
+
+impl From<i32> for AppOrHostingExitCode {
+    fn from(code: i32) -> Self {
+        Self(code)
     }
 }

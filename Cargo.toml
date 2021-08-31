@@ -19,7 +19,8 @@ build = "build/mod.rs"
 dlopen = "0.1"
 dlopen_derive = "0.1"
 num_enum = "0.5"
-quick-error = "2.0"
+thiserror = "1.0"
+display_derive = "0.0"
 
 [target.'cfg(windows)'.dependencies]
 widestring = "0.4"

@@ -2,9 +2,10 @@
     maybe_uninit_uninit_array,
     maybe_uninit_extra,
     maybe_uninit_slice,
-    negative_impls
+    negative_impls,
+    try_trait_v2
 )]
-#![allow(clippy::missing_safety_doc)]
+#![allow(clippy::missing_safety_doc)] // TODO: add safety docs
 #![warn(unsafe_op_in_unsafe_fn)]
 
 //! A Rust library for hosting .NET Core application.
@@ -29,14 +30,14 @@
 //! ```
 //! The following code will setup the hostfxr library, load the app and run its `Main` method.
 //! ```
-//! # use netcorehost::{nethost, hostfxr::HostExitCode, pdcstr};
+//! # use netcorehost::{nethost, pdcstr};
 //! # use std::path::Path;
 //! # use std::str::FromStr;
 //! # fn run_app() -> Result<(), Box<dyn std::error::Error>> {
 //! let hostfxr = nethost::load_hostfxr()?;
 //! let context = hostfxr.initialize_for_dotnet_command_line(pdcstr!("Test.dll"))?;
-//! let result = context.run_app();
-//! # assert_eq!(result, HostExitCode::from(42));
+//! let result = context.run_app().value();
+//! # assert_eq!(result, 42);
 //! # Ok(())
 //! # }
 //! ```
@@ -88,8 +89,6 @@
 
 #[macro_use]
 extern crate dlopen_derive;
-#[macro_use]
-extern crate quick_error;
 
 /// Module for the raw bindings for hostfxr and nethost.
 #[allow(non_camel_case_types, dead_code)]
@@ -99,10 +98,6 @@ pub mod hostfxr;
 /// Module for abstractions of the nethost library.
 #[cfg(feature = "nethost")]
 pub mod nethost;
-
-/// Module containing a universal error enum for this crate.
-mod error;
-pub use error::*;
 
 /// Module for a platform dependent c-like string type.
 pub mod pdcstring;

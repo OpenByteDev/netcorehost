@@ -1,4 +1,4 @@
-use netcorehost::{hostfxr::HostExitCode, nethost, pdcstr};
+use netcorehost::{nethost, pdcstr};
 
 #[path = "common.rs"]
 mod common;
@@ -11,6 +11,6 @@ fn run_app() {
     let context = hostfxr
         .initialize_for_dotnet_command_line(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll"))
         .unwrap();
-    let result = context.run_app();
-    assert_eq!(result, HostExitCode::from(42));
+    let result = context.run_app().value();
+    assert_eq!(result, 42);
 }
