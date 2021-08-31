@@ -6,7 +6,7 @@ use display_derive::Display;
 /// Codes returned by the hosting APIs from `hostfxr`, `hostpolicy` and `nethost`.
 ///
 /// Source: [https://github.com/dotnet/runtime/blob/main/docs/design/features/host-error-codes.md](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-error-codes.md)
-#[ust_use]
+#[must_use]
 #[derive(Debug, PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Hash, Display)]
 pub enum HostingExitCode {
     #[display(fmt = "{}", _0)]
