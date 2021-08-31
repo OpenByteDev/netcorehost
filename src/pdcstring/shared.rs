@@ -8,7 +8,7 @@ use std::{
 
 use super::{NulError, PdCStrInner, PdCStringInner, PdUChar};
 
-/// A platform-dependent c-like string type for interacting with the hostfxr API.
+/// A platform-dependent c-like string type for interacting with the `hostfxr` and `nethost` API.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 #[repr(transparent)]
 pub struct PdCString(pub(crate) PdCStringInner);
@@ -22,7 +22,7 @@ impl PdCString {
     }
 }
 
-/// A borrowed slice of a PdCString.
+/// A borrowed slice of a [`PdCString`].
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
 pub struct PdCStr(pub(crate) PdCStrInner);

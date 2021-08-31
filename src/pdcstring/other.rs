@@ -11,6 +11,7 @@ pub(crate) type PdCStrInner = CStr;
 pub extern crate cstr;
 
 #[macro_export]
+/// A macro for creating a [`PdCStr`](crate::pdcstring::PdCStr) at compile time.
 macro_rules! pdcstr {
     ($expression:expr) => {
         $crate::pdcstring::PdCStr::from_c_str($crate::pdcstring::cstr::cstr!($expression))
