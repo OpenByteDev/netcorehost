@@ -1,6 +1,5 @@
 #![feature(
     maybe_uninit_uninit_array,
-    maybe_uninit_extra,
     maybe_uninit_slice,
     negative_impls,
     try_trait_v2
