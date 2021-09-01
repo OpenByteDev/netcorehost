@@ -7,13 +7,18 @@ use crate::{
             load_assembly_and_get_function_pointer_fn,
         },
     },
-    pdcstring::PdCStr
+    pdcstring::PdCStr,
 };
-use std::{convert::TryFrom, mem::{self, MaybeUninit}, path::PathBuf, ptr};
 use num_enum::TryFromPrimitive;
+use std::{
+    convert::TryFrom,
+    mem::{self, MaybeUninit},
+    path::PathBuf,
+    ptr,
+};
 use thiserror::Error;
 
-use super::{HostingErrorExitCode, HostingExitCode, HostingSuccessExitCode};
+use super::{HostingError, HostingResult, HostingSuccess};
 
 /// A function pointer for a method with the default signature.
 pub type MethodWithDefaultSignature = component_entry_point_fn;
@@ -52,12 +57,14 @@ impl DelegateLoader {
                 delegate.as_mut_ptr(),
             )
         };
-        GetFunctionPointerError::from_error_code(result)?;
+        GetFunctionPointerError::from_status_code(result)?;
 
         Ok(unsafe { mem::transmute(delegate.assume_init()) })
     }
 
-    fn _validate_assembly_path(assembly_path: impl AsRef<PdCStr>) -> Result<(), GetFunctionPointerError> {
+    fn _validate_assembly_path(
+        assembly_path: impl AsRef<PdCStr>,
+    ) -> Result<(), GetFunctionPointerError> {
         if PathBuf::from(assembly_path.as_ref().to_os_string()).exists() {
             Ok(())
         } else {
@@ -83,7 +90,7 @@ impl DelegateLoader {
                 delegate.as_mut_ptr(),
             )
         };
-        GetFunctionPointerError::from_error_code(result)?;
+        GetFunctionPointerError::from_status_code(result)?;
 
         Ok(unsafe { mem::transmute(delegate.assume_init()) })
     }
@@ -368,7 +375,7 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
 pub enum GetFunctionPointerError {
     /// An error occured inside the hosting components.
     #[error("Error from hosting components: {}.", .0)]
-    Hosting(#[from] HostingErrorExitCode),
+    Hosting(#[from] HostingError),
 
     /// A type with the specified name could not be found or loaded.
     #[error("Failed to load type containing method of delegate type.")]
@@ -388,20 +395,22 @@ pub enum GetFunctionPointerError {
 
     /// Some other unknown error occured.
     #[error("Unknown error code: {}", format!("{:#08X}", .0))]
-    Other(u32)
+    Other(u32),
 }
 
 impl GetFunctionPointerError {
-    pub fn from_error_code(code: i32) -> Result<HostingSuccessExitCode, Self> {
+    pub fn from_status_code(code: i32) -> Result<HostingSuccess, Self> {
         let code = code as u32;
-        match HostingExitCode::try_from(code) {
-            Ok(HostingExitCode::Success(code)) => return Ok(code),
-            Ok(HostingExitCode::Error(code)) => return Err(GetFunctionPointerError::Hosting(code)),
+        match HostingResult::known_from_status_code(code) {
+            Ok(HostingResult(Ok(code))) => return Ok(code),
+            Ok(HostingResult(Err(code))) => return Err(GetFunctionPointerError::Hosting(code)),
             _ => {}
         }
         match HResult::try_from(code) {
             Ok(HResult::COR_E_TYPELOAD) => return Err(Self::TypeNotFound),
-            Ok(HResult::COR_E_MISSINGMETHOD | HResult::COR_E_ARGUMENT) => return Err(Self::MissingMethod),
+            Ok(HResult::COR_E_MISSINGMETHOD | HResult::COR_E_ARGUMENT) => {
+                return Err(Self::MissingMethod)
+            }
             Ok(HResult::FILE_NOT_FOUND) => return Err(Self::AssemblyNotFound),
             Ok(HResult::COR_E_INVALIDOPERATION) => return Err(Self::MethodNotUnmanagedCallersOnly),
             _ => {}
@@ -415,11 +424,12 @@ impl GetFunctionPointerError {
 #[derive(TryFromPrimitive, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[allow(non_camel_case_types)]
 enum HResult {
-    E_POINTER = 0x80004003, // System.ArgumentNullException
+    E_POINTER = 0x80004003,                // System.ArgumentNullException
     COR_E_ARGUMENTOUTOFRANGE = 0x80131502, // System.ArgumentOutOfRangeException (reserved was not 0)
-    COR_E_TYPELOAD = 0x80131522, // invalid type
-    COR_E_MISSINGMETHOD = 2148734227, // invalid method
-    /*COR_E_*/FILE_NOT_FOUND = 2147942402, // assembly with specified name not found (from type name)
+    COR_E_TYPELOAD = 0x80131522,           // invalid type
+    COR_E_MISSINGMETHOD = 2148734227,      // invalid method
+    /*COR_E_*/
+    FILE_NOT_FOUND = 2147942402, // assembly with specified name not found (from type name)
     COR_E_ARGUMENT = 0x80070057, // invalid method signature or method not found
     COR_E_INVALIDOPERATION = 0x80131509, // invalid assembly path or not unmanaged,
 }

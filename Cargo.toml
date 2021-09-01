@@ -20,7 +20,7 @@ dlopen = "0.1"
 dlopen_derive = "0.1"
 num_enum = "0.5"
 thiserror = "1.0"
-display_derive = "0.0"
+derive_more = { version = "0.99", default-features = false, features = ["deref", "from", "display"] }
 
 [target.'cfg(windows)'.dependencies]
 widestring = "0.4"

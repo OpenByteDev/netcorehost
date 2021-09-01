@@ -3,9 +3,12 @@ use crate::{
         char_t,
         hostfxr::{hostfxr_handle, hostfxr_initialize_parameters, HostfxrLib},
     },
-    hostfxr::{HostfxrContext, HostfxrHandle, HostingErrorExitCode, HostingExitCode, InitializedForCommandLine, InitializedForRuntimeConfig},
+    hostfxr::{
+        HostfxrContext, HostfxrHandle, HostingError, HostingResult, InitializedForCommandLine,
+        InitializedForRuntimeConfig,
+    },
     nethost::LoadHostfxrError,
-    pdcstring::PdCStr
+    pdcstring::PdCStr,
 };
 use dlopen::wrapper::Container;
 use std::{ffi::OsStr, mem::MaybeUninit, ptr};
@@ -51,7 +54,7 @@ impl Hostfxr {
     pub fn initialize_for_dotnet_command_line(
         &self,
         app_path: impl AsRef<PdCStr>,
-    ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingErrorExitCode> {
+    ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         self.initialize_for_dotnet_command_line_with_args(&[app_path.as_ref()])
     }
 
@@ -83,7 +86,7 @@ impl Hostfxr {
         &self,
         app_path: impl AsRef<PdCStr>,
         host_path: impl AsRef<PdCStr>,
-    ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingErrorExitCode> {
+    ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         self.initialize_for_dotnet_command_line_with_args_and_host_path(
             &[app_path.as_ref()],
             host_path,
@@ -117,7 +120,7 @@ impl Hostfxr {
         &self,
         app_path: impl AsRef<PdCStr>,
         dotnet_root: impl AsRef<PdCStr>,
-    ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingErrorExitCode> {
+    ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         self.initialize_for_dotnet_command_line_with_args_and_dotnet_root(
             &[app_path.as_ref()],
             dotnet_root,
@@ -147,7 +150,7 @@ impl Hostfxr {
     pub fn initialize_for_dotnet_command_line_with_args(
         &self,
         args: &[&PdCStr],
-    ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingErrorExitCode> {
+    ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         unsafe {
             self.initialize_for_dotnet_command_line_with_parameters(args.as_ref(), ptr::null())
         }
@@ -183,7 +186,7 @@ impl Hostfxr {
         &self,
         args: &[&PdCStr],
         host_path: impl AsRef<PdCStr>,
-    ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingErrorExitCode> {
+    ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         let parameters = hostfxr_initialize_parameters::with_host_path(host_path.as_ref().as_ptr());
         unsafe { self.initialize_for_dotnet_command_line_with_parameters(args, &parameters) }
     }
@@ -217,7 +220,7 @@ impl Hostfxr {
         &self,
         args: &[&PdCStr],
         dotnet_root: impl AsRef<PdCStr>,
-    ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingErrorExitCode> {
+    ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         let parameters =
             hostfxr_initialize_parameters::with_dotnet_root(dotnet_root.as_ref().as_ptr());
         unsafe { self.initialize_for_dotnet_command_line_with_parameters(args, &parameters) }
@@ -227,7 +230,7 @@ impl Hostfxr {
         &self,
         args: &[&PdCStr],
         parameters: *const hostfxr_initialize_parameters,
-    ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingErrorExitCode> {
+    ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         let mut hostfxr_handle = MaybeUninit::<hostfxr_handle>::uninit();
 
         let result = unsafe {
@@ -239,7 +242,7 @@ impl Hostfxr {
             )
         };
 
-        HostingExitCode::from(result).to_result_assume_unknown_is_error()?;
+        HostingResult::from(result).into_result()?;
 
         Ok(HostfxrContext::new(
             unsafe { HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()) },
@@ -268,7 +271,7 @@ impl Hostfxr {
     pub fn initialize_for_runtime_config(
         &self,
         runtime_config_path: impl AsRef<PdCStr>,
-    ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, HostingErrorExitCode> {
+    ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, HostingError> {
         unsafe {
             self.initialize_for_runtime_config_with_parameters(runtime_config_path, ptr::null())
         }
@@ -302,7 +305,7 @@ impl Hostfxr {
         &self,
         runtime_config_path: impl AsRef<PdCStr>,
         host_path: impl AsRef<PdCStr>,
-    ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, HostingErrorExitCode> {
+    ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, HostingError> {
         let parameters = hostfxr_initialize_parameters::with_host_path(host_path.as_ref().as_ptr());
         unsafe {
             self.initialize_for_runtime_config_with_parameters(runtime_config_path, &parameters)
@@ -335,7 +338,7 @@ impl Hostfxr {
         &self,
         runtime_config_path: impl AsRef<PdCStr>,
         dotnet_root: impl AsRef<PdCStr>,
-    ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, HostingErrorExitCode> {
+    ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, HostingError> {
         let parameters =
             hostfxr_initialize_parameters::with_dotnet_root(dotnet_root.as_ref().as_ptr());
         unsafe {
@@ -347,7 +350,7 @@ impl Hostfxr {
         &self,
         runtime_config_path: impl AsRef<PdCStr>,
         parameters: *const hostfxr_initialize_parameters,
-    ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, HostingErrorExitCode> {
+    ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, HostingError> {
         let mut hostfxr_handle = MaybeUninit::uninit();
 
         let result = unsafe {
@@ -358,7 +361,7 @@ impl Hostfxr {
             )
         };
 
-        HostingExitCode::from(result).to_result_assume_unknown_is_error()?;
+        HostingResult::from(result).into_result()?;
 
         Ok(HostfxrContext::new(
             unsafe { HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()) },

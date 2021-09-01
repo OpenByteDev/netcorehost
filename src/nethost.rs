@@ -1,13 +1,13 @@
 use crate::{
     bindings::{consts::MAX_PATH, nethost::get_hostfxr_parameters},
-    hostfxr::{Hostfxr, HostingErrorExitCode, HostingExitCode},
+    hostfxr::{Hostfxr, HostingError, HostingResult},
     pdcstring::PdCStr,
 };
 use std::{ffi::OsString, mem::MaybeUninit, ptr};
 use thiserror::Error;
 
 /// Gets the path to the hostfxr library.
-pub fn get_hostfxr_path() -> Result<OsString, HostingErrorExitCode> {
+pub fn get_hostfxr_path() -> Result<OsString, HostingError> {
     unsafe { get_hostfxr_path_with_parameters(ptr::null()) }
 }
 
@@ -15,7 +15,7 @@ pub fn get_hostfxr_path() -> Result<OsString, HostingErrorExitCode> {
 /// Hostfxr is located as if the `assembly_path` is the apphost.
 pub fn get_hostfxr_path_with_assembly_path<P: AsRef<PdCStr>>(
     assembly_path: P,
-) -> Result<OsString, HostingErrorExitCode> {
+) -> Result<OsString, HostingError> {
     let parameters = get_hostfxr_parameters::with_assembly_path(assembly_path.as_ref().as_ptr());
     unsafe { get_hostfxr_path_with_parameters(&parameters) }
 }
@@ -25,14 +25,14 @@ pub fn get_hostfxr_path_with_assembly_path<P: AsRef<PdCStr>>(
 /// searched for under the `dotnet_root` path.
 pub fn get_hostfxr_path_with_dotnet_root<P: AsRef<PdCStr>>(
     dotnet_root: P,
-) -> Result<OsString, HostingErrorExitCode> {
+) -> Result<OsString, HostingError> {
     let parameters = get_hostfxr_parameters::with_dotnet_root(dotnet_root.as_ref().as_ptr());
     unsafe { get_hostfxr_path_with_parameters(&parameters) }
 }
 
 unsafe fn get_hostfxr_path_with_parameters(
     parameters: *const get_hostfxr_parameters,
-) -> Result<OsString, HostingErrorExitCode> {
+) -> Result<OsString, HostingError> {
     let mut path_buffer = MaybeUninit::uninit_array::<MAX_PATH>();
     let mut path_length = path_buffer.len();
 
@@ -43,7 +43,7 @@ unsafe fn get_hostfxr_path_with_parameters(
             parameters,
         )
     };
-    HostingExitCode::from(result).to_result_assume_unknown_is_error()?;
+    HostingResult::from(result).into_result()?;
 
     let path_slice = unsafe { MaybeUninit::slice_assume_init_ref(&path_buffer[..path_length]) };
     Ok(unsafe { PdCStr::from_slice_with_nul_unchecked(path_slice) }.to_os_string())
@@ -69,7 +69,9 @@ pub fn load_hostfxr_with_assembly_path<P: AsRef<PdCStr>>(
 /// Retrieves the path to the hostfxr library and loads it.
 /// Hostfxr is located as if an application is started using `dotnet app.dll`, which means it will be
 /// searched for under the `dotnet_root` path.
-pub fn load_hostfxr_with_dotnet_root<P: AsRef<PdCStr>>(dotnet_root: P) -> Result<Hostfxr, LoadHostfxrError> {
+pub fn load_hostfxr_with_dotnet_root<P: AsRef<PdCStr>>(
+    dotnet_root: P,
+) -> Result<Hostfxr, LoadHostfxrError> {
     let hostfxr_path = get_hostfxr_path_with_dotnet_root(dotnet_root)?;
     let hostfxr = Hostfxr::load_from_path(hostfxr_path)?;
     Ok(hostfxr)
@@ -80,8 +82,8 @@ pub fn load_hostfxr_with_dotnet_root<P: AsRef<PdCStr>>(dotnet_root: P) -> Result
 pub enum LoadHostfxrError {
     /// An error occured inside the hosting components.
     #[error(transparent)]
-    Hosting(#[from] HostingErrorExitCode),
+    Hosting(#[from] HostingError),
     /// An error occured while loading the hostfxr library.
     #[error(transparent)]
-    DlOpen(#[from] dlopen::Error)
+    DlOpen(#[from] dlopen::Error),
 }
