@@ -83,14 +83,7 @@ pub fn download_and_link_nethost() -> Result<(), Box<dyn std::error::Error>> {
         _ => panic!("platform not supported."),
     };
 
-    let out_dir = env::var("OUT_DIR")?;
-    let runtime_dir = Path::new(&out_dir)
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
+    let runtime_dir = Path::new(&env::var("OUT_DIR")?)
         .join("nethost")
         .join(target);
     if !runtime_dir.exists() || runtime_dir.read_dir()?.next().is_none() {
