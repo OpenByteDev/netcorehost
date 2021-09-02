@@ -1,6 +1,7 @@
 use crate::{
     bindings::{consts::MAX_PATH, nethost::get_hostfxr_parameters},
-    hostfxr::{Hostfxr, HostingError, HostingResult},
+    hostfxr::Hostfxr,
+    error::{HostingError, HostingResult},
     pdcstring::PdCStr,
 };
 use std::{ffi::OsString, mem::MaybeUninit, ptr};

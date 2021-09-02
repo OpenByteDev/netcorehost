@@ -4,9 +4,10 @@ use crate::{
         hostfxr::{hostfxr_handle, hostfxr_initialize_parameters, HostfxrLib},
     },
     hostfxr::{
-        HostfxrContext, HostfxrHandle, HostingError, HostingResult, InitializedForCommandLine,
+        HostfxrContext, HostfxrHandle, InitializedForCommandLine,
         InitializedForRuntimeConfig,
     },
+    error::{HostingError, HostingResult},
     nethost::LoadHostfxrError,
     pdcstring::PdCStr,
 };

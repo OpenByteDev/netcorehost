@@ -7,6 +7,7 @@ use crate::{
             load_assembly_and_get_function_pointer_fn,
         },
     },
+    error::{HostingError, HostingResult, HostingSuccess},
     pdcstring::PdCStr,
 };
 use num_enum::TryFromPrimitive;
@@ -17,8 +18,6 @@ use std::{
     ptr,
 };
 use thiserror::Error;
-
-use super::{HostingError, HostingResult, HostingSuccess};
 
 /// A function pointer for a method with the default signature.
 pub type MethodWithDefaultSignature = component_entry_point_fn;

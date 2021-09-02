@@ -164,3 +164,6 @@ pub mod nethost;
 
 /// Module for a platform dependent c-like string type.
 pub mod pdcstring;
+
+/// Module containing error enums.
+pub mod error;

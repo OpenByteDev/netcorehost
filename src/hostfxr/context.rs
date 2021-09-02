@@ -3,6 +3,11 @@ use crate::{
         get_function_pointer_fn, hostfxr_delegate_type, hostfxr_handle,
         load_assembly_and_get_function_pointer_fn,
     },
+    hostfxr::{
+        AssemblyDelegateLoader, DelegateLoader, Hostfxr,
+        MethodWithUnknownSignature,
+    },
+    error::{HostingError, HostingResult, HostingSuccess},
     pdcstring::{PdCStr, PdCString},
 };
 
@@ -12,11 +17,6 @@ use std::{
     marker::PhantomData,
     mem::{self, ManuallyDrop, MaybeUninit},
     ptr::{self, NonNull},
-};
-
-use super::{
-    AssemblyDelegateLoader, DelegateLoader, Hostfxr, HostingError, HostingResult, HostingSuccess,
-    MethodWithUnknownSignature,
 };
 
 /// A marker struct indicating that the context was initialized with a runtime config.
