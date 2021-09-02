@@ -16,6 +16,7 @@ pub struct HostingResult(pub Result<HostingSuccess, HostingError>);
 
 impl HostingResult {
     /// Creates a new [`HostingResult`] from the raw status code.
+    #[allow(clippy::cast_possible_wrap)]
     pub fn from_status_code(code: u32) -> Self {
         if code as i32 >= 0 {
             Self::from_success(HostingSuccess::from_status_code(code))
@@ -47,6 +48,7 @@ impl HostingResult {
     }
 
     /// Returns the underlying status code value.
+    #[must_use]
     pub fn value(&self) -> u32 {
         match self.0 {
             Ok(success) => success.value(),
@@ -55,6 +57,7 @@ impl HostingResult {
     }
 
     /// Returns whether the status code of this result has a known meaning.
+    #[must_use]
     pub fn is_known(&self) -> bool {
         match self.0 {
             Ok(success) => success.is_known(),
@@ -63,6 +66,7 @@ impl HostingResult {
     }
 
     /// Returns whether the status code of this result has a unknown meaning.
+    #[must_use]
     pub fn is_unknown(&self) -> bool {
         match self.0 {
             Ok(success) => success.is_unknown(),
@@ -83,6 +87,7 @@ impl From<u32> for HostingResult {
 }
 
 impl From<i32> for HostingResult {
+    #[allow(clippy::cast_sign_loss)]
     fn from(code: i32) -> Self {
         Self::from(code as u32)
     }
@@ -95,6 +100,7 @@ impl From<HostingResult> for u32 {
 }
 
 impl From<HostingResult> for i32 {
+    #[allow(clippy::cast_possible_wrap)]
     fn from(code: HostingResult) -> Self {
         code.value() as i32
     }
@@ -165,6 +171,7 @@ pub enum HostingSuccess {
 
 impl HostingSuccess {
     /// Creates a new [`HostingSuccess`] from the raw status code.
+    #[must_use]
     pub fn from_status_code(code: u32) -> Self {
         match Self::known_from_status_code(code) {
             Ok(s) => s,
@@ -188,6 +195,7 @@ impl HostingSuccess {
     }
 
     /// Returns the underlying status code value.
+    #[must_use]
     pub fn value(&self) -> u32 {
         match self {
             Self::Success => bindings::StatusCode::Success as u32,
@@ -202,11 +210,13 @@ impl HostingSuccess {
     }
 
     /// Returns whether the status code of this success has a known meaning.
+    #[must_use]
     pub fn is_known(&self) -> bool {
         !self.is_unknown()
     }
 
     /// Returns whether the status code of this success has a unknown meaning.
+    #[must_use]
     pub fn is_unknown(&self) -> bool {
         matches!(self, Self::Unknown(_))
     }
@@ -602,6 +612,7 @@ impl HostingError {
     }
 
     /// Returns the underlying status code value.
+    #[must_use]
     pub fn value(&self) -> u32 {
         match self {
             Self::InvalidArgFailure => bindings::StatusCode::InvalidArgFailure as u32,
@@ -664,11 +675,13 @@ impl HostingError {
     }
 
     /// Returns whether the status code of this error has a known meaning.
+    #[must_use]
     pub fn is_known(&self) -> bool {
         !self.is_unknown()
     }
 
     /// Returns whether the status code of this error has a unknown meaning.
+    #[must_use]
     pub fn is_unknown(&self) -> bool {
         matches!(self, Self::Unknown(_))
     }

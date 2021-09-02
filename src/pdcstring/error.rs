@@ -3,6 +3,7 @@ use std::{error::Error, fmt};
 use super::PdUChar;
 
 // same definition as ffi::NulError and widestring::NulError<u16>
+#[must_use]
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct NulError(usize, Vec<PdUChar>);
 
@@ -12,12 +13,14 @@ impl NulError {
     }
 
     /// Returns the position of the nul byte in the slice.
+    #[must_use]
     pub fn nul_position(&self) -> usize {
         self.0
     }
 
     /// Consumes this error, returning the underlying vector of bytes which
     /// generated the error in the first place.
+    #[must_use]
     pub fn into_vec(self) -> Vec<PdUChar> {
         self.1
     }

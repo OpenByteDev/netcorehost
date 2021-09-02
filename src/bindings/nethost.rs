@@ -58,6 +58,7 @@ pub struct get_hostfxr_parameters {
 impl get_hostfxr_parameters {
     /// Creates a new instance of [`get_hostfxr_parameters`] with the given `dotnet_root`.
     /// The `size` field is set accordingly to the size of the struct and `assembly_path` to [`ptr::null()`].
+    #[must_use]
     pub fn with_dotnet_root(dotnet_root: *const char_t) -> get_hostfxr_parameters {
         get_hostfxr_parameters {
             size: size_of::<get_hostfxr_parameters>(),
@@ -67,6 +68,7 @@ impl get_hostfxr_parameters {
     }
     /// Creates a new instance of [`get_hostfxr_parameters`] with the given `assembly_path`.
     /// The `size` field is set accordingly to the size of the struct and `dotnet_root` to [`ptr::null()`].
+    #[must_use]
     pub fn with_assembly_path(assembly_path: *const char_t) -> get_hostfxr_parameters {
         get_hostfxr_parameters {
             size: size_of::<get_hostfxr_parameters>(),

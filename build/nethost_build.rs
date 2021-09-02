@@ -68,6 +68,7 @@ pub fn download_and_link_nethost() -> Result<(), Box<dyn std::error::Error>> {
     let arch = Arch::target().unwrap();
     let env = Env::target().unwrap();
 
+    #[rustfmt::skip]
     let target = match (&os, arch, env) {
         (Os::Windows, Arch::X86,     _) => "win-x86",
         (Os::Windows, Arch::X86_64,  _) => "win-x64",

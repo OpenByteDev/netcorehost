@@ -1,18 +1,14 @@
 use crate::{
-    bindings::{
-        char_t,
-        hostfxr::{hostfxr_handle, hostfxr_initialize_parameters, HostfxrLib},
-    },
-    hostfxr::{
-        HostfxrContext, HostfxrHandle, InitializedForCommandLine,
-        InitializedForRuntimeConfig,
-    },
+    bindings::hostfxr::{hostfxr_handle, hostfxr_initialize_parameters, HostfxrLib},
     error::{HostingError, HostingResult},
+    hostfxr::{
+        HostfxrContext, HostfxrHandle, InitializedForCommandLine, InitializedForRuntimeConfig,
+    },
     nethost::LoadHostfxrError,
     pdcstring::PdCStr,
 };
 use dlopen::wrapper::Container;
-use std::{ffi::OsStr, mem::MaybeUninit, ptr};
+use std::{convert::TryInto, ffi::OsStr, mem::MaybeUninit, ptr};
 
 /// A struct representing a loaded hostfxr library.
 pub struct Hostfxr {
@@ -42,7 +38,7 @@ impl Hostfxr {
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
     ///
-    /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
+    /// The functions will **NOT** load the `CoreCLR` runtime. They just prepare everything to the point where it can be loaded.
     ///
     /// # Arguments
     ///  * `app_path`:
@@ -67,7 +63,7 @@ impl Hostfxr {
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
     ///
-    /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
+    /// The functions will **NOT** load the `CoreCLR` runtime. They just prepare everything to the point where it can be loaded.
     ///
     /// # Arguments
     ///  * `app_path`:
@@ -75,7 +71,7 @@ impl Hostfxr {
     ///  * `host_path`:
     ///     Path to the native host (typically the `.exe`).
     ///     This value is not used for anything by the hosting components.
-    ///     It's just passed to the CoreCLR as the path to the executable.
+    ///     It's just passed to the `CoreCLR` as the path to the executable.
     ///     It can point to a file which is not executable itself, if such file doesn't exist (for example in COM activation scenarios this points to the `comhost.dll`).
     ///     This is used by PAL to initialize internal command line structures, process name and so on.
     ///
@@ -102,7 +98,7 @@ impl Hostfxr {
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
     ///
-    /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
+    /// The functions will **NOT** load the `CoreCLR` runtime. They just prepare everything to the point where it can be loaded.
     ///
     /// # Arguments
     ///  * `app_path`:
@@ -136,7 +132,7 @@ impl Hostfxr {
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
     ///
-    /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
+    /// The functions will **NOT** load the `CoreCLR` runtime. They just prepare everything to the point where it can be loaded.
     ///
     /// # Arguments
     ///  * `args`:
@@ -165,7 +161,7 @@ impl Hostfxr {
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
     ///
-    /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
+    /// The functions will **NOT** load the `CoreCLR` runtime. They just prepare everything to the point where it can be loaded.
     ///
     /// # Arguments
     ///  * `args`:
@@ -175,7 +171,7 @@ impl Hostfxr {
     ///  * `host_path`:
     ///     Path to the native host (typically the `.exe`).
     ///     This value is not used for anything by the hosting components.
-    ///     It's just passed to the CoreCLR as the path to the executable.
+    ///     It's just passed to the `CoreCLR` as the path to the executable.
     ///     It can point to a file which is not executable itself, if such file doesn't exist (for example in COM activation scenarios this points to the `comhost.dll`).
     ///     This is used by PAL to initialize internal command line structures, process name and so on.
     ///
@@ -200,7 +196,7 @@ impl Hostfxr {
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
     ///
-    /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
+    /// The functions will **NOT** load the `CoreCLR` runtime. They just prepare everything to the point where it can be loaded.
     ///
     /// # Arguments
     ///  * `args`:
@@ -236,8 +232,8 @@ impl Hostfxr {
 
         let result = unsafe {
             self.lib.hostfxr_initialize_for_dotnet_command_line(
-                args.len() as i32,
-                args.as_ptr() as *const *const char_t,
+                args.len().try_into().unwrap(),
+                args.as_ptr().cast(),
                 parameters,
                 hostfxr_handle.as_mut_ptr(),
             )
@@ -263,7 +259,7 @@ impl Hostfxr {
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
     ///
-    /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
+    /// The functions will **NOT** load the `CoreCLR` runtime. They just prepare everything to the point where it can be loaded.
     ///
     /// # Arguments
     ///  * `runtime_config_path`:
@@ -290,7 +286,7 @@ impl Hostfxr {
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
     ///
-    /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
+    /// The functions will **NOT** load the `CoreCLR` runtime. They just prepare everything to the point where it can be loaded.
     ///
     /// # Arguments
     ///  * `runtime_config_path`:
@@ -299,7 +295,7 @@ impl Hostfxr {
     ///  * `host_path`:
     ///     Path to the native host (typically the `.exe`).
     ///     This value is not used for anything by the hosting components.
-    ///     It's just passed to the CoreCLR as the path to the executable.
+    ///     It's just passed to the `CoreCLR` as the path to the executable.
     ///     It can point to a file which is not executable itself, if such file doesn't exist (for example in COM activation scenarios this points to the `comhost.dll`).
     ///     This is used by PAL to initialize internal command line structures, process name and so on.
     ///
@@ -324,7 +320,7 @@ impl Hostfxr {
     /// * Find the root framework (`Microsoft.NETCore.App`) and load the hostpolicy from it
     /// * The hostpolicy will then process all relevant `.deps.json` files and produce the list of assemblies, native search paths and other artifacts needed to initialize the runtime.
     ///
-    /// The functions will **NOT** load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
+    /// The functions will **NOT** load the `CoreCLR` runtime. They just prepare everything to the point where it can be loaded.
     ///
     /// # Arguments
     ///  * `runtime_config_path`:

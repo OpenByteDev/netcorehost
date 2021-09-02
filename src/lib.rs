@@ -4,7 +4,15 @@
     negative_impls,
     try_trait_v2
 )]
-#![warn(unsafe_op_in_unsafe_fn)]
+#![warn(clippy::pedantic, clippy::cargo, unsafe_op_in_unsafe_fn)]
+#![allow(
+    clippy::missing_safety_doc,
+    clippy::missing_errors_doc,
+    clippy::missing_panics_doc,
+    clippy::module_name_repetitions,
+    clippy::multiple_crate_versions,
+    clippy::doc_markdown
+)]
 
 //! A Rust library for hosting the dotnet core runtime.
 //!

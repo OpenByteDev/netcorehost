@@ -68,7 +68,7 @@ impl DerefMut for PdCString {
 
 impl Default for PdCString {
     fn default() -> Self {
-        Self(Default::default())
+        Self(PdCStringInner::default())
     }
 }
 

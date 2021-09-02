@@ -3,11 +3,8 @@ use crate::{
         get_function_pointer_fn, hostfxr_delegate_type, hostfxr_handle,
         load_assembly_and_get_function_pointer_fn,
     },
-    hostfxr::{
-        AssemblyDelegateLoader, DelegateLoader, Hostfxr,
-        MethodWithUnknownSignature,
-    },
     error::{HostingError, HostingResult, HostingSuccess},
+    hostfxr::{AssemblyDelegateLoader, DelegateLoader, Hostfxr, MethodWithUnknownSignature},
     pdcstring::{PdCStr, PdCString},
 };
 
@@ -38,11 +35,13 @@ impl HostfxrHandle {
     /// # Safety
     /// - The given raw handle has to be non-null.
     /// - The given handle has to be valid and has to represent a hostfxr context.
+    #[must_use]
     pub unsafe fn new_unchecked(ptr: hostfxr_handle) -> Self {
         Self(unsafe { NonNull::new_unchecked(ptr as *mut _) })
     }
 
     /// Returns the raw underlying handle.
+    #[must_use]
     pub fn as_raw(&self) -> hostfxr_handle {
         self.0.as_ptr()
     }
@@ -71,6 +70,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     ///
     /// [`initialize_for_dotnet_command_line`]: crate::hostfxr::Hostfxr::initialize_for_dotnet_command_line
     /// [`initialize_for_runtime_config`]: crate::hostfxr::Hostfxr::initialize_for_runtime_config
+    #[must_use]
     pub unsafe fn from_handle(handle: HostfxrHandle, hostfxr: &'a Hostfxr) -> Self {
         Self {
             handle,
@@ -80,11 +80,13 @@ impl<'a, I> HostfxrContext<'a, I> {
     }
 
     /// Gets the underlying handle to the hostfxr context.
+    #[must_use]
     pub fn handle(&self) -> HostfxrHandle {
         self.handle
     }
 
     /// Gets the underlying handle to the hostfxr context and consume this context.
+    #[must_use]
     pub fn into_handle(self) -> HostfxrHandle {
         let this = mem::ManuallyDrop::new(self);
         this.handle
@@ -175,7 +177,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     ) -> Result<(Vec<&'a PdCStr>, Vec<&'a PdCStr>), HostingError> {
         // get count
         let mut count = MaybeUninit::uninit();
-        let result = unsafe {
+        let mut result = unsafe {
             self.hostfxr.lib.hostfxr_get_runtime_properties(
                 self.handle.as_raw(),
                 count.as_mut_ptr(),
@@ -194,7 +196,7 @@ impl<'a, I> HostfxrContext<'a, I> {
         let mut count = unsafe { count.assume_init() };
         let mut keys = Vec::with_capacity(count);
         let mut values = Vec::with_capacity(count);
-        let result = unsafe {
+        result = unsafe {
             self.hostfxr.lib.hostfxr_get_runtime_properties(
                 self.handle.as_raw(),
                 &mut count,
@@ -224,8 +226,8 @@ impl<'a, I> HostfxrContext<'a, I> {
         &self,
     ) -> Result<(Vec<PdCString>, Vec<PdCString>), HostingError> {
         unsafe { self.get_runtime_properties_ref() }.map(|(keys, values)| {
-            let owned_keys = keys.into_iter().map(|key| key.to_owned()).collect();
-            let owned_values = values.into_iter().map(|value| value.to_owned()).collect();
+            let owned_keys = keys.into_iter().map(PdCStr::to_owned).collect();
+            let owned_values = values.into_iter().map(PdCStr::to_owned).collect();
             (owned_keys, owned_values)
         })
     }
@@ -280,11 +282,10 @@ impl<'a, I> HostfxrContext<'a, I> {
     pub fn get_runtime_properties_as_map(
         &self,
     ) -> Result<HashMap<PdCString, PdCString>, HostingError> {
-        self.get_runtime_properties_iter()
-            .map(|iter| iter.collect())
+        self.get_runtime_properties_iter().map(Iterator::collect)
     }
 
-    /// Gets a typed delegate from the currently loaded CoreCLR or from a newly created one.
+    /// Gets a typed delegate from the currently loaded `CoreCLR` or from a newly created one.
     /// You propably want to use [`get_delegate_loader`] or [`get_delegate_loader_for_assembly`]
     /// instead of this function if you want to load function pointers.
     ///
@@ -316,7 +317,7 @@ impl<'a, I> HostfxrContext<'a, I> {
 
         HostingResult::from(result).into_result()?;
 
-        Ok(unsafe { mem::transmute(delegate.assume_init()) })
+        Ok(unsafe { delegate.assume_init() }.cast())
     }
     fn get_load_assembly_and_get_function_pointer_delegate(
         &self,
@@ -370,10 +371,11 @@ impl<'a, I> HostfxrContext<'a, I> {
 }
 
 impl<'a> HostfxrContext<'a, InitializedForCommandLine> {
-    /// Load CoreCLR and run the application.
+    /// Load the dotnet runtime and run the application.
     ///
     /// # Return value
     /// If the app was successfully run, the exit code of the application. Otherwise, the error code result.
+    #[must_use]
     pub fn run_app(self) -> AppOrHostingResult {
         let result = unsafe { self.hostfxr.lib.hostfxr_run_app(self.handle.as_raw()) };
         AppOrHostingResult::from(result)
@@ -391,6 +393,7 @@ impl<I> Drop for HostfxrContext<'_, I> {
 pub struct AppOrHostingResult(i32);
 
 impl AppOrHostingResult {
+    #[must_use]
     pub fn value(self) -> i32 {
         self.0
     }

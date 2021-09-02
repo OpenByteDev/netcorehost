@@ -58,7 +58,7 @@ impl DelegateLoader {
         };
         GetFunctionPointerError::from_status_code(result)?;
 
-        Ok(unsafe { mem::transmute(delegate.assume_init()) })
+        Ok(unsafe { delegate.assume_init() }.cast())
     }
 
     fn _validate_assembly_path(
@@ -91,7 +91,7 @@ impl DelegateLoader {
         };
         GetFunctionPointerError::from_status_code(result)?;
 
-        Ok(unsafe { mem::transmute(delegate.assume_init()) })
+        Ok(unsafe { delegate.assume_init() }.cast())
     }
 
     /// Calling this function will load the specified assembly in isolation (into its own `AssemblyLoadContext`)
@@ -398,6 +398,7 @@ pub enum GetFunctionPointerError {
 }
 
 impl GetFunctionPointerError {
+    #[allow(clippy::cast_sign_loss)]
     pub fn from_status_code(code: i32) -> Result<HostingSuccess, Self> {
         let code = code as u32;
         match HostingResult::known_from_status_code(code) {
@@ -423,12 +424,12 @@ impl GetFunctionPointerError {
 #[derive(TryFromPrimitive, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[allow(non_camel_case_types)]
 enum HResult {
-    E_POINTER = 0x80004003,                // System.ArgumentNullException
-    COR_E_ARGUMENTOUTOFRANGE = 0x80131502, // System.ArgumentOutOfRangeException (reserved was not 0)
-    COR_E_TYPELOAD = 0x80131522,           // invalid type
-    COR_E_MISSINGMETHOD = 2148734227,      // invalid method
+    E_POINTER = 0x8000_4003,                // System.ArgumentNullException
+    COR_E_ARGUMENTOUTOFRANGE = 0x8013_1502, // System.ArgumentOutOfRangeException (reserved was not 0)
+    COR_E_TYPELOAD = 0x8013_1522,           // invalid type
+    COR_E_MISSINGMETHOD = 0x8013_1513,      // invalid method
     /*COR_E_*/
-    FILE_NOT_FOUND = 2147942402, // assembly with specified name not found (from type name)
-    COR_E_ARGUMENT = 0x80070057, // invalid method signature or method not found
-    COR_E_INVALIDOPERATION = 0x80131509, // invalid assembly path or not unmanaged,
+    FILE_NOT_FOUND = 0x8007_0002, // assembly with specified name not found (from type name)
+    COR_E_ARGUMENT = 0x8007_0057, // invalid method signature or method not found
+    COR_E_INVALIDOPERATION = 0x8013_1509, // invalid assembly path or not unmanaged,
 }
