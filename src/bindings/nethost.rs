@@ -28,7 +28,7 @@ extern "system" {
     ///
     /// # Return value
     ///  * 0 on success, otherwise failure
-    ///  * 0x80008098 - `buffer` is too small ([`HostApiBufferTooSmall`](crate::hostfxr::HostingError::HostApiBufferTooSmall))
+    ///  * 0x80008098 - `buffer` is too small ([`HostApiBufferTooSmall`](crate::error::HostingError::HostApiBufferTooSmall))
     ///
     /// # Remarks
     /// The full search for the hostfxr library is done on every call. To minimize the need
