@@ -128,7 +128,7 @@ impl Try for HostingResult {
 
 impl FromResidual for HostingResult {
     fn from_residual(r: HostingError) -> Self {
-        HostingResult(Err(r.into()))
+        HostingResult(Err(r))
     }
 }
 
