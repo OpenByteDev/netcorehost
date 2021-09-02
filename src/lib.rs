@@ -7,84 +7,150 @@
 #![allow(clippy::missing_safety_doc)] // TODO: add safety docs
 #![warn(unsafe_op_in_unsafe_fn)]
 
-//! A Rust library for hosting .NET Core application.
-//!
-//! This crate allows a .NET Core app to be run inside the current process or to load it and call a contained method directly.
-//!
-//! # Basic Usage
-//! The first step is to load the hostfxr library with handles the hosting. This can be done with [`nethost::load_hostfxr()`]
-//! which automatically locates the library on your system. The returned instance of [`Hostfxr`] can then be used to initialize
-//! a new [`HostfxrContext`] through one of the `initialize_*` methods like [`initialize_for_dotnet_command_line`]
-//! which in turn be used to run the app associated with the context or to load a pointer to a function od the loaded library.
-//!
-//! # Examples
+//! A Rust library for hosting the dotnet core runtime.
+//! 
+//! It utilizes the dotnet core hosting API to load and execute managed code from withing the current process. 
+//! 
+//! # Usage
 //! ## Running an application
-//! Assuming the following app located inside the current folder and named `Test.dll`:
-//! ```cs
-//! public static class Program {
-//!     public static int Main() {
-//!         System.Console.WriteLine("Hello from C#!");
-//!     }
-//! }
-//! ```
-//! The following code will setup the hostfxr library, load the app and run its `Main` method.
-//! ```
+//! The example below will setup the runtime, load `Test.dll` and run its `Main` method:
+//! ```rust
 //! # use netcorehost::{nethost, pdcstr};
-//! # use std::path::Path;
-//! # use std::str::FromStr;
-//! # fn run_app() -> Result<(), Box<dyn std::error::Error>> {
-//! let hostfxr = nethost::load_hostfxr()?;
-//! let context = hostfxr.initialize_for_dotnet_command_line(pdcstr!("Test.dll"))?;
-//! let result = context.run_app().value();
-//! # assert_eq!(result, 42);
-//! # Ok(())
+//! # fn test() {
+//! let hostfxr = nethost::load_hostfxr().unwrap();
+//! let context = hostfxr.initialize_for_dotnet_command_line(pdcstr!("Test.dll")).unwrap();
+//! let result = context.run_app();
 //! # }
 //! ```
+//! The full example can be found in [examples/run-app](https://github.com/OpenByteDev/netcorehost/tree/master/examples/run-app).
+//! 
 //! ## Calling a managed function
-//! Assuming the following app located inside the current folder and named `Test.dll`:
+//! A function pointer to a managed method can be aquired using an [`AssemblyDelegateLoader`].
+//! 
+//! ### Using the default signature
+//! The default method signature is defined as follows:
+//! ```csharp
+//! public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);
+//! ```
+//! 
+//! A method with the default signature (see code below) can be loaded using [`AssemblyDelegateLoader::get_function_pointer_with_default_signature`].
+//! 
+//! **C#**
 //! ```cs
+//! using System;
+//! 
 //! namespace Test {
 //!     public static class Program {
-//!         public static int Hello(IntPtr arg, int argLength) {
+//!         public static int Hello(IntPtr args, int sizeBytes) {
+//!             Console.WriteLine("Hello from C#!");
 //!             return 42;
 //!         }
 //!     }
 //! }
 //! ```
-//! The following code will setup the hostfxr library, load the app and call the `Hello` method.
-//! The method has the default signature which avoids having to specify it. It accepts a ptr to some data and the size of said data.
-//! ```
-//! # use std::{path::Path, ptr};
-//! #
+//! 
+//! **Rust**
+//! ```rust
 //! # use netcorehost::{nethost, pdcstr};
-//! # use std::str::FromStr;
-//! #
-//! # fn hello_world() -> Result<(), Box<dyn std::error::Error>> {
-//! let hostfxr = nethost::load_hostfxr()?;
+//! # fn test() {
+//! let hostfxr = nethost::load_hostfxr().unwrap();
 //! let context =
-//!     hostfxr.initialize_for_runtime_config(pdcstr!("Test.runtimeconfig.json"))?;
-//! let mut fn_loader =
-//!     context.get_delegate_loader_for_assembly(pdcstr!("Test.dll"))?;
+//!     hostfxr.initialize_for_runtime_config(pdcstr!("Test.runtimeconfig.json")).unwrap();
+//! let fn_loader =
+//!     context.get_delegate_loader_for_assembly(pdcstr!("Test.dll")).unwrap();
 //! let hello = fn_loader.get_function_pointer_with_default_signature(
 //!     pdcstr!("Test.Program, Test"),
 //!     pdcstr!("Hello"),
-//! )?;
-//! let result = unsafe { hello(ptr::null(), 0) };
-//! # assert_eq!(result, 42);
-//! #
-//! #  Ok(())
+//! ).unwrap();
+//! let result = unsafe { hello(std::ptr::null(), 0) };
 //! # }
 //! ```
-//!
-//! Alternatively it is possible to call a method with any signature if it is annotated with [`UnmanagedCallersOnly`] (loaded with
-//! [`get_function_pointer_for_unmanaged_callers_only_method`]) or if the signature is passed to [`get_function_pointer`].
-//!
-//! [`Hostfxr`]: crate::hostfxr::Hostfxr
-//! [`HostfxrContext`]: crate::hostfxr::HostfxrContext
-//! [`initialize_for_dotnet_command_line`]: crate::hostfxr::Hostfxr::initialize_for_dotnet_command_line
-//! [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
-//! [`get_function_pointer_for_unmanaged_callers_only_method`]: crate::hostfxr::AssemblyDelegateLoader::get_function_pointer_for_unmanaged_callers_only_method
-//! [`get_function_pointer`]: crate::hostfxr::AssemblyDelegateLoader::get_function_pointer
+//! 
+//! ### Using UnmanagedCallersOnly
+//! A function pointer to a method annotated with [`UnmanagedCallersOnly`] can be loaded without
+//! specifying its signature (as these methods cannot be overloaded).
+//! 
+//! **C#**
+//! ```cs
+//! using System;
+//! using System.Runtime.InteropServices;
+//! 
+//! namespace Test {
+//!     public static class Program {
+//!         [UnmanagedCallersOnly]
+//!         public static void UnmanagedHello() {
+//!             Console.WriteLine("Hello from C#!");
+//!         }
+//!     }
+//! }
+//! ```
+//! 
+//! **Rust**
+//! ```rust
+//! # use netcorehost::{nethost, pdcstr};
+//! # fn test() {
+//! let hostfxr = nethost::load_hostfxr().unwrap();
+//! let context =
+//!     hostfxr.initialize_for_runtime_config(pdcstr!("Test.runtimeconfig.json")).unwrap();
+//! let fn_loader =
+//!     context.get_delegate_loader_for_assembly(pdcstr!("Test.dll")).unwrap();
+//! let hello = fn_loader.get_function_pointer_with_default_signature(
+//!     pdcstr!("Test.Program, Test"),
+//!     pdcstr!("UnmanagedHello"),
+//! ).unwrap();
+//! let hello: unsafe extern "system" fn() = unsafe { std::mem::transmute(hello) };
+//! let result = unsafe { hello() };
+//! # }
+//! ```
+//! 
+//! 
+//! ### Specifying the delegate type
+//! Another option is to define a custom delegate type and passing its assembly qualified name to [`AssemblyDelegateLoader::get_function_pointer`].
+//! 
+//! **C#**
+//! ```cs
+//! using System;
+//! 
+//! namespace Test {
+//!     public static class Program {
+//!         public delegate void CustomHelloFunc();
+//!     
+//!         public static void CustomHello() {
+//!             Console.WriteLine("Hello from C#!");
+//!         }
+//!     }
+//! }
+//! ```
+//! 
+//! **Rust**
+//! ```rust
+//! # use netcorehost::{nethost, pdcstr};
+//! # fn test() {
+//! let hostfxr = nethost::load_hostfxr().unwrap();
+//! let context =
+//!     hostfxr.initialize_for_runtime_config(pdcstr!("Test.runtimeconfig.json")).unwrap();
+//! let fn_loader =
+//!     context.get_delegate_loader_for_assembly(pdcstr!("Test.dll")).unwrap();
+//! let hello = fn_loader.get_function_pointer(
+//!     pdcstr!("Test.Program, Test"),
+//!     pdcstr!("UnmanagedHello"),
+//!     pdcstr!("Test.Program+CustomHelloFunc, Test")
+//! ).unwrap();
+//! let hello: unsafe extern "system" fn() = unsafe { std::mem::transmute(hello) };
+//! let result = unsafe { hello() };
+//! # }
+//! ```
+//! 
+//! The full examples can be found in [examples/call-managed-function](https://github.com/OpenByteDev/netcorehost/tree/master/examples/call-managed-function).
+//! 
+//! ## Passing complex parameters
+//! Examples for passing non-primitive parameters can be found in [examples/passing-parameters](https://github.com/OpenByteDev/netcorehost/tree/master/examples/passing-parameters).
+//! 
+//! [`UnmanagedCallersOnly`]: <https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute>
+//! [`AssemblyDelegateLoader`]: crate::hostfxr::AssemblyDelegateLoader
+//! [`AssemblyDelegateLoader::get_function_pointer_with_default_signature`]: crate::hostfxr::AssemblyDelegateLoader::get_function_pointer_with_default_signature
+//! [`AssemblyDelegateLoader::get_function_pointer`]: crate::hostfxr::AssemblyDelegateLoader::get_function_pointer
+
 
 #[macro_use]
 extern crate dlopen_derive;
