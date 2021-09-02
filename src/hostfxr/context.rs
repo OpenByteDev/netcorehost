@@ -28,14 +28,22 @@ pub struct InitializedForRuntimeConfig;
 pub struct InitializedForCommandLine;
 
 /// Handle of a loaded [`HostfxrContext`].
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct HostfxrHandle(NonNull<c_void>);
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[repr(transparent)]
+pub struct HostfxrHandle(NonNull<c_void>);
 
 impl HostfxrHandle {
-    pub(crate) unsafe fn new_unchecked(ptr: hostfxr_handle) -> Self {
+    /// Creates a new hostfxr handle from the given raw handle.
+    /// 
+    /// # Safety
+    /// - The given raw handle has to be non-null.
+    /// - The given handle has to be valid and has to represent a hostfxr context.
+    pub unsafe fn new_unchecked(ptr: hostfxr_handle) -> Self {
         Self(unsafe { NonNull::new_unchecked(ptr as *mut _) })
     }
-    pub(crate) fn as_raw(&self) -> hostfxr_handle {
+
+    /// Returns the raw underlying handle.
+    pub fn as_raw(&self) -> hostfxr_handle {
         self.0.as_ptr()
     }
 }
@@ -47,7 +55,6 @@ impl From<HostfxrHandle> for hostfxr_handle {
 }
 
 /// State which hostfxr creates and maintains and represents a logical operation on the hosting components.
-#[derive(Clone)]
 pub struct HostfxrContext<'a, I> {
     handle: HostfxrHandle,
     hostfxr: &'a Hostfxr,
@@ -55,7 +62,16 @@ pub struct HostfxrContext<'a, I> {
 }
 
 impl<'a, I> HostfxrContext<'a, I> {
-    pub(crate) fn new(handle: HostfxrHandle, hostfxr: &'a Hostfxr) -> Self {
+    /// Creates a new context from the given handle.
+    ///
+    /// # Safety
+    /// The context handle  has to be match the context type `I`.
+    /// If the context was initialized using [`initialize_for_dotnet_command_line`] `I` has to be [`InitializedForCommandLine`].
+    /// If the context was initialized using [`initialize_for_runtime_config`] `I` has to be [`InitializedForRuntimeConfig`].
+    /// 
+    /// [`initialize_for_dotnet_command_line`]: crate::hostfxr::Hostfxr::initialize_for_dotnet_command_line
+    /// [`initialize_for_dotnet_command_line`]: crate::hostfxr::Hostfxr::initialize_for_runtime_config
+    pub unsafe fn from_handle(handle: HostfxrHandle, hostfxr: &'a Hostfxr) -> Self {
         Self {
             handle,
             hostfxr,
@@ -63,12 +79,23 @@ impl<'a, I> HostfxrContext<'a, I> {
         }
     }
 
+    /// Gets the underlying handle to the hostfxr context.
+    pub fn handle(&self) -> HostfxrHandle {
+        self.handle
+    }
+
+    /// Gets the underlying handle to the hostfxr context and consume this context.
+    pub fn into_handle(self) -> HostfxrHandle {
+        let this = mem::ManuallyDrop::new(self);
+        this.handle
+    }
+
     /// Gets the runtime property value for the given key of this host context.
     pub fn get_runtime_property_value_owned(
         &self,
         name: impl AsRef<PdCStr>,
     ) -> Result<PdCString, HostingError> {
-        unsafe { self.get_runtime_property_value_borrowed(name) }.map(PdCStr::to_owned)
+        unsafe { self.get_runtime_property_value_ref(name) }.map(PdCStr::to_owned)
     }
 
     /// Gets the runtime property value for the given key of this host context.
@@ -82,7 +109,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// [`run_app`]: HostfxrContext::run_app
     /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
     /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
-    pub unsafe fn get_runtime_property_value_borrowed(
+    pub unsafe fn get_runtime_property_value_ref(
         &'a self,
         name: impl AsRef<PdCStr>,
     ) -> Result<&'a PdCStr, HostingError> {
