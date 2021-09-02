@@ -34,7 +34,7 @@ pub struct HostfxrHandle(NonNull<c_void>);
 
 impl HostfxrHandle {
     /// Creates a new hostfxr handle from the given raw handle.
-    /// 
+    ///
     /// # Safety
     /// - The given raw handle has to be non-null.
     /// - The given handle has to be valid and has to represent a hostfxr context.
@@ -68,9 +68,9 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// The context handle  has to be match the context type `I`.
     /// If the context was initialized using [`initialize_for_dotnet_command_line`] `I` has to be [`InitializedForCommandLine`].
     /// If the context was initialized using [`initialize_for_runtime_config`] `I` has to be [`InitializedForRuntimeConfig`].
-    /// 
+    ///
     /// [`initialize_for_dotnet_command_line`]: crate::hostfxr::Hostfxr::initialize_for_dotnet_command_line
-    /// [`initialize_for_dotnet_command_line`]: crate::hostfxr::Hostfxr::initialize_for_runtime_config
+    /// [`initialize_for_runtime_config`]: crate::hostfxr::Hostfxr::initialize_for_runtime_config
     pub unsafe fn from_handle(handle: HostfxrHandle, hostfxr: &'a Hostfxr) -> Self {
         Self {
             handle,
