@@ -10,7 +10,7 @@ use std::{
     collections::HashMap,
     ffi::c_void,
     marker::PhantomData,
-    mem::{self, MaybeUninit},
+    mem::{self, ManuallyDrop, MaybeUninit},
     ptr::{self, NonNull},
 };
 
@@ -358,7 +358,8 @@ impl<'a, I> HostfxrContext<'a, I> {
     ///
     /// This method is automatically called on drop, but can be explicitely called to handle errors during closing.
     pub fn close(self) -> Result<HostingSuccess, HostingError> {
-        unsafe { self._close() }
+        let this = ManuallyDrop::new(self);
+        unsafe { this._close() }
     }
 
     /// Internal non-consuming version of [`close`](HostfxrContext::close)

@@ -244,10 +244,12 @@ impl Hostfxr {
 
         HostingResult::from(result).into_result()?;
 
-        Ok(unsafe { HostfxrContext::from_handle(
-            HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()),
-            self,
-        )})
+        Ok(unsafe {
+            HostfxrContext::from_handle(
+                HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()),
+                self,
+            )
+        })
     }
 
     /// This function loads the specified `.runtimeconfig.json`, resolve all frameworks, resolve all the assets from those frameworks and
@@ -363,9 +365,11 @@ impl Hostfxr {
 
         HostingResult::from(result).into_result()?;
 
-        Ok(unsafe { HostfxrContext::from_handle(
-            HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()),
-            self,
-        )})
+        Ok(unsafe {
+            HostfxrContext::from_handle(
+                HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()),
+                self,
+            )
+        })
     }
 }
