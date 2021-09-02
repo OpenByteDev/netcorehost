@@ -20,11 +20,11 @@ fn runtime_properties() {
         .set_runtime_property_value(&test_property_name, &test_property_value)
         .unwrap();
     let property_value = context
-        .get_runtime_property_value_owned(&test_property_name)
+        .get_runtime_property_value(&test_property_name)
         .unwrap();
     assert_eq!(test_property_value, property_value.as_ref());
 
-    let properties = context.get_runtime_properties_owned_as_map().unwrap();
+    let properties = context.get_runtime_properties_as_map().unwrap();
     let property_value = properties.get(test_property_name).unwrap();
     assert_eq!(test_property_value, property_value.as_ref());
 }

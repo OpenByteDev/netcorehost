@@ -91,7 +91,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     }
 
     /// Gets the runtime property value for the given key of this host context.
-    pub fn get_runtime_property_value_owned(
+    pub fn get_runtime_property_value(
         &self,
         name: impl AsRef<PdCStr>,
     ) -> Result<PdCString, HostingError> {
@@ -170,7 +170,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// [`run_app`]: HostfxrContext::run_app
     /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
     /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
-    pub unsafe fn get_runtime_properties_borrowed(
+    pub unsafe fn get_runtime_properties_ref(
         &'a self,
     ) -> Result<(Vec<&'a PdCStr>, Vec<&'a PdCStr>), HostingError> {
         // get count
@@ -223,7 +223,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     pub fn get_runtime_properties_owned(
         &self,
     ) -> Result<(Vec<PdCString>, Vec<PdCString>), HostingError> {
-        unsafe { self.get_runtime_properties_borrowed() }.map(|(keys, values)| {
+        unsafe { self.get_runtime_properties_ref() }.map(|(keys, values)| {
             let owned_keys = keys.into_iter().map(|key| key.to_owned()).collect();
             let owned_values = values.into_iter().map(|value| value.to_owned()).collect();
             (owned_keys, owned_values)
@@ -242,15 +242,15 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// [`run_app`]: HostfxrContext::run_app
     /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
     /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
-    pub unsafe fn get_runtime_properties_iter_borrowed(
+    pub unsafe fn get_runtime_properties_ref_iter(
         &'a self,
     ) -> Result<impl Iterator<Item = (&'a PdCStr, &'a PdCStr)>, HostingError> {
-        unsafe { self.get_runtime_properties_borrowed() }
+        unsafe { self.get_runtime_properties_ref() }
             .map(|(keys, values)| keys.into_iter().zip(values.into_iter()))
     }
 
     /// Get all runtime properties for this host context as an iterator over owned key-value pairs.
-    pub fn get_runtime_properties_iter_owned(
+    pub fn get_runtime_properties_iter(
         &self,
     ) -> Result<impl Iterator<Item = (PdCString, PdCString)>, HostingError> {
         self.get_runtime_properties_owned()
@@ -269,18 +269,18 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// [`run_app`]: HostfxrContext::run_app
     /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
     /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
-    pub unsafe fn get_runtime_properties_borrowed_as_map(
+    pub unsafe fn get_runtime_properties_ref_as_map(
         &'a self,
     ) -> Result<HashMap<&'a PdCStr, &'a PdCStr>, HostingError> {
-        unsafe { self.get_runtime_properties_borrowed() }
+        unsafe { self.get_runtime_properties_ref() }
             .map(|(keys, values)| keys.into_iter().zip(values.into_iter()).collect())
     }
 
     /// Get all runtime properties for this host context as an hashmap of owned strings.
-    pub fn get_runtime_properties_owned_as_map(
+    pub fn get_runtime_properties_as_map(
         &self,
     ) -> Result<HashMap<PdCString, PdCString>, HostingError> {
-        self.get_runtime_properties_iter_owned()
+        self.get_runtime_properties_iter()
             .map(|iter| iter.collect())
     }
 
