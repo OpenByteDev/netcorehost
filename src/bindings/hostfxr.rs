@@ -158,8 +158,8 @@ pub struct HostfxrLib {
     ///
     /// This function does not load the runtime.
     ///
-    /// [`Success`]: crate::bindings::status_code::Success
-    /// [`HostInvalidState`]: crate::bindings::status_code::HostInvalidState
+    /// [`Success`]: crate::bindings::StatusCode::Success
+    /// [`HostInvalidState`]: crate::bindings::StatusCode::HostInvalidState
     hostfxr_initialize_for_dotnet_command_line: unsafe extern "C" fn(
         argc: i32,
         argv: *const *const char_t,
@@ -201,10 +201,10 @@ pub struct HostfxrLib {
     /// initializations. In the case of [`Success_DifferentRuntimeProperties`], it is left to the consumer to verify that
     /// the difference in properties is acceptable.
     ///
-    /// [`Success`]: crate::bindings::status_code::Success
-    /// [`Success_HostAlreadyInitialized`]: crate::bindings::status_code::Success_HostAlreadyInitialized
-    /// [`Success_DifferentRuntimeProperties`]: crate::bindings::status_code::Success_DifferentRuntimeProperties
-    /// [`CoreHostIncompatibleConfig`]: crate::bindings::status_code::CoreHostIncompatibleConfig
+    /// [`Success`]: crate::bindings::StatusCode::Success
+    /// [`Success_HostAlreadyInitialized`]: crate::bindings::StatusCode::Success_HostAlreadyInitialized
+    /// [`Success_DifferentRuntimeProperties`]: crate::bindings::StatusCode::Success_DifferentRuntimeProperties
+    /// [`CoreHostIncompatibleConfig`]: crate::bindings::StatusCode::CoreHostIncompatibleConfig
     hostfxr_initialize_for_runtime_config: unsafe extern "C" fn(
         runtime_config_path: *const char_t,
         parameters: *const hostfxr_initialize_parameters,
