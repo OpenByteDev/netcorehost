@@ -1,23 +1,23 @@
 error: C-style string cannot contain nul characters
- --> $DIR/pdcstr-compile-fail.rs:3:26
+ --> $DIR/pdcstr-compile-fail.rs:3:34
   |
-3 |     netcorehost::pdcstr!("\0");
-  |                          ^^^^
+3 |     let _ = netcorehost::pdcstr!("\0");
+  |                                  ^^^^
 
 error: C-style string cannot contain nul characters
- --> $DIR/pdcstr-compile-fail.rs:4:26
+ --> $DIR/pdcstr-compile-fail.rs:4:34
   |
-4 |     netcorehost::pdcstr!("somerandomteststring\0");
-  |                          ^^^^^^^^^^^^^^^^^^^^^^^^
+4 |     let _ = netcorehost::pdcstr!("somerandomteststring\0");
+  |                                  ^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: C-style string cannot contain nul characters
- --> $DIR/pdcstr-compile-fail.rs:5:26
+ --> $DIR/pdcstr-compile-fail.rs:5:34
   |
-5 |     netcorehost::pdcstr!("somerandomteststring\0somerandomteststring");
-  |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5 |     let _ = netcorehost::pdcstr!("somerandomteststring\0somerandomteststring");
+  |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: C-style string cannot contain nul characters
- --> $DIR/pdcstr-compile-fail.rs:6:26
+ --> $DIR/pdcstr-compile-fail.rs:6:34
   |
-6 |     netcorehost::pdcstr!("somerandomteststring\0somerandomteststring");
-  |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+6 |     let _ = netcorehost::pdcstr!("somerandomteststring\0somerandomteststring");
+  |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

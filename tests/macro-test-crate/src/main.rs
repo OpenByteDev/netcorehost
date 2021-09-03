@@ -1,3 +1,3 @@
 fn main() {
-    netcorehost::pdcstr!("test");
+    let _ = netcorehost::pdcstr!("test");
 }
