@@ -18,7 +18,7 @@ The example below will setup the runtime, load `Test.dll` and run its `Main` met
 ```rust
 let hostfxr = nethost::load_hostfxr()?;
 let context = hostfxr.initialize_for_dotnet_command_line(pdcstr!("Test.dll")).unwrap();
-let result = context.run_app();
+let result = context.run_app().value();
 ```
 The full example can be found in [examples/run-app](https://github.com/OpenByteDev/netcorehost/tree/master/examples/run-app).
 
@@ -125,8 +125,8 @@ let hello = fn_loader.get_function_pointer(
     pdcstr!("CustomHello"),
     pdcstr!("Test.Program+CustomHelloFunc, Test")
 ).unwrap();
-//! let hello = unsafe { cast_managed_fn!(hello, fn()) };
-//! hello();
+let hello = unsafe { cast_managed_fn!(hello, fn()) };
+hello(); // prints "Hello from C#!"
 ```
 
 The full examples can be found in [examples/call-managed-function](https://github.com/OpenByteDev/netcorehost/tree/master/examples/call-managed-function).

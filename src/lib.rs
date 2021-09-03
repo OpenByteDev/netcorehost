@@ -28,7 +28,7 @@
 //! # use netcorehost::{nethost, pdcstr};
 //! let hostfxr = nethost::load_hostfxr().unwrap();
 //! let context = hostfxr.initialize_for_dotnet_command_line(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
-//! let result = context.run_app();
+//! let result = context.run_app().value();
 //! ```
 //! The full example can be found in [examples/run-app](https://github.com/OpenByteDev/netcorehost/tree/master/examples/run-app).
 //!
