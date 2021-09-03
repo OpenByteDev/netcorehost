@@ -9,6 +9,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUSTDOCFLAGS: "--deny warnings"
+  RUSTFLAGS: "--deny warnings"
       
 jobs:
   test:
