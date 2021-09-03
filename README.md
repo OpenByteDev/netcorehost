@@ -96,7 +96,7 @@ let result = unsafe { hello() };
 
 
 #### Specifying the delegate type
-Another option is to define a custom delegate type and passing its assembly qualified name to [`AssemblyDelegateLoader::get_function_pointer](https://docs.rs/netcorehost/*/netcorehost/hostfxr/struct.AssemblyDelegateLoader.html#method.get_function_pointer)`.
+Another option is to define a custom delegate type and passing its assembly qualified name to [`AssemblyDelegateLoader::get_function_pointer`](https://docs.rs/netcorehost/*/netcorehost/hostfxr/struct.AssemblyDelegateLoader.html#method.get_function_pointer).
 
 **C#**
 ```cs
