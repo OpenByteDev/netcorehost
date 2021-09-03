@@ -423,13 +423,13 @@ impl GetFunctionPointerError {
 #[non_exhaustive]
 #[derive(TryFromPrimitive, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[allow(non_camel_case_types)]
+#[rustfmt::skip]
 enum HResult {
-    E_POINTER = 0x8000_4003,                // System.ArgumentNullException
-    COR_E_ARGUMENTOUTOFRANGE = 0x8013_1502, // System.ArgumentOutOfRangeException (reserved was not 0)
-    COR_E_TYPELOAD = 0x8013_1522,           // invalid type
-    COR_E_MISSINGMETHOD = 0x8013_1513,      // invalid method
-    /*COR_E_*/
-    FILE_NOT_FOUND = 0x8007_0002, // assembly with specified name not found (from type name)
-    COR_E_ARGUMENT = 0x8007_0057, // invalid method signature or method not found
-    COR_E_INVALIDOPERATION = 0x8013_1509, // invalid assembly path or not unmanaged,
+    E_POINTER = 0x8000_4003,                 // System.ArgumentNullException
+    COR_E_ARGUMENTOUTOFRANGE = 0x8013_1502,  // System.ArgumentOutOfRangeException (reserved was not 0)
+    COR_E_TYPELOAD = 0x8013_1522,            // invalid type
+    COR_E_MISSINGMETHOD = 0x8013_1513,       // invalid method
+    /*COR_E_*/FILE_NOT_FOUND = 0x8007_0002,  // assembly with specified name not found (from type name)
+    COR_E_ARGUMENT = 0x8007_0057,            // invalid method signature or method not found
+    COR_E_INVALIDOPERATION = 0x8013_1509,    // invalid assembly path or not unmanaged,
 }
