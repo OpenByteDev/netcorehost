@@ -22,12 +22,13 @@
 //! ## Running an application
 //! The example below will setup the runtime, load `Test.dll` and run its `Main` method:
 //! ```rust
+//! # #[path = "../tests/common.rs"]
+//! # mod common;
+//! # common::setup();
 //! # use netcorehost::{nethost, pdcstr};
-//! # fn test() {
 //! let hostfxr = nethost::load_hostfxr().unwrap();
-//! let context = hostfxr.initialize_for_dotnet_command_line(pdcstr!("Test.dll")).unwrap();
+//! let context = hostfxr.initialize_for_dotnet_command_line(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
 //! let result = context.run_app();
-//! # }
 //! ```
 //! The full example can be found in [examples/run-app](https://github.com/OpenByteDev/netcorehost/tree/master/examples/run-app).
 //!
@@ -36,7 +37,7 @@
 //!
 //! ### Using the default signature
 //! The default method signature is defined as follows:
-//! ```csharp
+//! ```cs
 //! public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);
 //! ```
 //!
@@ -58,19 +59,21 @@
 //!
 //! **Rust**
 //! ```rust
+//! # #[path = "../tests/common.rs"]
+//! # mod common;
+//! # common::setup();
 //! # use netcorehost::{nethost, pdcstr};
-//! # fn test() {
 //! let hostfxr = nethost::load_hostfxr().unwrap();
 //! let context =
-//!     hostfxr.initialize_for_runtime_config(pdcstr!("Test.runtimeconfig.json")).unwrap();
+//!     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json")).unwrap();
 //! let fn_loader =
-//!     context.get_delegate_loader_for_assembly(pdcstr!("Test.dll")).unwrap();
+//!     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
 //! let hello = fn_loader.get_function_pointer_with_default_signature(
 //!     pdcstr!("Test.Program, Test"),
 //!     pdcstr!("Hello"),
 //! ).unwrap();
 //! let result = unsafe { hello(std::ptr::null(), 0) };
-//! # }
+//! assert_eq!(result, 42);
 //! ```
 //!
 //! ### Using UnmanagedCallersOnly
@@ -94,20 +97,21 @@
 //!
 //! **Rust**
 //! ```rust
-//! # use netcorehost::{nethost, pdcstr};
-//! # fn test() {
+//! # #[path = "../tests/common.rs"]
+//! # mod common;
+//! # common::setup();
+//! # use netcorehost::{nethost, pdcstr, cast_managed_fn};
 //! let hostfxr = nethost::load_hostfxr().unwrap();
 //! let context =
-//!     hostfxr.initialize_for_runtime_config(pdcstr!("Test.runtimeconfig.json")).unwrap();
+//!     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json")).unwrap();
 //! let fn_loader =
-//!     context.get_delegate_loader_for_assembly(pdcstr!("Test.dll")).unwrap();
-//! let hello = fn_loader.get_function_pointer_with_default_signature(
+//!     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
+//! let hello = fn_loader.get_function_pointer_for_unmanaged_callers_only_method(
 //!     pdcstr!("Test.Program, Test"),
 //!     pdcstr!("UnmanagedHello"),
 //! ).unwrap();
-//! let hello: unsafe extern "system" fn() = unsafe { std::mem::transmute(hello) };
-//! let result = unsafe { hello() };
-//! # }
+//! let hello = unsafe { cast_managed_fn!(hello, fn()) };
+//! hello();
 //! ```
 //!
 //!
@@ -131,21 +135,22 @@
 //!
 //! **Rust**
 //! ```rust
-//! # use netcorehost::{nethost, pdcstr};
-//! # fn test() {
+//! # #[path = "../tests/common.rs"]
+//! # mod common;
+//! # common::setup();
+//! # use netcorehost::{nethost, pdcstr, cast_managed_fn};
 //! let hostfxr = nethost::load_hostfxr().unwrap();
 //! let context =
-//!     hostfxr.initialize_for_runtime_config(pdcstr!("Test.runtimeconfig.json")).unwrap();
+//!     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json")).unwrap();
 //! let fn_loader =
-//!     context.get_delegate_loader_for_assembly(pdcstr!("Test.dll")).unwrap();
+//!     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
 //! let hello = fn_loader.get_function_pointer(
 //!     pdcstr!("Test.Program, Test"),
-//!     pdcstr!("UnmanagedHello"),
+//!     pdcstr!("CustomHello"),
 //!     pdcstr!("Test.Program+CustomHelloFunc, Test")
 //! ).unwrap();
-//! let hello: unsafe extern "system" fn() = unsafe { std::mem::transmute(hello) };
-//! let result = unsafe { hello() };
-//! # }
+//! let hello = unsafe { cast_managed_fn!(hello, fn()) };
+//! hello();
 //! ```
 //!
 //! The full examples can be found in [examples/call-managed-function](https://github.com/OpenByteDev/netcorehost/tree/master/examples/call-managed-function).

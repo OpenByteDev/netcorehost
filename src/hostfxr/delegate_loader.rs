@@ -433,3 +433,58 @@ enum HResult {
     COR_E_ARGUMENT = 0x8007_0057,            // invalid method signature or method not found
     COR_E_INVALIDOPERATION = 0x8013_1509,    // invalid assembly path or not unmanaged,
 }
+
+/// Macro for casting a [`MethodWithUnknownSignature`] to a concrete function signature with the correct calling convention.
+///
+/// # Example
+///
+/// ```rust
+/// # #[path = "../../tests/common.rs"]
+/// # mod common;
+/// # common::setup();
+/// # use netcorehost::{nethost, pdcstr, cast_managed_fn, hostfxr::MethodWithUnknownSignature};
+/// # let hostfxr = nethost::load_hostfxr().unwrap();
+/// # let context =
+/// #     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json")).unwrap();
+/// # let fn_loader =
+/// #     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
+/// // Get a pointer to the managed "Hello" method.
+/// let hello: MethodWithUnknownSignature = fn_loader.get_function_pointer_for_unmanaged_callers_only_method(
+///     pdcstr!("Test.Program, Test"),
+///     pdcstr!("UnmanagedHello"),
+/// ).unwrap();
+/// // Cast the unknown function pointer to the concrete function type with the correct signature and calling convention.
+/// let hello: extern "system" fn() = unsafe { cast_managed_fn!(hello, fn()) };
+/// # hello();
+/// ```
+#[macro_export]
+macro_rules! cast_managed_fn {
+    // fn()
+    ($fn_ptr:expr, $($fn_ty:tt)*) => {
+        ::core::mem::transmute::<
+            $crate::hostfxr::MethodWithUnknownSignature,
+            extern "system" $($fn_ty)*
+        >($fn_ptr)
+    };
+    // unsafe fn()
+    ($fn_ptr:expr, unsafe $($fn_ty:tt)*) => {
+        ::core::mem::transmute::<
+            $crate::hostfxr::MethodWithUnknownSignature,
+            unsafe extern "system" $($fn_ty)*
+        >($fn_ptr)
+    };
+    // extern "system" fn()
+    ($fn_ptr:expr, extern "system" $($fn_ty:tt)*) => {
+        ::core::mem::transmute::<
+            $crate::hostfxr::MethodWithUnknownSignature,
+            extern "system" $($fn_ty)*
+        >($fn_ptr)
+    };
+    // unsafe extern "system" fn()
+    ($fn_ptr:expr, unsafe extern "system" $($fn_ty:tt)*) => {
+        ::core::mem::transmute::<
+            $crate::hostfxr::MethodWithUnknownSignature,
+            unsafe extern "system" $($fn_ty)*
+        >($fn_ptr)
+    };
+}

@@ -1,6 +1,4 @@
-use std::mem;
-
-use netcorehost::{nethost, pdcstr};
+use netcorehost::{cast_managed_fn, nethost, pdcstr};
 
 #[path = "common.rs"]
 mod common;
@@ -25,7 +23,7 @@ fn unmanaged_caller_hello_world() {
             pdcstr!("UnmanagedHello"),
         )
         .unwrap();
-    let hello: extern "system" fn() -> i32 = unsafe { mem::transmute(hello) };
+    let hello = unsafe { cast_managed_fn!(hello, fn() -> i32) };
 
     let result = hello();
     assert_eq!(result, 42);

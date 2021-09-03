@@ -90,8 +90,8 @@ let hello = fn_loader.get_function_pointer_with_default_signature(
     pdcstr!("Test.Program, Test"),
     pdcstr!("UnmanagedHello"),
 ).unwrap();
-let hello: unsafe extern "system" fn() = unsafe { std::mem::transmute(hello) };
-let result = unsafe { hello() };
+let hello = unsafe { cast_managed_fn!(hello, fn()) };
+hello(); // prints "Hello from C#!"
 ```
 
 
@@ -122,11 +122,11 @@ let fn_loader =
     context.get_delegate_loader_for_assembly(pdcstr!("Test.dll")).unwrap();
 let hello = fn_loader.get_function_pointer(
     pdcstr!("Test.Program, Test"),
-    pdcstr!("UnmanagedHello"),
+    pdcstr!("CustomHello"),
     pdcstr!("Test.Program+CustomHelloFunc, Test")
 ).unwrap();
-let hello: unsafe extern "system" fn() = unsafe { std::mem::transmute(hello) };
-let result = unsafe { hello() };
+//! let hello = unsafe { cast_managed_fn!(hello, fn()) };
+//! hello();
 ```
 
 The full examples can be found in [examples/call-managed-function](https://github.com/OpenByteDev/netcorehost/tree/master/examples/call-managed-function).

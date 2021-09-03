@@ -1,6 +1,4 @@
-use std::{mem, ptr};
-
-use netcorehost::{nethost, pdcstr};
+use netcorehost::{cast_managed_fn, nethost, pdcstr};
 
 #[path = "common.rs"]
 mod common;
@@ -22,11 +20,10 @@ fn hello_world_with_custom_delegate_type() {
     let hello = fn_loader
         .get_function_pointer(
             pdcstr!("Test.Program, Test"),
-            pdcstr!("Hello"),
-            pdcstr!("Test.Program+HelloFunc, Test"),
+            pdcstr!("CustomHello"),
+            pdcstr!("Test.Program+CustomHelloFunc, Test"),
         )
         .unwrap();
-    let hello: extern "system" fn(*const (), i32) -> i32 = unsafe { mem::transmute(hello) };
-    let result = hello(ptr::null(), 0);
-    assert_eq!(result, 42);
+    let hello = unsafe { cast_managed_fn!(hello, fn()) };
+    hello();
 }
