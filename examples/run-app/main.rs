@@ -12,5 +12,5 @@ fn main() {
             "examples/run-app/ExampleProject/bin/Debug/net5.0/ExampleProject.dll"
         ))
         .unwrap();
-    context.run_app();
+    context.run_app().as_hosting_exit_code().unwrap();
 }
