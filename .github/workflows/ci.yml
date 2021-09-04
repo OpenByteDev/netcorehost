@@ -55,7 +55,12 @@ jobs:
       run: cargo run --example passing-parameters
 
   documentation:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+          - os: windows-latest
     steps:
     - uses: actions/checkout@v2
     - name: Install latest nightly
@@ -72,7 +77,12 @@ jobs:
       run: cargo deadlinks
 
   clippy:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+          - os: windows-latest
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
@@ -80,6 +90,7 @@ jobs:
             toolchain: nightly
             components: clippy
             override: true
-      - uses: actions-rs/clippy@master
+      - uses: actions-rs/clippy-check@v1
         with:
-          args: --all-features --all-targets
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features
