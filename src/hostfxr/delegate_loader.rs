@@ -437,7 +437,7 @@ enum HResult {
 /// Macro for casting a [`MethodWithUnknownSignature`] to a concrete function signature with the correct calling convention.
 ///
 /// # Example
-///
+/// Type annotations are not needed and only for clarity.
 /// ```rust
 /// # #[path = "../../tests/common.rs"]
 /// # mod common;
@@ -448,7 +448,7 @@ enum HResult {
 /// #     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json")).unwrap();
 /// # let fn_loader =
 /// #     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
-/// // Get a pointer to the managed "Hello" method.
+/// // Get a pointer to the managed "UnmanagedHello" method.
 /// let hello: MethodWithUnknownSignature = fn_loader.get_function_pointer_for_unmanaged_callers_only_method(
 ///     pdcstr!("Test.Program, Test"),
 ///     pdcstr!("UnmanagedHello"),
