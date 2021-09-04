@@ -54,7 +54,7 @@ jobs:
     - name: Run example 'passing-parameters'
       run: cargo run --example passing-parameters
 
-  check-doc:
+  documentation:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -70,3 +70,16 @@ jobs:
       run: cargo install cargo-deadlinks
     - name: Check dead links in doc
       run: cargo deadlinks
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly
+            components: clippy
+            override: true
+      - uses: actions-rs/clippy@master
+        with:
+          args: --all-features --all-targets
