@@ -20,9 +20,11 @@ macro_rules! pdcstr {
 
 // conversions to and from inner
 impl PdCString {
+    #[must_use]
     pub fn from_c_string(s: CString) -> Self {
         PdCString::from_inner(s)
     }
+    #[must_use]
     pub fn into_c_string(self) -> CString {
         self.into_inner()
     }
@@ -33,6 +35,7 @@ impl PdCString {
     pub fn from_os_str(s: impl AsRef<OsStr>) -> Result<Self, NulError> {
         PdCString::from_vec(s.as_ref().as_bytes().to_vec())
     }
+    #[must_use]
     pub unsafe fn from_str_ptr(ptr: *const i8) -> Self {
         unsafe { PdCStr::from_str_ptr(ptr) }.to_owned()
     }
@@ -52,9 +55,11 @@ impl PdCString {
         let inner = CString::new(vec)?;
         Ok(PdCString::from_inner(inner))
     }
+    #[must_use]
     pub fn into_vec(self) -> Vec<u8> {
         self.0.into_bytes()
     }
+    #[must_use]
     pub fn into_vec_with_nul(self) -> Vec<u8> {
         self.0.into_bytes_with_nul()
     }
@@ -62,9 +67,11 @@ impl PdCString {
 
 // conversions to and from inner
 impl PdCStr {
+    #[must_use]
     pub fn from_c_str(s: &CStr) -> &Self {
         PdCStr::from_inner(s)
     }
+    #[must_use]
     pub fn to_c_str(&self) -> &CStr {
         self.to_inner()
     }
@@ -72,17 +79,21 @@ impl PdCStr {
 
 // methods used by this crate
 impl PdCStr {
+    #[must_use]
     pub fn as_ptr(&self) -> *const i8 {
         self.0.as_ptr()
     }
+    #[must_use]
     pub unsafe fn from_str_ptr<'a>(ptr: *const i8) -> &'a Self {
         let inner = unsafe { CStr::from_ptr(ptr) };
         PdCStr::from_inner(inner)
     }
+    #[must_use]
     pub unsafe fn from_slice_with_nul_unchecked(slice: &[u8]) -> &Self {
         let inner = unsafe { CStr::from_bytes_with_nul_unchecked(slice) };
         PdCStr::from_inner(inner)
     }
+    #[must_use]
     pub fn to_os_string(&self) -> OsString {
         self.to_os_str().to_owned()
     }
@@ -90,6 +101,7 @@ impl PdCStr {
 
 // methods not used by this crate
 impl PdCStr {
+    #[must_use]
     pub fn to_os_str(&self) -> &OsStr {
         OsStr::from_bytes(self.0.to_bytes())
     }
@@ -97,18 +109,26 @@ impl PdCStr {
     pub fn from_slice_with_nul(slice: &[u8]) -> Result<&Self, ffi::FromBytesWithNulError> {
         CStr::from_bytes_with_nul(slice).map(|s| PdCStr::from_inner(s))
     }
+    #[must_use]
     pub fn to_slice(&self) -> &[u8] {
         self.0.to_bytes()
     }
+    #[must_use]
     pub fn to_slice_with_nul(&self) -> &[u8] {
         self.0.to_bytes_with_nul()
     }
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.0.to_bytes().is_empty()
+    }
+    #[must_use]
     pub fn len(&self) -> usize {
         self.0.to_bytes().len()
     }
     pub fn to_string(&self) -> Result<String, str::Utf8Error> {
-        self.0.to_str().map(|s| s.to_string())
+        self.0.to_str().map(str::to_string)
     }
+    #[must_use]
     pub fn to_string_lossy(&self) -> String {
         self.0.to_string_lossy().to_string()
     }
