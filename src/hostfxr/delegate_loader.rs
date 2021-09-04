@@ -177,7 +177,7 @@ impl DelegateLoader {
     ///     Name of the method on the `type_name` to find. The method must be static and must match be annotated with [`\[UnmanagedCallersOnly\]`].
     ///
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
-    /// [`\[UnmanagedCallersOnly\]`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
+    /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     pub fn load_assembly_and_get_function_pointer_for_unmanaged_callers_only_method(
         &self,
         assembly_path: impl AsRef<PdCStr>,
@@ -251,10 +251,10 @@ impl DelegateLoader {
     ///  * `type_name`:
     ///     Assembly qualified type name to find
     ///  * `method_name`:
-    ///     Name of the method on the `type_name` to find. The method must be static and must match be annotated with [`\[UnmanagedCallersOnly\]`].
+    ///     Name of the method on the `type_name` to find. The method must be static and must match be annotated with [`UnmanagedCallersOnly`].
     ///
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
-    /// [`\[UnmanagedCallersOnly\]`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
+    /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     pub fn get_function_pointer_for_unmanaged_callers_only_method(
         &self,
         type_name: impl AsRef<PdCStr>,
@@ -351,10 +351,10 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     ///  * `type_name`:
     ///     Assembly qualified type name to find
     ///  * `method_name`:
-    ///     Name of the method on the `type_name` to find. The method must be static and must match be annotated with [`\[UnmanagedCallersOnly\]`].
+    ///     Name of the method on the `type_name` to find. The method must be static and must match be annotated with [`UnmanagedCallersOnly`].
     ///
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
-    /// [`\[UnmanagedCallersOnly\]`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
+    /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     pub fn get_function_pointer_for_unmanaged_callers_only_method(
         &self,
         type_name: impl AsRef<PdCStr>,

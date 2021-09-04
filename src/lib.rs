@@ -33,8 +33,9 @@
 //! The full example can be found in [examples/run-app](https://github.com/OpenByteDev/netcorehost/tree/master/examples/run-app).
 //!
 //! ## Calling a managed function
-//! A function pointer to a managed method can be aquired using an [`AssemblyDelegateLoader`].
-//!
+//! A function pointer to a managed method can be aquired using an [`AssemblyDelegateLoader`](crate::hostfxr::AssemblyDelegateLoader).
+//! This is only supported for [`HostfxrContext`'s](crate::hostfxr::HostfxrContext) that are initialized using [`Hostfxr::initialize_for_runtime_config`](crate::hostfxr::Hostfxr::initialize_for_runtime_config).
+//! The [`runtimeconfig.json`](https://docs.microsoft.com/en-us/dotnet/core/run-time-config/) is automatically generated for executables, for libraries it is neccessary to add  `<GenerateRuntimeConfigurationFiles>True</GenerateRuntimeConfigurationFiles>` to the projects `.csproj` file.
 //! ### Using the default signature
 //! The default method signature is defined as follows:
 //! ```cs
