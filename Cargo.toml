@@ -36,7 +36,7 @@ glob = "0.3"
 widestring = "0.4"
 
 [build-dependencies]
-build-target = { version = "0.1", optional = true }
+build-target = { version = "0.2", optional = true }
 reqwest = { version = "0.11", features = ["blocking", "json"], optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
 serde_json = { version = "1.0", optional = true }
