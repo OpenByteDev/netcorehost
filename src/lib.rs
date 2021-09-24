@@ -164,14 +164,13 @@
 //! [`AssemblyDelegateLoader::get_function_pointer_with_default_signature`]: crate::hostfxr::AssemblyDelegateLoader::get_function_pointer_with_default_signature
 //! [`AssemblyDelegateLoader::get_function_pointer`]: crate::hostfxr::AssemblyDelegateLoader::get_function_pointer
 
-#[macro_use]
-extern crate dlopen_derive;
-
 /// Module for the raw bindings for hostfxr and nethost.
 #[allow(non_camel_case_types, dead_code)]
 pub mod bindings;
+
 /// Module for abstractions of the hostfxr library.
 pub mod hostfxr;
+
 /// Module for abstractions of the nethost library.
 #[cfg(feature = "nethost")]
 pub mod nethost;
@@ -181,3 +180,5 @@ pub mod pdcstring;
 
 /// Module containing error enums.
 pub mod error;
+
+pub use hostfxr_sys::dlopen as dlopen;

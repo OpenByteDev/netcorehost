@@ -1,15 +1,11 @@
-/// Module for constants related to hostfxr or nethost or useful for interacting with them.
-pub mod consts;
+extern crate coreclr_hosting_shared;
+
+/// Module for shared bindings for all hosting components.
+pub use coreclr_hosting_shared::*;
 
 /// Module containing the raw bindings for hostfxr.
-pub mod hostfxr;
+pub use hostfxr_sys as hostfxr;
 
 /// Module containing the raw bindings for nethost.
 #[cfg(feature = "nethost")]
-pub mod nethost;
-
-mod type_aliases;
-pub use type_aliases::*;
-
-mod status_code;
-pub use status_code::*;
+pub use nethost_sys as nethost;

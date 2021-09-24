@@ -320,7 +320,7 @@ pub enum HostingError {
     #[display(fmt = "Initialization of the `hostpolicy` library failed.")]
     LibHostInitFailure,
 
-    // Error only present in `error_codes.h` not in hostf sefs
+    // Error only present in `error_codes.h` not in `host-error-codes.md`
     #[doc(hidden)]
     #[display(fmt = "LibHostExecModeFailure")]
     LibHostExecModeFailure,

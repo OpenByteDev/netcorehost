@@ -1,5 +1,5 @@
 use crate::{
-    bindings::{consts::MAX_PATH, nethost::get_hostfxr_parameters},
+    bindings::{MAX_PATH, nethost::get_hostfxr_parameters},
     error::{HostingError, HostingResult},
     hostfxr::Hostfxr,
     pdcstring::PdCStr,
@@ -86,5 +86,5 @@ pub enum LoadHostfxrError {
     Hosting(#[from] HostingError),
     /// An error occured while loading the hostfxr library.
     #[error(transparent)]
-    DlOpen(#[from] dlopen::Error),
+    DlOpen(#[from] crate::dlopen::Error),
 }

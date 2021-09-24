@@ -1,10 +1,10 @@
 use crate::{
     bindings::{
         char_t,
-        consts::UNMANAGED_CALLERS_ONLY_METHOD,
         hostfxr::{
             component_entry_point_fn, get_function_pointer_fn,
             load_assembly_and_get_function_pointer_fn,
+            UNMANAGED_CALLERS_ONLY_METHOD
         },
     },
     error::{HostingError, HostingResult, HostingSuccess},

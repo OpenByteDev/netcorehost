@@ -9,18 +9,16 @@ documentation = "https://docs.rs/netcorehost"
 license = "MIT"
 authors = ["OpenByte <development.openbyte@gmail.com>"]
 edition = "2018"
-links = "nethost"
 categories = ["api-bindings", "external-ffi-bindings"]
 keywords = ["nethost", "hostfxr", "dotnet", "bindings", "coreclr"]
-resolver = "2"
-build = "build/mod.rs"
 
 [dependencies]
-dlopen = "0.1"
-dlopen_derive = "0.1"
 num_enum = "0.5"
 thiserror = "1.0"
 derive_more = { version = "0.99", default-features = false, features = ["deref", "from", "display"] }
+nethost-sys = { version = "0.2", optional = true }
+hostfxr-sys = { version = "0.1" }
+coreclr-hosting-shared = { version = "0.1" }
 
 [target.'cfg(windows)'.dependencies]
 widestring = "0.4"
@@ -35,19 +33,7 @@ platforms = "1.1"
 glob = "0.3"
 widestring = "0.4"
 
-[build-dependencies]
-build-target = { version = "0.2", optional = true }
-reqwest = { version = "0.11", features = ["blocking", "json"], optional = true }
-serde = { version = "1.0", features = ["derive"], optional = true }
-serde_json = { version = "1.0", optional = true }
-semver = { version = "1.0", optional = true }
-zip = { version = "0.5", optional = true }
-
 [features]
-default = ["nethost"]
-nethost = ["build-target", "reqwest", "serde", "serde_json", "semver", "zip"]
-private-docs-rs = [] # DO NOT RELY ON THIS
-
-# Prevent downloading nethost lib when building docs on docs.rs.
-[package.metadata.docs.rs]
-features = ["private-docs-rs", "nethost"]
+default = ["nethost", "download-nethost"]
+download-nethost = ["nethost-sys/download-nuget"]
+nethost = ["nethost-sys"]

@@ -1,13 +1,13 @@
 use crate::{
-    bindings::hostfxr::{hostfxr_handle, hostfxr_initialize_parameters, HostfxrLib},
+    bindings::hostfxr::{hostfxr_handle, hostfxr_initialize_parameters, wrapper::Hostfxr as HostfxrLib},
     error::{HostingError, HostingResult},
     hostfxr::{
         HostfxrContext, HostfxrHandle, InitializedForCommandLine, InitializedForRuntimeConfig,
     },
     nethost::LoadHostfxrError,
     pdcstring::PdCStr,
+    dlopen::wrapper::Container
 };
-use dlopen::wrapper::Container;
 use std::{convert::TryInto, ffi::OsStr, mem::MaybeUninit, ptr};
 
 /// A struct representing a loaded hostfxr library.
@@ -20,7 +20,7 @@ impl !Send for Hostfxr {}
 
 impl Hostfxr {
     /// Loads the hostfxr library from the given path.
-    pub fn load_from_path(path: impl AsRef<OsStr>) -> Result<Self, dlopen::Error> {
+    pub fn load_from_path(path: impl AsRef<OsStr>) -> Result<Self, crate::dlopen::Error> {
         unsafe { Container::load(path) }.map(|lib| Self { lib })
     }
 
