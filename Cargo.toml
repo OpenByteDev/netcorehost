@@ -15,7 +15,7 @@ keywords = ["nethost", "hostfxr", "dotnet", "bindings", "coreclr"]
 num_enum = "0.5"
 thiserror = "1.0"
 derive_more = { version = "0.99", default-features = false, features = ["deref", "from", "display"] }
-nethost-sys = { version = "0.2", optional = true }
+nethost-sys = { version = "0.2", optional = true, default-features = false }
 hostfxr-sys = "0.1"
 coreclr-hosting-shared = "0.1"
 
@@ -33,10 +33,11 @@ glob = "0.3"
 widestring = "0.4"
 
 [features]
-default = ["nethost", "download-nethost"]
-download-nethost = ["nethost-sys/download-nuget"]
+default = ["nethost", "nethost-download"]
+nethost-download = ["nethost-sys/download-nuget"]
 nethost = ["nethost-sys"]
 
 # Prevent downloading nethost lib when building docs on docs.rs.
 [package.metadata.docs.rs]
 features = ["nethost"]
+no-default-features = true
