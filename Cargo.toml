@@ -17,8 +17,8 @@ num_enum = "0.5"
 thiserror = "1.0"
 derive_more = { version = "0.99", default-features = false, features = ["deref", "from", "display"] }
 nethost-sys = { version = "0.2", optional = true }
-hostfxr-sys = { version = "0.1" }
-coreclr-hosting-shared = { version = "0.1" }
+hostfxr-sys = "0.1"
+coreclr-hosting-shared = "0.1"
 
 [target.'cfg(windows)'.dependencies]
 widestring = "0.4"
@@ -37,3 +37,7 @@ widestring = "0.4"
 default = ["nethost", "download-nethost"]
 download-nethost = ["nethost-sys/download-nuget"]
 nethost = ["nethost-sys"]
+
+# Prevent downloading nethost lib when building docs on docs.rs.
+[package.metadata.docs.rs]
+features = ["nethost"]
