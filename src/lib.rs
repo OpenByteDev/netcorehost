@@ -1,9 +1,4 @@
-#![feature(
-    maybe_uninit_uninit_array,
-    maybe_uninit_slice,
-    negative_impls,
-    try_trait_v2
-)]
+#![feature(maybe_uninit_uninit_array, maybe_uninit_slice, try_trait_v2)]
 #![warn(clippy::pedantic, clippy::cargo, unsafe_op_in_unsafe_fn)]
 #![allow(
     clippy::missing_safety_doc,
@@ -165,7 +160,6 @@
 //! [`AssemblyDelegateLoader::get_function_pointer`]: crate::hostfxr::AssemblyDelegateLoader::get_function_pointer
 
 /// Module for the raw bindings for hostfxr and nethost.
-#[allow(non_camel_case_types, dead_code)]
 pub mod bindings;
 
 /// Module for abstractions of the hostfxr library.
@@ -181,4 +175,4 @@ pub mod pdcstring;
 /// Module containing error enums.
 pub mod error;
 
-pub use hostfxr_sys::dlopen as dlopen;
+pub use hostfxr_sys::dlopen;
