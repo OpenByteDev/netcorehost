@@ -2,7 +2,7 @@ use crate::{
     bindings::{nethost::get_hostfxr_parameters, MAX_PATH},
     error::{HostingError, HostingResult, HostingSuccess},
     hostfxr::Hostfxr,
-    pdcstring::PdCStr,
+    pdcstring::{self, PdCStr},
 };
 use std::{ffi::OsString, mem::MaybeUninit, ptr};
 use thiserror::Error;
@@ -53,11 +53,11 @@ unsafe fn get_hostfxr_path_with_parameters(
         }
         Err(HostingError::HostApiBufferTooSmall) => {
             let mut path_vec = Vec::new();
-            path_vec.resize(path_length, MaybeUninit::uninit());
+            path_vec.resize(path_length, MaybeUninit::<pdcstring::PdUChar>::uninit());
 
             let result = unsafe {
                 crate::bindings::nethost::get_hostfxr_path(
-                    path_vec[0].as_mut_ptr(),
+                    path_vec[0].as_mut_ptr().cast(),
                     &mut path_length,
                     parameters,
                 )
