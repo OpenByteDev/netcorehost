@@ -3,8 +3,7 @@ use crate::{
         char_t,
         hostfxr::{
             component_entry_point_fn, get_function_pointer_fn,
-            load_assembly_and_get_function_pointer_fn,
-            UNMANAGED_CALLERS_ONLY_METHOD
+            load_assembly_and_get_function_pointer_fn, UNMANAGED_CALLERS_ONLY_METHOD,
         },
     },
     error::{HostingError, HostingResult, HostingSuccess},
@@ -13,11 +12,14 @@ use crate::{
 use num_enum::TryFromPrimitive;
 use std::{
     convert::TryFrom,
+    marker::PhantomData,
     mem::{self, MaybeUninit},
     path::PathBuf,
     ptr,
 };
 use thiserror::Error;
+
+use super::HostfxrContext;
 
 /// A function pointer for a method with the default signature.
 pub type MethodWithDefaultSignature = component_entry_point_fn;
@@ -30,15 +32,16 @@ pub type MethodWithUnknownSignature = *const SomeMethod;
 ///
 /// [`HostfxrContext`]: super::HostfxrContext
 #[derive(Copy, Clone)]
-pub struct DelegateLoader {
+pub struct DelegateLoader<'a> {
     pub(crate) get_load_assembly_and_get_function_pointer:
         load_assembly_and_get_function_pointer_fn,
     pub(crate) get_function_pointer: get_function_pointer_fn,
+    pub(crate) phantom: PhantomData<&'a HostfxrContext<()>>,
 }
 
-impl DelegateLoader {
+impl<'a> DelegateLoader<'a> {
     unsafe fn _load_assembly_and_get_function_pointer(
-        &self,
+        &'a self,
         assembly_path: *const char_t,
         type_name: *const char_t,
         method_name: *const char_t,
@@ -72,7 +75,7 @@ impl DelegateLoader {
     }
 
     unsafe fn _get_function_pointer(
-        &self,
+        &'a self,
         type_name: *const char_t,
         method_name: *const char_t,
         delegate_type_name: *const char_t,
@@ -111,7 +114,7 @@ impl DelegateLoader {
     ///  * `delegate_type_name`:
     ///     Assembly qualified delegate type name for the method signature.
     pub fn load_assembly_and_get_function_pointer(
-        &self,
+        &'a self,
         assembly_path: impl AsRef<PdCStr>,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
@@ -144,7 +147,7 @@ impl DelegateLoader {
     ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
     ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
     pub fn load_assembly_and_get_function_pointer_with_default_signature(
-        &self,
+        &'a self,
         assembly_path: impl AsRef<PdCStr>,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
@@ -179,7 +182,7 @@ impl DelegateLoader {
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     pub fn load_assembly_and_get_function_pointer_for_unmanaged_callers_only_method(
-        &self,
+        &'a self,
         assembly_path: impl AsRef<PdCStr>,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
@@ -206,7 +209,7 @@ impl DelegateLoader {
     ///  * `delegate_type_name`:
     ///     Assembly qualified delegate type name for the method signature.
     pub fn get_function_pointer(
-        &self,
+        &'a self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
         delegate_type_name: impl AsRef<PdCStr>,
@@ -230,7 +233,7 @@ impl DelegateLoader {
     ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
     ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
     pub fn get_function_pointer_with_default_signature(
-        &self,
+        &'a self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
     ) -> Result<MethodWithDefaultSignature, GetFunctionPointerError> {
@@ -256,7 +259,7 @@ impl DelegateLoader {
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     pub fn get_function_pointer_for_unmanaged_callers_only_method(
-        &self,
+        &'a self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
     ) -> Result<MethodWithUnknownSignature, GetFunctionPointerError> {
@@ -274,15 +277,15 @@ impl DelegateLoader {
 /// assembly from the given path on the first access.
 ///
 /// [`HostfxrContext`]: super::HostfxrContext
-pub struct AssemblyDelegateLoader<A: AsRef<PdCStr>> {
-    loader: DelegateLoader,
+pub struct AssemblyDelegateLoader<'a, A: AsRef<PdCStr>> {
+    loader: DelegateLoader<'a>,
     assembly_path: A,
 }
 
-impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
+impl<'a, A: AsRef<PdCStr>> AssemblyDelegateLoader<'a, A> {
     /// Creates a new [`AssemblyDelegateLoader`] wrapping the given [`DelegateLoader`] loading the assembly
     /// from the given path on the first access.
-    pub fn new(loader: DelegateLoader, assembly_path: A) -> Self {
+    pub fn new(loader: DelegateLoader<'a>, assembly_path: A) -> Self {
         Self {
             loader,
             assembly_path,
@@ -303,7 +306,7 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     ///  * `delegate_type_name`:
     ///     Assembly qualified delegate type name for the method signature.
     pub fn get_function_pointer(
-        &self,
+        &'a self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
         delegate_type_name: impl AsRef<PdCStr>,
@@ -329,7 +332,7 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
     ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
     pub fn get_function_pointer_with_default_signature(
-        &self,
+        &'a self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
     ) -> Result<MethodWithDefaultSignature, GetFunctionPointerError> {
@@ -356,7 +359,7 @@ impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     pub fn get_function_pointer_for_unmanaged_callers_only_method(
-        &self,
+        &'a self,
         type_name: impl AsRef<PdCStr>,
         method_name: impl AsRef<PdCStr>,
     ) -> Result<MethodWithUnknownSignature, GetFunctionPointerError> {
