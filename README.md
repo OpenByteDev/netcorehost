@@ -137,6 +137,11 @@ Examples for passing non-primitive parameters can be found in [examples/passing-
 
 <!-- cargo-sync-readme end -->
 
+## Related crates
+- [nethost-sys](https://crates.io/crates/nethost-sys) - bindings for the nethost library.
+- [hostfxr-sys](https://crates.io/crates/hostfxr-sys) - bindings for the hostfxr library.
+- [coreclr-hosting-shared](https://crates.io/crates/coreclr-hosting-shared) - shared bindings between [hostfxr-sys](https://crates.io/crates/hostfxr-sys) and [nethost-sys](https://crates.io/crates/nethost-sys).
+
 ## Additional Information
 - [Hosting layer APIs](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/hosting-layer-apis.md)
 - [Native hosting](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/native-hosting.md#runtime-properties)
