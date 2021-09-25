@@ -1,8 +1,9 @@
 use crate::{
     bindings::hostfxr::{
         get_function_pointer_fn, hostfxr_delegate_type, hostfxr_handle,
-        load_assembly_and_get_function_pointer_fn,
+        load_assembly_and_get_function_pointer_fn, wrapper::Hostfxr as HostfxrLib,
     },
+    dlopen::wrapper::Container,
     error::{HostingError, HostingResult, HostingSuccess},
     hostfxr::{AssemblyDelegateLoader, DelegateLoader, Hostfxr, MethodWithUnknownSignature},
     pdcstring::{PdCStr, PdCString},
@@ -14,6 +15,7 @@ use std::{
     marker::PhantomData,
     mem::{self, ManuallyDrop, MaybeUninit},
     ptr::{self, NonNull},
+    rc::Rc,
 };
 
 /// A marker struct indicating that the context was initialized with a runtime config.
@@ -54,13 +56,13 @@ impl From<HostfxrHandle> for hostfxr_handle {
 }
 
 /// State which hostfxr creates and maintains and represents a logical operation on the hosting components.
-pub struct HostfxrContext<'a, I> {
+pub struct HostfxrContext<I> {
     handle: HostfxrHandle,
-    hostfxr: &'a Hostfxr,
-    context_type: PhantomData<&'a I>,
+    hostfxr: Rc<Container<HostfxrLib>>,
+    context_type: PhantomData<I>,
 }
 
-impl<'a, I> HostfxrContext<'a, I> {
+impl<I> HostfxrContext<I> {
     /// Creates a new context from the given handle.
     ///
     /// # Safety
@@ -71,10 +73,10 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// [`initialize_for_dotnet_command_line`]: crate::hostfxr::Hostfxr::initialize_for_dotnet_command_line
     /// [`initialize_for_runtime_config`]: crate::hostfxr::Hostfxr::initialize_for_runtime_config
     #[must_use]
-    pub unsafe fn from_handle(handle: HostfxrHandle, hostfxr: &'a Hostfxr) -> Self {
+    pub unsafe fn from_handle(handle: HostfxrHandle, hostfxr: Hostfxr) -> Self {
         Self {
             handle,
-            hostfxr,
+            hostfxr: hostfxr.0,
             context_type: PhantomData,
         }
     }
@@ -88,7 +90,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// Gets the underlying handle to the hostfxr context and consume this context.
     #[must_use]
     pub fn into_handle(self) -> HostfxrHandle {
-        let this = mem::ManuallyDrop::new(self);
+        let this = ManuallyDrop::new(self);
         this.handle
     }
 
@@ -112,13 +114,13 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
     /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
     pub unsafe fn get_runtime_property_value_ref(
-        &'a self,
+        &self,
         name: impl AsRef<PdCStr>,
-    ) -> Result<&'a PdCStr, HostingError> {
+    ) -> Result<&PdCStr, HostingError> {
         let mut value = MaybeUninit::uninit();
 
         let result = unsafe {
-            self.hostfxr.lib.hostfxr_get_runtime_property_value(
+            self.hostfxr.hostfxr_get_runtime_property_value(
                 self.handle.as_raw(),
                 name.as_ref().as_ptr(),
                 value.as_mut_ptr(),
@@ -136,7 +138,7 @@ impl<'a, I> HostfxrContext<'a, I> {
         value: impl AsRef<PdCStr>,
     ) -> Result<HostingSuccess, HostingError> {
         let result = unsafe {
-            self.hostfxr.lib.hostfxr_set_runtime_property_value(
+            self.hostfxr.hostfxr_set_runtime_property_value(
                 self.handle.as_raw(),
                 name.as_ref().as_ptr(),
                 value.as_ref().as_ptr(),
@@ -151,7 +153,7 @@ impl<'a, I> HostfxrContext<'a, I> {
         name: impl AsRef<PdCStr>,
     ) -> Result<HostingSuccess, HostingError> {
         let result = unsafe {
-            self.hostfxr.lib.hostfxr_set_runtime_property_value(
+            self.hostfxr.hostfxr_set_runtime_property_value(
                 self.handle.as_raw(),
                 name.as_ref().as_ptr(),
                 ptr::null(),
@@ -173,12 +175,12 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
     /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
     pub unsafe fn get_runtime_properties_ref(
-        &'a self,
-    ) -> Result<(Vec<&'a PdCStr>, Vec<&'a PdCStr>), HostingError> {
+        &self,
+    ) -> Result<(Vec<&PdCStr>, Vec<&PdCStr>), HostingError> {
         // get count
         let mut count = MaybeUninit::uninit();
         let mut result = unsafe {
-            self.hostfxr.lib.hostfxr_get_runtime_properties(
+            self.hostfxr.hostfxr_get_runtime_properties(
                 self.handle.as_raw(),
                 count.as_mut_ptr(),
                 ptr::null_mut(),
@@ -197,7 +199,7 @@ impl<'a, I> HostfxrContext<'a, I> {
         let mut keys = Vec::with_capacity(count);
         let mut values = Vec::with_capacity(count);
         result = unsafe {
-            self.hostfxr.lib.hostfxr_get_runtime_properties(
+            self.hostfxr.hostfxr_get_runtime_properties(
                 self.handle.as_raw(),
                 &mut count,
                 keys.as_mut_ptr(),
@@ -245,8 +247,8 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
     /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
     pub unsafe fn get_runtime_properties_ref_iter(
-        &'a self,
-    ) -> Result<impl Iterator<Item = (&'a PdCStr, &'a PdCStr)>, HostingError> {
+        &self,
+    ) -> Result<impl Iterator<Item = (&PdCStr, &PdCStr)>, HostingError> {
         unsafe { self.get_runtime_properties_ref() }
             .map(|(keys, values)| keys.into_iter().zip(values.into_iter()))
     }
@@ -272,8 +274,8 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
     /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
     pub unsafe fn get_runtime_properties_ref_as_map(
-        &'a self,
-    ) -> Result<HashMap<&'a PdCStr, &'a PdCStr>, HostingError> {
+        &self,
+    ) -> Result<HashMap<&PdCStr, &PdCStr>, HostingError> {
         unsafe { self.get_runtime_properties_ref() }
             .map(|(keys, values)| keys.into_iter().zip(values.into_iter()).collect())
     }
@@ -308,7 +310,7 @@ impl<'a, I> HostfxrContext<'a, I> {
     ) -> Result<MethodWithUnknownSignature, HostingError> {
         let mut delegate = MaybeUninit::uninit();
         let result = unsafe {
-            self.hostfxr.lib.hostfxr_get_runtime_delegate(
+            self.hostfxr.hostfxr_get_runtime_delegate(
                 self.handle.as_raw(),
                 r#type,
                 delegate.as_mut_ptr(),
@@ -342,6 +344,7 @@ impl<'a, I> HostfxrContext<'a, I> {
             get_load_assembly_and_get_function_pointer: self
                 .get_load_assembly_and_get_function_pointer_delegate()?,
             get_function_pointer: self.get_get_function_pointer_delegate()?,
+            phantom: PhantomData,
         })
     }
 
@@ -358,31 +361,35 @@ impl<'a, I> HostfxrContext<'a, I> {
     /// Closes an initialized host context.
     ///
     /// This method is automatically called on drop, but can be explicitely called to handle errors during closing.
-    pub fn close(self) -> Result<HostingSuccess, HostingError> {
-        let this = ManuallyDrop::new(self);
-        unsafe { this._close() }
+    pub fn close(mut self) -> Result<HostingSuccess, HostingError> {
+        let result = unsafe { self._close() };
+        unsafe { ptr::drop_in_place(&mut self.hostfxr) };
+        unsafe { ptr::drop_in_place(&mut self.context_type) };
+        unsafe { ptr::drop_in_place(&mut self.handle) };
+        mem::forget(self);
+        result
     }
 
     /// Internal non-consuming version of [`close`](HostfxrContext::close)
     unsafe fn _close(&self) -> Result<HostingSuccess, HostingError> {
-        let result = unsafe { self.hostfxr.lib.hostfxr_close(self.handle.as_raw()) };
+        let result = unsafe { self.hostfxr.hostfxr_close(self.handle.as_raw()) };
         HostingResult::from(result).into_result()
     }
 }
 
-impl<'a> HostfxrContext<'a, InitializedForCommandLine> {
+impl HostfxrContext<InitializedForCommandLine> {
     /// Load the dotnet runtime and run the application.
     ///
     /// # Return value
     /// If the app was successfully run, the exit code of the application. Otherwise, the error code result.
     #[must_use]
     pub fn run_app(self) -> AppOrHostingResult {
-        let result = unsafe { self.hostfxr.lib.hostfxr_run_app(self.handle.as_raw()) };
+        let result = unsafe { self.hostfxr.hostfxr_run_app(self.handle.as_raw()) };
         AppOrHostingResult::from(result)
     }
 }
 
-impl<I> Drop for HostfxrContext<'_, I> {
+impl<I> Drop for HostfxrContext<I> {
     fn drop(&mut self) {
         let _ = unsafe { self._close() };
     }

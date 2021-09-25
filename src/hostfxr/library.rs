@@ -1,27 +1,26 @@
 use crate::{
-    bindings::hostfxr::{hostfxr_handle, hostfxr_initialize_parameters, wrapper::Hostfxr as HostfxrLib},
+    bindings::hostfxr::{
+        hostfxr_handle, hostfxr_initialize_parameters, wrapper::Hostfxr as HostfxrLib,
+    },
+    dlopen::wrapper::Container,
     error::{HostingError, HostingResult},
     hostfxr::{
         HostfxrContext, HostfxrHandle, InitializedForCommandLine, InitializedForRuntimeConfig,
     },
     nethost::LoadHostfxrError,
     pdcstring::PdCStr,
-    dlopen::wrapper::Container
 };
-use std::{convert::TryInto, ffi::OsStr, mem::MaybeUninit, ptr};
+use derive_more::From;
+use std::{convert::TryInto, ffi::OsStr, mem::MaybeUninit, ptr, rc::Rc};
 
 /// A struct representing a loaded hostfxr library.
-pub struct Hostfxr {
-    pub(crate) lib: Container<HostfxrLib>,
-}
-
-impl !Sync for Hostfxr {}
-impl !Send for Hostfxr {}
+#[derive(Clone, From)]
+pub struct Hostfxr(pub Rc<Container<HostfxrLib>>);
 
 impl Hostfxr {
     /// Loads the hostfxr library from the given path.
     pub fn load_from_path(path: impl AsRef<OsStr>) -> Result<Self, crate::dlopen::Error> {
-        unsafe { Container::load(path) }.map(|lib| Self { lib })
+        unsafe { Container::load(path) }.map(Rc::new).map(Self)
     }
 
     /// Locates the hostfxr library using [`nethost`](crate::nethost) and loads it.
@@ -231,7 +230,7 @@ impl Hostfxr {
         let mut hostfxr_handle = MaybeUninit::<hostfxr_handle>::uninit();
 
         let result = unsafe {
-            self.lib.hostfxr_initialize_for_dotnet_command_line(
+            self.0.hostfxr_initialize_for_dotnet_command_line(
                 args.len().try_into().unwrap(),
                 args.as_ptr().cast(),
                 parameters,
@@ -244,7 +243,7 @@ impl Hostfxr {
         Ok(unsafe {
             HostfxrContext::from_handle(
                 HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()),
-                self,
+                self.clone(),
             )
         })
     }
@@ -353,7 +352,7 @@ impl Hostfxr {
         let mut hostfxr_handle = MaybeUninit::uninit();
 
         let result = unsafe {
-            self.lib.hostfxr_initialize_for_runtime_config(
+            self.0.hostfxr_initialize_for_runtime_config(
                 runtime_config_path.as_ref().as_ptr(),
                 parameters,
                 hostfxr_handle.as_mut_ptr(),
@@ -365,7 +364,7 @@ impl Hostfxr {
         Ok(unsafe {
             HostfxrContext::from_handle(
                 HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()),
-                self,
+                self.clone(),
             )
         })
     }
