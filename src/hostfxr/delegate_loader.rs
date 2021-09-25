@@ -401,7 +401,6 @@ pub enum GetFunctionPointerError {
 }
 
 impl GetFunctionPointerError {
-    #[allow(clippy::cast_sign_loss)]
     pub fn from_status_code(code: i32) -> Result<HostingSuccess, Self> {
         let code = code as u32;
         match HostingResult::known_from_status_code(code) {

@@ -6,7 +6,9 @@
     clippy::missing_panics_doc,
     clippy::module_name_repetitions,
     clippy::multiple_crate_versions,
-    clippy::doc_markdown
+    clippy::doc_markdown,
+    clippy::cast_sign_loss,
+    clippy::shadow_unrelated
 )]
 
 //! A Rust library for hosting the dotnet core runtime.

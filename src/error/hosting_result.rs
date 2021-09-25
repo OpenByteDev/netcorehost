@@ -87,7 +87,6 @@ impl From<u32> for HostingResult {
 }
 
 impl From<i32> for HostingResult {
-    #[allow(clippy::cast_sign_loss)]
     fn from(code: i32) -> Self {
         Self::from(code as u32)
     }
