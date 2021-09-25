@@ -1,6 +1,6 @@
 use crate::{
     bindings::{nethost::get_hostfxr_parameters, MAX_PATH},
-    error::{HostingError, HostingResult},
+    error::{HostingError, HostingResult, HostingSuccess},
     hostfxr::Hostfxr,
     pdcstring::PdCStr,
 };
@@ -44,10 +44,32 @@ unsafe fn get_hostfxr_path_with_parameters(
             parameters,
         )
     };
-    HostingResult::from(result).into_result()?;
 
-    let path_slice = unsafe { MaybeUninit::slice_assume_init_ref(&path_buffer[..path_length]) };
-    Ok(unsafe { PdCStr::from_slice_with_nul_unchecked(path_slice) }.to_os_string())
+    match HostingResult::from(result).into_result() {
+        Ok(_) => {
+            let path_slice =
+                unsafe { MaybeUninit::slice_assume_init_ref(&path_buffer[..path_length]) };
+            Ok(unsafe { PdCStr::from_slice_with_nul_unchecked(path_slice) }.to_os_string())
+        }
+        Err(HostingError::HostApiBufferTooSmall) => {
+            let mut path_vec = Vec::new();
+            path_vec.resize(path_length, MaybeUninit::uninit());
+
+            let result = unsafe {
+                crate::bindings::nethost::get_hostfxr_path(
+                    path_vec[0].as_mut_ptr(),
+                    &mut path_length,
+                    parameters,
+                )
+            };
+            assert_eq!(result as u32, HostingSuccess::Success.value());
+
+            let path_slice =
+                unsafe { MaybeUninit::slice_assume_init_ref(&path_vec[..path_length]) };
+            Ok(unsafe { PdCStr::from_slice_with_nul_unchecked(path_slice) }.to_os_string())
+        }
+        Err(err) => Err(err),
+    }
 }
 
 /// Retrieves the path to the hostfxr library and loads it.
