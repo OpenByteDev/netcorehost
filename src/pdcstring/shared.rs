@@ -9,7 +9,7 @@ use std::{
 use super::{NulError, PdCStrInner, PdCStringInner, PdUChar};
 
 /// A platform-dependent c-like string type for interacting with the `hostfxr` and `nethost` API.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 #[repr(transparent)]
 pub struct PdCString(pub(crate) PdCStringInner);
 
@@ -63,12 +63,6 @@ impl Deref for PdCString {
 impl DerefMut for PdCString {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.borrow_mut()
-    }
-}
-
-impl Default for PdCString {
-    fn default() -> Self {
-        Self(PdCStringInner::default())
     }
 }
 
