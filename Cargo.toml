@@ -18,6 +18,7 @@ derive_more = { version = "0.99", default-features = false, features = ["deref",
 nethost-sys = { version = "0.2", optional = true, default-features = false }
 hostfxr-sys = "0.1"
 coreclr-hosting-shared = "0.1"
+destruct-drop = "0.1.0"
 
 [target.'cfg(windows)'.dependencies]
 widestring = "0.4"

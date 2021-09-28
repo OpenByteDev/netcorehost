@@ -18,6 +18,8 @@ use std::{
     rc::Rc,
 };
 
+use destruct_drop::DestructDrop;
+
 /// A marker struct indicating that the context was initialized with a runtime config.
 /// This means that it is not possible to run the application associated with the context.
 pub struct InitializedForRuntimeConfig;
@@ -56,6 +58,7 @@ impl From<HostfxrHandle> for hostfxr_handle {
 }
 
 /// State which hostfxr creates and maintains and represents a logical operation on the hosting components.
+#[derive(DestructDrop)]
 pub struct HostfxrContext<I> {
     handle: HostfxrHandle,
     hostfxr: Rc<Container<HostfxrLib>>,
@@ -361,12 +364,9 @@ impl<I> HostfxrContext<I> {
     /// Closes an initialized host context.
     ///
     /// This method is automatically called on drop, but can be explicitely called to handle errors during closing.
-    pub fn close(mut self) -> Result<HostingSuccess, HostingError> {
+    pub fn close(self) -> Result<HostingSuccess, HostingError> {
         let result = unsafe { self._close() };
-        unsafe { ptr::drop_in_place(&mut self.hostfxr) };
-        unsafe { ptr::drop_in_place(&mut self.context_type) };
-        unsafe { ptr::drop_in_place(&mut self.handle) };
-        mem::forget(self);
+        self.destruct_drop();
         result
     }
 
