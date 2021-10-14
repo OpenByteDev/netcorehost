@@ -15,10 +15,10 @@ keywords = ["nethost", "hostfxr", "dotnet", "bindings", "coreclr"]
 num_enum = "0.5"
 thiserror = "1.0"
 derive_more = { version = "0.99", default-features = false, features = ["deref", "from", "display"] }
-nethost-sys = { version = "0.2", optional = true, default-features = false }
-hostfxr-sys = "0.1"
-coreclr-hosting-shared = "0.1"
-destruct-drop = "0.1.0"
+nethost-sys = { version = "0.2.3", optional = true, default-features = false }
+hostfxr-sys = "0.1.2"
+coreclr-hosting-shared = "0.1.2"
+destruct-drop = "0.1"
 
 [target.'cfg(windows)'.dependencies]
 widestring = "0.5"
