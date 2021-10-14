@@ -108,7 +108,9 @@ impl PdCStr {
 // methods not used by this crate
 impl PdCStr {
     // TODO: use abstract error type
-    pub fn from_slice_with_nul(slice: &[u16]) -> Result<&Self, widestring::error::MissingNulTerminator> {
+    pub fn from_slice_with_nul(
+        slice: &[u16],
+    ) -> Result<&Self, widestring::error::MissingNulTerminator> {
         U16CStr::from_slice_truncate(slice).map(PdCStr::from_inner)
     }
     #[must_use]
