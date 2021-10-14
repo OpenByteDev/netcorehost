@@ -58,7 +58,7 @@ impl FromStr for PdCString {
 // methods not used by this crate
 impl PdCString {
     pub fn from_vec(vec: impl Into<Vec<u16>>) -> Result<Self, NulError> {
-        let inner = U16CString::new(vec)?;
+        let inner = U16CString::from_vec(vec)?;
         Ok(PdCString::from_inner(inner))
     }
     #[must_use]
@@ -96,7 +96,7 @@ impl PdCStr {
     }
     #[must_use]
     pub unsafe fn from_slice_with_nul_unchecked(slice: &[u16]) -> &Self {
-        let inner = unsafe { U16CStr::from_slice_with_nul_unchecked(slice) };
+        let inner = unsafe { U16CStr::from_slice_unchecked(slice) };
         PdCStr::from_inner(inner)
     }
     #[must_use]
@@ -108,8 +108,8 @@ impl PdCStr {
 // methods not used by this crate
 impl PdCStr {
     // TODO: use abstract error type
-    pub fn from_slice_with_nul(slice: &[u16]) -> Result<&Self, widestring::MissingNulError<u16>> {
-        U16CStr::from_slice_with_nul(slice).map(|s| PdCStr::from_inner(s))
+    pub fn from_slice_with_nul(slice: &[u16]) -> Result<&Self, widestring::error::MissingNulTerminator> {
+        U16CStr::from_slice_truncate(slice).map(PdCStr::from_inner)
     }
     #[must_use]
     pub fn to_slice(&self) -> &[u16] {
