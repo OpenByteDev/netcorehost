@@ -11,9 +11,9 @@
     clippy::shadow_unrelated
 )]
 
-//! A Rust library for hosting the dotnet core runtime.
+//! A Rust library for hosting the .NET Core runtime.
 //!
-//! It utilizes the dotnet core hosting API to load and execute managed code from withing the current process.
+//! It utilizes the .NET Core hosting API to load and execute managed code from withing the current process.
 //!
 //! # Usage
 //! ## Running an application

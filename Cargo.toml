@@ -1,7 +1,7 @@
 [package]
 name = "netcorehost"
 version = "0.7.2"
-description = "A Rust library for hosting .NET Core applications."
+description = "A Rust library for hosting the .NET Core runtime."
 readme = "README.md"
 repository = "https://github.com/OpenByteDev/netcorehost"
 documentation = "https://docs.rs/netcorehost"
@@ -38,7 +38,7 @@ default = ["nethost", "nethost-download"]
 nethost-download = ["nethost-sys/download-nuget"]
 nethost = ["nethost-sys"]
 
-# Prevent downloading nethost lib when building docs on docs.rs.
+# Prevent downloading nethost library when building on docs.rs.
 [package.metadata.docs.rs]
 features = ["nethost"]
 no-default-features = true
