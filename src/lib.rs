@@ -156,6 +156,10 @@
 //! ## Passing complex parameters
 //! Examples for passing non-primitive parameters can be found in [examples/passing-parameters](https://github.com/OpenByteDev/netcorehost/tree/master/examples/passing-parameters).
 //!
+//! # Features
+//! - `nethost` - Links against nethost and allows for automatic detection of the hostfxr library.
+//! - `download-nethost` - Automatically downloads the latest nethost binary from [NuGet](https://www.nuget.org/packages/Microsoft.NETCore.DotNetHost/).
+//!
 //! [`UnmanagedCallersOnly`]: <https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute>
 //! [`AssemblyDelegateLoader`]: crate::hostfxr::AssemblyDelegateLoader
 //! [`AssemblyDelegateLoader::get_function_pointer_with_default_signature`]: crate::hostfxr::AssemblyDelegateLoader::get_function_pointer_with_default_signature

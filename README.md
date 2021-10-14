@@ -135,7 +135,12 @@ The full examples can be found in [examples/call-managed-function](https://githu
 ### Passing complex parameters
 Examples for passing non-primitive parameters can be found in [examples/passing-parameters](https://github.com/OpenByteDev/netcorehost/tree/master/examples/passing-parameters).
 
+## Features
+- `nethost` - Links against nethost and allows for automatic detection of the hostfxr library.
+- `download-nethost` - Automatically downloads the latest nethost binary from [NuGet](https://www.nuget.org/packages/Microsoft.NETCore.DotNetHost/).
+
 <!-- cargo-sync-readme end -->
+
 
 ## Related crates
 - [nethost-sys](https://crates.io/crates/nethost-sys) - bindings for the nethost library.
