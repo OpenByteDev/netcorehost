@@ -37,6 +37,7 @@ widestring = "0.5"
 default = ["nethost", "nethost-download"]
 nethost-download = ["nethost-sys/download-nuget"]
 nethost = ["nethost-sys"]
+nightly = []
 
 # Prevent downloading nethost library when building on docs.rs.
 [package.metadata.docs.rs]
