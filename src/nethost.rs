@@ -4,7 +4,7 @@ use crate::{
     hostfxr::Hostfxr,
     pdcstring::{self, PdCStr},
 };
-use std::{ffi::OsString, ptr};
+use std::{ffi::OsString, mem::MaybeUninit, ptr};
 use thiserror::Error;
 
 /// Gets the path to the hostfxr library.
@@ -34,7 +34,7 @@ pub fn get_hostfxr_path_with_dotnet_root<P: AsRef<PdCStr>>(
 unsafe fn get_hostfxr_path_with_parameters(
     parameters: *const get_hostfxr_parameters,
 ) -> Result<OsString, HostingError> {
-    let mut path_buffer = [0; MAX_PATH];
+    let mut path_buffer = MaybeUninit::uninit_array::<MAX_PATH>();
     let mut path_length = path_buffer.len();
 
     let result = unsafe {
@@ -47,23 +47,25 @@ unsafe fn get_hostfxr_path_with_parameters(
 
     match HostingResult::from(result).into_result() {
         Ok(_) => {
-            let path_slice = &path_buffer[..path_length];
+            let path_slice =
+                unsafe { MaybeUninit::slice_assume_init_ref(&path_buffer[..path_length]) };
             Ok(unsafe { PdCStr::from_slice_with_nul_unchecked(path_slice) }.to_os_string())
         }
         Err(HostingError::HostApiBufferTooSmall) => {
-            let mut path_vec: Vec<pdcstring::PdUChar> = Vec::new();
-            path_vec.resize(path_length, 0);
+            let mut path_vec = Vec::new();
+            path_vec.resize(path_length, MaybeUninit::<pdcstring::PdUChar>::uninit());
 
             let result = unsafe {
                 crate::bindings::nethost::get_hostfxr_path(
-                    &mut path_vec[0],
+                    path_vec[0].as_mut_ptr().cast(),
                     &mut path_length,
                     parameters,
                 )
             };
             assert_eq!(result as u32, HostingSuccess::Success.value());
 
-            let path_slice = &path_vec[..path_length];
+            let path_slice =
+                unsafe { MaybeUninit::slice_assume_init_ref(&path_vec[..path_length]) };
             Ok(unsafe { PdCStr::from_slice_with_nul_unchecked(path_slice) }.to_os_string())
         }
         Err(err) => Err(err),
