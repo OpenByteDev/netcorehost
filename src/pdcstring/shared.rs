@@ -33,16 +33,32 @@ impl PdCStr {
         // Safe because PdCStr has the same layout as PdCStrInner
         unsafe { &*(inner as *const PdCStrInner as *const PdCStr) }
     }
+    pub(crate) fn from_inner_mut(inner: &mut PdCStrInner) -> &mut Self {
+        // Safety:
+        // Safe because PdCStr has the same layout as PdCStrInner
+        unsafe { &mut *(inner as *mut PdCStrInner as *mut PdCStr) }
+    }
     pub(crate) fn to_inner(&self) -> &PdCStrInner {
         // Safety:
         // Safe because PdCStr has the same layout as PdCStrInner
         unsafe { &*(self as *const PdCStr as *const PdCStrInner) }
+    }
+    pub(crate) fn to_inner_mut(&mut self) -> &mut PdCStrInner {
+        // Safety:
+        // Safe because PdCStr has the same layout as PdCStrInner
+        unsafe { &mut *(self as *mut PdCStr as *mut PdCStrInner) }
     }
 }
 
 impl Borrow<PdCStr> for PdCString {
     fn borrow(&self) -> &PdCStr {
         PdCStr::from_inner(self.0.borrow())
+    }
+}
+
+impl BorrowMut<PdCStr> for PdCString {
+    fn borrow_mut(&mut self) -> &mut PdCStr {
+        PdCStr::from_inner_mut(self.0.borrow_mut())
     }
 }
 
@@ -90,9 +106,21 @@ impl<'a> From<&'a PdCStrInner> for &'a PdCStr {
     }
 }
 
+impl<'a> From<&'a mut PdCStrInner> for &'a mut PdCStr {
+    fn from(s: &'a mut PdCStrInner) -> Self {
+        PdCStr::from_inner_mut(s)
+    }
+}
+
 impl<'a> From<&'a PdCStr> for &'a PdCStrInner {
     fn from(s: &'a PdCStr) -> Self {
         s.to_inner()
+    }
+}
+
+impl<'a> From<&'a mut PdCStr> for &'a mut PdCStrInner {
+    fn from(s: &'a mut PdCStr) -> Self {
+        s.to_inner_mut()
     }
 }
 
