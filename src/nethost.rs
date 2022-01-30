@@ -2,7 +2,7 @@ use crate::{
     bindings::{nethost::get_hostfxr_parameters, MAX_PATH},
     error::{HostingError, HostingResult, HostingSuccess},
     hostfxr::Hostfxr,
-    pdcstring::{self, PdCStr},
+    pdcstring::{self, PdCStr, PdUChar},
 };
 use std::{ffi::OsString, mem::MaybeUninit, ptr};
 use thiserror::Error;
@@ -34,7 +34,7 @@ pub fn get_hostfxr_path_with_dotnet_root<P: AsRef<PdCStr>>(
 unsafe fn get_hostfxr_path_with_parameters(
     parameters: *const get_hostfxr_parameters,
 ) -> Result<OsString, HostingError> {
-    let mut path_buffer = maybe_uninit_uninit_array::<MAX_PATH, u16>();
+    let mut path_buffer = maybe_uninit_uninit_array::<PdUChar, MAX_PATH>();
     let mut path_length = path_buffer.len();
 
     let result = unsafe {
@@ -122,7 +122,7 @@ const unsafe fn maybe_uninit_slice_assume_init_ref<T>(slice: &[MaybeUninit<T>]) 
     }
 }
 
-const fn maybe_uninit_uninit_array<const LEN: usize, T>() -> [MaybeUninit<T>; LEN] {
+fn maybe_uninit_uninit_array<T, const LEN: usize>() -> [MaybeUninit<T>; LEN] {
     #[cfg(nightly)]
     unsafe {
         MaybeUninit::uninit_array::<MAX_PATH, T>()
