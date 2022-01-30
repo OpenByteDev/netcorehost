@@ -1,5 +1,3 @@
-#![feature(option_result_unwrap_unchecked)]
-
 use netcorehost::{hostfxr::GetFunctionPointerError, nethost, pdcstr};
 
 #[path = "common.rs"]
