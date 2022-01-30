@@ -34,7 +34,7 @@ pub fn get_hostfxr_path_with_dotnet_root<P: AsRef<PdCStr>>(
 unsafe fn get_hostfxr_path_with_parameters(
     parameters: *const get_hostfxr_parameters,
 ) -> Result<OsString, HostingError> {
-    let mut path_buffer = MaybeUninit::uninit_array::<MAX_PATH>();
+    let mut path_buffer = maybe_uninit_uninit_array::<MAX_PATH, u16>();
     let mut path_length = path_buffer.len();
 
     let result = unsafe {
@@ -48,7 +48,7 @@ unsafe fn get_hostfxr_path_with_parameters(
     match HostingResult::from(result).into_result() {
         Ok(_) => {
             let path_slice =
-                unsafe { MaybeUninit::slice_assume_init_ref(&path_buffer[..path_length]) };
+                unsafe { maybe_uninit_slice_assume_init_ref(&path_buffer[..path_length]) };
             Ok(unsafe { PdCStr::from_slice_with_nul_unchecked(path_slice) }.to_os_string())
         }
         Err(HostingError::HostApiBufferTooSmall) => {
@@ -65,7 +65,7 @@ unsafe fn get_hostfxr_path_with_parameters(
             assert_eq!(result as u32, HostingSuccess::Success.value());
 
             let path_slice =
-                unsafe { MaybeUninit::slice_assume_init_ref(&path_vec[..path_length]) };
+                unsafe { maybe_uninit_slice_assume_init_ref(&path_vec[..path_length]) };
             Ok(unsafe { PdCStr::from_slice_with_nul_unchecked(path_slice) }.to_os_string())
         }
         Err(err) => Err(err),
@@ -109,4 +109,26 @@ pub enum LoadHostfxrError {
     /// An error occured while loading the hostfxr library.
     #[error(transparent)]
     DlOpen(#[from] crate::dlopen::Error),
+}
+
+const unsafe fn maybe_uninit_slice_assume_init_ref<T>(slice: &[MaybeUninit<T>]) -> &[T] {
+    #[cfg(nightly)]
+    unsafe {
+        MaybeUninit::slice_assume_init_ref(slice)
+    }
+    #[cfg(not(nightly))]
+    unsafe {
+        &*(slice as *const [MaybeUninit<T>] as *const [T])
+    }
+}
+
+const fn maybe_uninit_uninit_array<const LEN: usize, T>() -> [MaybeUninit<T>; LEN] {
+    #[cfg(nightly)]
+    unsafe {
+        MaybeUninit::uninit_array::<MAX_PATH, T>()
+    }
+    #[cfg(not(nightly))]
+    unsafe {
+        MaybeUninit::<[MaybeUninit<T>; LEN]>::uninit().assume_init()
+    }
 }

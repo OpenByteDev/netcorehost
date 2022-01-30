@@ -1,4 +1,7 @@
-#![feature(maybe_uninit_uninit_array, maybe_uninit_slice, try_trait_v2)]
+#![cfg_attr(
+    feature = "nightly",
+    feature(try_trait_v2, maybe_uninit_uninit_array, maybe_uninit_slice)
+)]
 #![warn(clippy::pedantic, clippy::cargo, unsafe_op_in_unsafe_fn)]
 #![allow(
     clippy::missing_safety_doc,
