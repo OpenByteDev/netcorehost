@@ -16,6 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        toolchain: ["nightly", "stable"]
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
@@ -27,11 +28,11 @@ jobs:
             target: x86_64-apple-darwin
     steps:
     - uses: actions/checkout@v2
-    - name: Install latest nightly
+    - name: Install latest ${{ matrix.toolchain }}
       uses: actions-rs/toolchain@v1
       with:
           target: ${{ matrix.target }}
-          toolchain: nightly
+          toolchain: ${{ matrix.toolchain }}
           override: true
     - name: Build
       run: cargo build --target ${{ matrix.target }}
