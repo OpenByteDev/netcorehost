@@ -1,4 +1,4 @@
-use netcorehost::{nethost, pdcstr};
+use netcorehost::{nethost, pdcstr, cast_managed_fn};
 
 #[path = "../helpers/dotnet-build.rs"]
 mod dotnet_build;
@@ -21,8 +21,8 @@ fn main() {
             pdcstr!("ExampleProject.Program+HelloWorld1Delegate, ExampleProject"),
         )
         .unwrap();
-    let hello_world1: unsafe extern "system" fn() = unsafe { std::mem::transmute(hello_world1) };
-    unsafe { hello_world1() };
+    let hello_world1 = unsafe { cast_managed_fn!(hello_world1, fn()) };
+    hello_world1();
 
     let hello_world2 = delegate_loader
         .get_function_pointer_for_unmanaged_callers_only_method(
@@ -30,8 +30,8 @@ fn main() {
             pdcstr!("HelloWorld2"),
         )
         .unwrap();
-    let hello_world2: unsafe extern "system" fn() = unsafe { std::mem::transmute(hello_world2) };
-    unsafe { hello_world2() };
+    let hello_world2 = unsafe { cast_managed_fn!(hello_world2, fn()) };
+    hello_world2();
 
     let hello_world3 = delegate_loader
         .get_function_pointer_with_default_signature(
