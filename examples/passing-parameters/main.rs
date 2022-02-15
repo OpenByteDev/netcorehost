@@ -1,4 +1,6 @@
-use netcorehost::{hostfxr::AssemblyDelegateLoader, nethost, pdcstr, pdcstring::PdCStr, cast_managed_fn};
+use netcorehost::{
+    cast_managed_fn, hostfxr::AssemblyDelegateLoader, nethost, pdcstr, pdcstring::PdCStr,
+};
 
 #[path = "../helpers/dotnet-build.rs"]
 mod dotnet_build;
@@ -27,7 +29,8 @@ fn print_utf8_example<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoader
             pdcstr!("PrintUtf8"),
         )
         .unwrap();
-    let print_utf8 = unsafe { cast_managed_fn!(print_utf8, fn(text_ptr: *const u8, text_length: i32)) };
+    let print_utf8 =
+        unsafe { cast_managed_fn!(print_utf8, fn(text_ptr: *const u8, text_length: i32)) };
     let test_string = "Hello World!";
     print_utf8(test_string.as_ptr(), test_string.len() as i32);
 }
@@ -39,7 +42,8 @@ fn print_utf16_example<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoade
             pdcstr!("PrintUtf16"),
         )
         .unwrap();
-    let print_utf16 = unsafe { cast_managed_fn!(print_utf16, fn(text_ptr: *const u16, text_length: i32)) };
+    let print_utf16 =
+        unsafe { cast_managed_fn!(print_utf16, fn(text_ptr: *const u16, text_length: i32)) };
     let test_string = widestring::U16String::from_str("Hello World!");
     print_utf16(test_string.as_ptr(), test_string.len() as i32);
 }
@@ -51,15 +55,19 @@ fn is_palindrom_example<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoad
             pdcstr!("IsPalindrom"),
         )
         .unwrap();
-    let is_palindrom = unsafe { cast_managed_fn!(is_palindrom, fn(text_ptr: *const u16, text_length: i32) -> i32) };
+    let is_palindrom = unsafe {
+        cast_managed_fn!(
+            is_palindrom,
+            fn(text_ptr: *const u16, text_length: i32) -> i32
+        )
+    };
     for s in ["Racecar", "stats", "hello", "test"].iter() {
         let widestring = widestring::U16String::from_str(s);
-        let palindrom_answer =
-            if is_palindrom(widestring.as_ptr(), widestring.len() as i32) != 0 {
-                "Yes"
-            } else {
-                "No"
-            };
+        let palindrom_answer = if is_palindrom(widestring.as_ptr(), widestring.len() as i32) != 0 {
+            "Yes"
+        } else {
+            "No"
+        };
         println!("Is '{}' a palindrom? {}!", s, palindrom_answer);
     }
 }

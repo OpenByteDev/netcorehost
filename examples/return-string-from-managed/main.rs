@@ -1,7 +1,15 @@
 use core::slice;
-use std::{ffi::{CString, CStr}, os::raw::c_char, mem::{self, MaybeUninit}, string::FromUtf16Error, str::Utf8Error};
+use std::{
+    ffi::{CStr, CString},
+    mem::{self, MaybeUninit},
+    os::raw::c_char,
+    str::Utf8Error,
+    string::FromUtf16Error,
+};
 
-use netcorehost::{hostfxr::AssemblyDelegateLoader, nethost, pdcstr, pdcstring::PdCStr, cast_managed_fn};
+use netcorehost::{
+    cast_managed_fn, hostfxr::AssemblyDelegateLoader, nethost, pdcstr, pdcstring::PdCStr,
+};
 
 #[path = "../helpers/dotnet-build.rs"]
 mod dotnet_build;
@@ -24,14 +32,21 @@ fn main() {
 }
 
 // Method 1: using CString
-fn print_string_from_csharp_using_c_string<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoader<A>) {
+fn print_string_from_csharp_using_c_string<A: AsRef<PdCStr>>(
+    delegate_loader: &AssemblyDelegateLoader<A>,
+) {
     let set_copy_to_c_string = delegate_loader
         .get_function_pointer_for_unmanaged_callers_only_method(
             pdcstr!("ExampleProject.Method1, ExampleProject"),
             pdcstr!("SetCopyToCStringFunctionPtr"),
         )
         .unwrap();
-    let set_copy_to_c_string = unsafe { cast_managed_fn!(set_copy_to_c_string, fn(f: extern "system" fn(*const u16, i32) -> *mut c_char)) };
+    let set_copy_to_c_string = unsafe {
+        cast_managed_fn!(
+            set_copy_to_c_string,
+            fn(f: extern "system" fn(*const u16, i32) -> *mut c_char)
+        )
+    };
     set_copy_to_c_string(copy_to_c_string);
 
     let get_name = delegate_loader
@@ -57,7 +72,9 @@ pub extern "system" fn copy_to_c_string(ptr: *const u16, length: i32) -> *mut c_
 }
 
 // Method 2: using GCHandle
-fn print_string_from_csharp_using_unmanaged_alloc<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoader<A>) {
+fn print_string_from_csharp_using_unmanaged_alloc<A: AsRef<PdCStr>>(
+    delegate_loader: &AssemblyDelegateLoader<A>,
+) {
     // one time setup
     let free_h_global = delegate_loader
         .get_function_pointer_for_unmanaged_callers_only_method(
@@ -67,7 +84,6 @@ fn print_string_from_csharp_using_unmanaged_alloc<A: AsRef<PdCStr>>(delegate_loa
         .unwrap();
     let free_h_global = unsafe { cast_managed_fn!(free_h_global, fn(*const u8)) };
     unsafe { FREE_H_GLOBAL = Some(free_h_global) };
-    
 
     // actual usage
     let get_name = delegate_loader
@@ -87,16 +103,13 @@ static mut FREE_H_GLOBAL: Option<extern "system" fn(*const u8)> = None;
 
 struct HGlobalString {
     ptr: *const u8,
-    len: usize
+    len: usize,
 }
 
 impl HGlobalString {
     pub unsafe fn from_h_global(ptr: *const u8) -> Self {
         let len = CStr::from_ptr(ptr.cast()).to_bytes().len();
-        Self {
-            ptr,
-            len
-        }
+        Self { ptr, len }
     }
     #[allow(dead_code)]
     pub fn as_bytes(&self) -> &[u8] {
@@ -120,7 +133,9 @@ impl Drop for HGlobalString {
 }
 
 // Method 3: using GCHandle
-fn print_string_from_csharp_using_gc_handle<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoader<A>) {
+fn print_string_from_csharp_using_gc_handle<A: AsRef<PdCStr>>(
+    delegate_loader: &AssemblyDelegateLoader<A>,
+) {
     // one time setup
     let free_gc_handle_string = delegate_loader
         .get_function_pointer_for_unmanaged_callers_only_method(
@@ -128,7 +143,8 @@ fn print_string_from_csharp_using_gc_handle<A: AsRef<PdCStr>>(delegate_loader: &
             pdcstr!("FreeGCHandleString"),
         )
         .unwrap();
-    let free_gc_handle_string = unsafe { cast_managed_fn!(free_gc_handle_string, fn(*const *const u16)) };
+    let free_gc_handle_string =
+        unsafe { cast_managed_fn!(free_gc_handle_string, fn(*const *const u16)) };
     unsafe { FREE_GC_HANDLE_STRING = Some(free_gc_handle_string) };
 
     let get_string_data_offset = delegate_loader
@@ -140,7 +156,7 @@ fn print_string_from_csharp_using_gc_handle<A: AsRef<PdCStr>>(delegate_loader: &
     let get_string_data_offset = unsafe { cast_managed_fn!(get_string_data_offset, fn() -> usize) };
     let string_data_offset = get_string_data_offset();
     unsafe { STRING_DATA_OFFSET = Some(string_data_offset) };
-    
+
     // actual usage
     let get_name = delegate_loader
         .get_function_pointer_for_unmanaged_callers_only_method(
@@ -167,7 +183,8 @@ impl GcHandleString {
     pub fn data_ptr(&self) -> *const u16 {
         // convert the handle pointer to the actual string pointer by removing the mark.
         let unmarked_ptr = (self.0 as usize & !1usize) as *const *const u16;
-        (unsafe { *unmarked_ptr } as usize + unsafe { STRING_DATA_OFFSET }.expect("string interop not init")) as *const u16
+        (unsafe { *unmarked_ptr } as usize
+            + unsafe { STRING_DATA_OFFSET }.expect("string interop not init")) as *const u16
     }
     pub fn len(&self) -> usize {
         // read the length of the string which is stored in front of the data.
@@ -192,9 +209,10 @@ impl Drop for GcHandleString {
     }
 }
 
-
 // Method 4: using rust allocate
-fn print_string_from_csharp_using_rust_allocate<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoader<A>) {
+fn print_string_from_csharp_using_rust_allocate<A: AsRef<PdCStr>>(
+    delegate_loader: &AssemblyDelegateLoader<A>,
+) {
     // one time setup
     let set_rust_allocate_memory = delegate_loader
         .get_function_pointer_for_unmanaged_callers_only_method(
@@ -202,7 +220,12 @@ fn print_string_from_csharp_using_rust_allocate<A: AsRef<PdCStr>>(delegate_loade
             pdcstr!("SetRustAllocateMemory"),
         )
         .unwrap();
-    let set_rust_allocate_memory = unsafe { cast_managed_fn!(set_rust_allocate_memory, fn(extern "system" fn(usize, *mut RawVec<u8>))) };
+    let set_rust_allocate_memory = unsafe {
+        cast_managed_fn!(
+            set_rust_allocate_memory,
+            fn(extern "system" fn(usize, *mut RawVec<u8>))
+        )
+    };
     set_rust_allocate_memory(rust_allocate_memory);
 
     // actual usage
@@ -213,22 +236,25 @@ fn print_string_from_csharp_using_rust_allocate<A: AsRef<PdCStr>>(delegate_loade
         )
         .unwrap();
     let get_name = unsafe { cast_managed_fn!(get_name, fn(*mut RawVec<u8>)) };
-    
+
     let mut name_raw_vec = MaybeUninit::uninit();
     get_name(name_raw_vec.as_mut_ptr());
     let name_raw_vec = unsafe { name_raw_vec.assume_init() };
-    let name_vec = unsafe { Vec::from_raw_parts(name_raw_vec.data, name_raw_vec.len, name_raw_vec.capacity) };
+    let name_vec =
+        unsafe { Vec::from_raw_parts(name_raw_vec.data, name_raw_vec.len, name_raw_vec.capacity) };
     let name = String::from_utf8(name_vec).unwrap();
     println!("{}", name);
 }
 
 extern "system" fn rust_allocate_memory(size: usize, vec: *mut RawVec<u8>) {
     let mut buf = Vec::<u8>::with_capacity(size);
-    unsafe { *vec = RawVec {
-        data: buf.as_mut_ptr(),
-        len: buf.len(),
-        capacity: buf.capacity(),
-    }};
+    unsafe {
+        *vec = RawVec {
+            data: buf.as_mut_ptr(),
+            len: buf.len(),
+            capacity: buf.capacity(),
+        }
+    };
     mem::forget(buf);
 }
 
@@ -236,5 +262,5 @@ extern "system" fn rust_allocate_memory(size: usize, vec: *mut RawVec<u8>) {
 struct RawVec<T> {
     data: *mut T,
     len: usize,
-    capacity: usize
+    capacity: usize,
 }

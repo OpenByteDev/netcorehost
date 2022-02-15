@@ -1,4 +1,4 @@
-use netcorehost::{nethost, pdcstr, cast_managed_fn};
+use netcorehost::{cast_managed_fn, nethost, pdcstr};
 
 #[path = "../helpers/dotnet-build.rs"]
 mod dotnet_build;
