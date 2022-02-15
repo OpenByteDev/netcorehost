@@ -98,6 +98,7 @@ impl HGlobalString {
             len
         }
     }
+    #[allow(dead_code)]
     pub fn as_bytes(&self) -> &[u8] {
         unsafe { slice::from_raw_parts(self.ptr, self.len) }
     }
@@ -176,6 +177,7 @@ impl GcHandleString {
     pub fn wide_chars(&self) -> &[u16] {
         unsafe { slice::from_raw_parts(self.data_ptr(), self.len()) }
     }
+    #[allow(dead_code)]
     pub fn to_string(&self) -> Result<String, FromUtf16Error> {
         String::from_utf16(self.wide_chars())
     }
