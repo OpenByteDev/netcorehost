@@ -125,7 +125,7 @@ const unsafe fn maybe_uninit_slice_assume_init_ref<T>(slice: &[MaybeUninit<T>]) 
 fn maybe_uninit_uninit_array<T, const LEN: usize>() -> [MaybeUninit<T>; LEN] {
     #[cfg(nightly)]
     unsafe {
-        MaybeUninit::uninit_array::<MAX_PATH, T>()
+        MaybeUninit::uninit_array::<LEN, T>()
     }
     #[cfg(not(nightly))]
     unsafe {
