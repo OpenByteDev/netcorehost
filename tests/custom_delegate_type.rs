@@ -1,4 +1,4 @@
-use netcorehost::{cast_managed_fn, nethost, pdcstr};
+use netcorehost::{nethost, pdcstr};
 
 #[path = "common.rs"]
 mod common;
@@ -18,12 +18,11 @@ fn hello_world_with_custom_delegate_type() {
         .get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll"))
         .unwrap();
     let hello = fn_loader
-        .get_function_pointer(
+        .get_function::<fn()>(
             pdcstr!("Test.Program, Test"),
             pdcstr!("CustomHello"),
             pdcstr!("Test.Program+CustomHelloFunc, Test"),
         )
         .unwrap();
-    let hello = unsafe { cast_managed_fn!(hello, fn()) };
     hello();
 }

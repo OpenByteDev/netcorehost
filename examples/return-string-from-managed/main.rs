@@ -1,3 +1,5 @@
+#![warn(unsafe_op_in_unsafe_fn)]
+
 use core::slice;
 use std::{
     ffi::{CStr, CString},
@@ -8,7 +10,9 @@ use std::{
 };
 
 use netcorehost::{
-    cast_managed_fn, hostfxr::AssemblyDelegateLoader, nethost, pdcstr, pdcstring::PdCStr,
+    hostfxr::{AssemblyDelegateLoader, ManagedFunction},
+    nethost, pdcstr,
+    pdcstring::PdCStr,
 };
 
 #[path = "../helpers/dotnet-build.rs"]
@@ -36,32 +40,25 @@ fn print_string_from_csharp_using_c_string<A: AsRef<PdCStr>>(
     delegate_loader: &AssemblyDelegateLoader<A>,
 ) {
     let set_copy_to_c_string = delegate_loader
-        .get_function_pointer_for_unmanaged_callers_only_method(
+        .get_function_with_unmanaged_callers_only::<fn(f: unsafe extern "system" fn(*const u16, i32) -> *mut c_char)>(
             pdcstr!("ExampleProject.Method1, ExampleProject"),
             pdcstr!("SetCopyToCStringFunctionPtr"),
         )
         .unwrap();
-    let set_copy_to_c_string = unsafe {
-        cast_managed_fn!(
-            set_copy_to_c_string,
-            fn(f: extern "system" fn(*const u16, i32) -> *mut c_char)
-        )
-    };
     set_copy_to_c_string(copy_to_c_string);
 
     let get_name = delegate_loader
-        .get_function_pointer_for_unmanaged_callers_only_method(
+        .get_function_with_unmanaged_callers_only::<fn() -> *mut c_char>(
             pdcstr!("ExampleProject.Method1, ExampleProject"),
             pdcstr!("GetNameAsCString"),
         )
         .unwrap();
-    let get_name = unsafe { cast_managed_fn!(get_name, fn() -> *mut c_char) };
     let name_ptr = get_name();
     let name = unsafe { CString::from_raw(name_ptr) };
     println!("{}", name.to_string_lossy());
 }
 
-pub extern "system" fn copy_to_c_string(ptr: *const u16, length: i32) -> *mut c_char {
+unsafe extern "system" fn copy_to_c_string(ptr: *const u16, length: i32) -> *mut c_char {
     let wide_chars = unsafe { slice::from_raw_parts(ptr, length as usize) };
     let string = String::from_utf16_lossy(wide_chars);
     let c_string = match CString::new(string) {
@@ -77,29 +74,27 @@ fn print_string_from_csharp_using_unmanaged_alloc<A: AsRef<PdCStr>>(
 ) {
     // one time setup
     let free_h_global = delegate_loader
-        .get_function_pointer_for_unmanaged_callers_only_method(
+        .get_function_with_unmanaged_callers_only::<fn(*const u8)>(
             pdcstr!("ExampleProject.Method2, ExampleProject"),
             pdcstr!("FreeUnmanagedMemory"),
         )
         .unwrap();
-    let free_h_global = unsafe { cast_managed_fn!(free_h_global, fn(*const u8)) };
     unsafe { FREE_H_GLOBAL = Some(free_h_global) };
 
     // actual usage
     let get_name = delegate_loader
-        .get_function_pointer_for_unmanaged_callers_only_method(
+        .get_function_with_unmanaged_callers_only::<fn() -> *const u8>(
             pdcstr!("ExampleProject.Method2, ExampleProject"),
             pdcstr!("GetNameAsUnmanagedMemory"),
         )
         .unwrap();
-    let get_name = unsafe { cast_managed_fn!(get_name, fn() -> *const u8) };
     let name_h_global = get_name();
     let name = unsafe { HGlobalString::from_h_global(name_h_global) };
     println!("{}", name.as_str().unwrap());
 }
 
 // use OnceCell or similar instead if possible.
-static mut FREE_H_GLOBAL: Option<extern "system" fn(*const u8)> = None;
+static mut FREE_H_GLOBAL: Option<ManagedFunction<extern "system" fn(*const u8)>> = None;
 
 struct HGlobalString {
     ptr: *const u8,
@@ -108,7 +103,7 @@ struct HGlobalString {
 
 impl HGlobalString {
     pub unsafe fn from_h_global(ptr: *const u8) -> Self {
-        let len = CStr::from_ptr(ptr.cast()).to_bytes().len();
+        let len = unsafe { CStr::from_ptr(ptr.cast()) }.to_bytes().len();
         Self { ptr, len }
     }
     #[allow(dead_code)]
@@ -128,7 +123,7 @@ impl HGlobalString {
 
 impl Drop for HGlobalString {
     fn drop(&mut self) {
-        unsafe { FREE_H_GLOBAL }.expect("string interop not init")(self.ptr);
+        unsafe { FREE_H_GLOBAL.as_ref() }.expect("string interop not init")(self.ptr);
     }
 }
 
@@ -138,40 +133,37 @@ fn print_string_from_csharp_using_gc_handle<A: AsRef<PdCStr>>(
 ) {
     // one time setup
     let free_gc_handle_string = delegate_loader
-        .get_function_pointer_for_unmanaged_callers_only_method(
+        .get_function_with_unmanaged_callers_only::<fn(*const *const u16)>(
             pdcstr!("ExampleProject.Method3, ExampleProject"),
             pdcstr!("FreeGCHandleString"),
         )
         .unwrap();
-    let free_gc_handle_string =
-        unsafe { cast_managed_fn!(free_gc_handle_string, fn(*const *const u16)) };
     unsafe { FREE_GC_HANDLE_STRING = Some(free_gc_handle_string) };
 
     let get_string_data_offset = delegate_loader
-        .get_function_pointer_for_unmanaged_callers_only_method(
+        .get_function_with_unmanaged_callers_only::<fn() -> usize>(
             pdcstr!("ExampleProject.Method3, ExampleProject"),
             pdcstr!("GetStringDataOffset"),
         )
         .unwrap();
-    let get_string_data_offset = unsafe { cast_managed_fn!(get_string_data_offset, fn() -> usize) };
     let string_data_offset = get_string_data_offset();
     unsafe { STRING_DATA_OFFSET = Some(string_data_offset) };
 
     // actual usage
     let get_name = delegate_loader
-        .get_function_pointer_for_unmanaged_callers_only_method(
+        .get_function_with_unmanaged_callers_only::<fn() -> *const *const u16>(
             pdcstr!("ExampleProject.Method3, ExampleProject"),
             pdcstr!("GetNameAsGCHandle"),
         )
         .unwrap();
-    let get_name = unsafe { cast_managed_fn!(get_name, fn() -> *const *const u16) };
     let name_gc_handle = get_name();
     let name = unsafe { GcHandleString::from_gc_handle(name_gc_handle) };
     println!("{}", name.to_string_lossy());
 }
 
 // use OnceCell or similar instead if possible.
-static mut FREE_GC_HANDLE_STRING: Option<extern "system" fn(*const *const u16)> = None;
+static mut FREE_GC_HANDLE_STRING: Option<ManagedFunction<extern "system" fn(*const *const u16)>> =
+    None;
 static mut STRING_DATA_OFFSET: Option<usize> = None;
 
 struct GcHandleString(*const *const u16);
@@ -205,7 +197,7 @@ impl GcHandleString {
 
 impl Drop for GcHandleString {
     fn drop(&mut self) {
-        unsafe { FREE_GC_HANDLE_STRING }.expect("string interop not init")(self.0);
+        unsafe { FREE_GC_HANDLE_STRING.as_ref() }.expect("string interop not init")(self.0);
     }
 }
 
@@ -215,27 +207,20 @@ fn print_string_from_csharp_using_rust_allocate<A: AsRef<PdCStr>>(
 ) {
     // one time setup
     let set_rust_allocate_memory = delegate_loader
-        .get_function_pointer_for_unmanaged_callers_only_method(
+        .get_function_with_unmanaged_callers_only::<fn(extern "system" fn(usize, *mut RawVec<u8>))>(
             pdcstr!("ExampleProject.Method4, ExampleProject"),
             pdcstr!("SetRustAllocateMemory"),
         )
         .unwrap();
-    let set_rust_allocate_memory = unsafe {
-        cast_managed_fn!(
-            set_rust_allocate_memory,
-            fn(extern "system" fn(usize, *mut RawVec<u8>))
-        )
-    };
     set_rust_allocate_memory(rust_allocate_memory);
 
     // actual usage
     let get_name = delegate_loader
-        .get_function_pointer_for_unmanaged_callers_only_method(
+        .get_function_with_unmanaged_callers_only::<fn(*mut RawVec<u8>)>(
             pdcstr!("ExampleProject.Method4, ExampleProject"),
             pdcstr!("GetNameIntoRustVec"),
         )
         .unwrap();
-    let get_name = unsafe { cast_managed_fn!(get_name, fn(*mut RawVec<u8>)) };
 
     let mut name_raw_vec = MaybeUninit::uninit();
     get_name(name_raw_vec.as_mut_ptr());

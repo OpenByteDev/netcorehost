@@ -1,11 +1,11 @@
 use crate::{
     bindings::hostfxr::{
         get_function_pointer_fn, hostfxr_delegate_type, hostfxr_handle,
-        load_assembly_and_get_function_pointer_fn, wrapper::Hostfxr as HostfxrLib,
+        load_assembly_and_get_function_pointer_fn, wrapper,
     },
     dlopen::wrapper::Container,
     error::{HostingError, HostingResult, HostingSuccess},
-    hostfxr::{AssemblyDelegateLoader, DelegateLoader, Hostfxr, MethodWithUnknownSignature},
+    hostfxr::{AssemblyDelegateLoader, DelegateLoader, Hostfxr},
     pdcstring::{PdCStr, PdCString},
 };
 
@@ -19,6 +19,8 @@ use std::{
 };
 
 use destruct_drop::DestructDrop;
+
+use super::RawFunctionPtr;
 
 /// A marker struct indicating that the context was initialized with a runtime config.
 /// This means that it is not possible to run the application associated with the context.
@@ -57,11 +59,13 @@ impl From<HostfxrHandle> for hostfxr_handle {
     }
 }
 
+pub(crate) type HostfxrLibrary = Container<wrapper::Hostfxr>;
+
 /// State which hostfxr creates and maintains and represents a logical operation on the hosting components.
 #[derive(DestructDrop)]
 pub struct HostfxrContext<I> {
     handle: HostfxrHandle,
-    hostfxr: Rc<Container<HostfxrLib>>,
+    hostfxr: Rc<HostfxrLibrary>,
     context_type: PhantomData<I>,
 }
 
@@ -310,7 +314,7 @@ impl<I> HostfxrContext<I> {
     pub fn get_runtime_delegate(
         &self,
         r#type: hostfxr_delegate_type,
-    ) -> Result<MethodWithUnknownSignature, HostingError> {
+    ) -> Result<RawFunctionPtr, HostingError> {
         let mut delegate = MaybeUninit::uninit();
         let result = unsafe {
             self.hostfxr.hostfxr_get_runtime_delegate(
@@ -347,7 +351,7 @@ impl<I> HostfxrContext<I> {
             get_load_assembly_and_get_function_pointer: self
                 .get_load_assembly_and_get_function_pointer_delegate()?,
             get_function_pointer: self.get_get_function_pointer_delegate()?,
-            phantom: PhantomData,
+            hostfxr: self.hostfxr.clone(),
         })
     }
 

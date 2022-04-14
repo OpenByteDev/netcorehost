@@ -19,6 +19,7 @@ nethost-sys = { version = "0.2", optional = true, default-features = false }
 hostfxr-sys = "0.1"
 coreclr-hosting-shared = "0.1"
 destruct-drop = "0.1"
+ffi-opaque = "2.0"
 
 [target.'cfg(windows)'.dependencies]
 widestring = "0.5"

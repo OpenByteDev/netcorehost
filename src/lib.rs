@@ -42,7 +42,7 @@
 //! public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);
 //! ```
 //!
-//! A method with the default signature (see code below) can be loaded using [`AssemblyDelegateLoader::get_function_pointer_with_default_signature`].
+//! A method with the default signature (see code below) can be loaded using [`AssemblyDelegateLoader::get_function_with_default_signature`].
 //!
 //! **C#**
 //! ```cs
@@ -69,7 +69,7 @@
 //!     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json")).unwrap();
 //! let fn_loader =
 //!     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
-//! let hello = fn_loader.get_function_pointer_with_default_signature(
+//! let hello = fn_loader.get_function_with_default_signature(
 //!     pdcstr!("Test.Program, Test"),
 //!     pdcstr!("Hello"),
 //! ).unwrap();
@@ -101,23 +101,22 @@
 //! # #[path = "../tests/common.rs"]
 //! # mod common;
 //! # common::setup();
-//! # use netcorehost::{nethost, pdcstr, cast_managed_fn};
+//! # use netcorehost::{nethost, pdcstr};
 //! let hostfxr = nethost::load_hostfxr().unwrap();
 //! let context =
 //!     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json")).unwrap();
 //! let fn_loader =
 //!     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
-//! let hello = fn_loader.get_function_pointer_for_unmanaged_callers_only_method(
+//! let hello = fn_loader.get_function_with_unmanaged_callers_only::<fn()>(
 //!     pdcstr!("Test.Program, Test"),
 //!     pdcstr!("UnmanagedHello"),
 //! ).unwrap();
-//! let hello = unsafe { cast_managed_fn!(hello, fn()) };
 //! hello();
 //! ```
 //!
 //!
 //! ### Specifying the delegate type
-//! Another option is to define a custom delegate type and passing its assembly qualified name to [`AssemblyDelegateLoader::get_function_pointer`].
+//! Another option is to define a custom delegate type and passing its assembly qualified name to [`AssemblyDelegateLoader::get_function`].
 //!
 //! **C#**
 //! ```cs
@@ -139,18 +138,17 @@
 //! # #[path = "../tests/common.rs"]
 //! # mod common;
 //! # common::setup();
-//! # use netcorehost::{nethost, pdcstr, cast_managed_fn};
+//! # use netcorehost::{nethost, pdcstr};
 //! let hostfxr = nethost::load_hostfxr().unwrap();
 //! let context =
 //!     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json")).unwrap();
 //! let fn_loader =
 //!     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
-//! let hello = fn_loader.get_function_pointer(
+//! let hello = fn_loader.get_function::<fn()>(
 //!     pdcstr!("Test.Program, Test"),
 //!     pdcstr!("CustomHello"),
 //!     pdcstr!("Test.Program+CustomHelloFunc, Test")
 //! ).unwrap();
-//! let hello = unsafe { cast_managed_fn!(hello, fn()) };
 //! hello();
 //! ```
 //!
@@ -165,8 +163,8 @@
 //!
 //! [`UnmanagedCallersOnly`]: <https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute>
 //! [`AssemblyDelegateLoader`]: crate::hostfxr::AssemblyDelegateLoader
-//! [`AssemblyDelegateLoader::get_function_pointer_with_default_signature`]: crate::hostfxr::AssemblyDelegateLoader::get_function_pointer_with_default_signature
-//! [`AssemblyDelegateLoader::get_function_pointer`]: crate::hostfxr::AssemblyDelegateLoader::get_function_pointer
+//! [`AssemblyDelegateLoader::get_function_with_default_signature`]: crate::hostfxr::AssemblyDelegateLoader::get_function_with_default_signature
+//! [`AssemblyDelegateLoader::get_function`]: crate::hostfxr::AssemblyDelegateLoader::get_function
 
 /// Module for the raw bindings for hostfxr and nethost.
 pub mod bindings;

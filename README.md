@@ -10,7 +10,7 @@
 
 A Rust library for hosting the .NET Core runtime.
 
-It utilizes the .NET Core hosting API to load and execute managed code from withing the current process. 
+It utilizes the .NET Core hosting API to load and execute managed code from withing the current process.
 
 ## Usage
 ### Running an application
@@ -32,7 +32,7 @@ The default method signature is defined as follows:
 public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);
 ```
 
-A method with the default signature (see code below) can be loaded using [`AssemblyDelegateLoader::get_function_pointer_with_default_signature`](https://docs.rs/netcorehost/*/netcorehost/hostfxr/struct.AssemblyDelegateLoader.html#method.get_function_pointer_with_default_signature).
+A method with the default signature (see code below) can be loaded using [`AssemblyDelegateLoader::get_function_with_default_signature`](https://docs.rs/netcorehost/*/netcorehost/hostfxr/struct.AssemblyDelegateLoader.html#method.get_function_with_default_signature).
 
 **C#**
 ```cs
@@ -55,11 +55,12 @@ let context =
     hostfxr.initialize_for_runtime_config(pdcstr!("Test.runtimeconfig.json")).unwrap();
 let fn_loader =
     context.get_delegate_loader_for_assembly(pdcstr!("Test.dll")).unwrap();
-let hello = fn_loader.get_function_pointer_with_default_signature(
+let hello = fn_loader.get_function_with_default_signature(
     pdcstr!("Test.Program, Test"),
     pdcstr!("Hello"),
 ).unwrap();
 let result = unsafe { hello(std::ptr::null(), 0) };
+assert_eq!(result, 42);
 ```
 
 #### Using UnmanagedCallersOnly
@@ -87,17 +88,16 @@ let context =
     hostfxr.initialize_for_runtime_config(pdcstr!("Test.runtimeconfig.json")).unwrap();
 let fn_loader =
     context.get_delegate_loader_for_assembly(pdcstr!("Test.dll")).unwrap();
-let hello = fn_loader.get_function_pointer_with_default_signature(
+let hello = fn_loader.get_function_with_unmanaged_callers_only::<fn()>(
     pdcstr!("Test.Program, Test"),
     pdcstr!("UnmanagedHello"),
 ).unwrap();
-let hello = unsafe { cast_managed_fn!(hello, fn()) };
 hello(); // prints "Hello from C#!"
 ```
 
 
 #### Specifying the delegate type
-Another option is to define a custom delegate type and passing its assembly qualified name to [`AssemblyDelegateLoader::get_function_pointer`](https://docs.rs/netcorehost/*/netcorehost/hostfxr/struct.AssemblyDelegateLoader.html#method.get_function_pointer).
+Another option is to define a custom delegate type and passing its assembly qualified name to [`AssemblyDelegateLoader::get_function`](https://docs.rs/netcorehost/*/netcorehost/hostfxr/struct.AssemblyDelegateLoader.html#method.get_function).
 
 **C#**
 ```cs
@@ -121,12 +121,11 @@ let context =
     hostfxr.initialize_for_runtime_config(pdcstr!("Test.runtimeconfig.json")).unwrap();
 let fn_loader =
     context.get_delegate_loader_for_assembly(pdcstr!("Test.dll")).unwrap();
-let hello = fn_loader.get_function_pointer(
+let hello = fn_loader.get_function::<fn()>(
     pdcstr!("Test.Program, Test"),
     pdcstr!("CustomHello"),
     pdcstr!("Test.Program+CustomHelloFunc, Test")
 ).unwrap();
-let hello = unsafe { cast_managed_fn!(hello, fn()) };
 hello(); // prints "Hello from C#!"
 ```
 

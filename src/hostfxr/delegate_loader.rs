@@ -10,43 +10,35 @@ use crate::{
     pdcstring::PdCStr,
 };
 use num_enum::TryFromPrimitive;
-use std::{
-    convert::TryFrom,
-    marker::PhantomData,
-    mem::{self, MaybeUninit},
-    path::PathBuf,
-    ptr,
-};
+use std::{convert::TryFrom, mem::MaybeUninit, path::Path, ptr, rc::Rc};
 use thiserror::Error;
 
-use super::HostfxrContext;
+use super::{FunctionPtr, HostfxrLibrary, ManagedFunction, ManagedFunctionPtr, RawFunctionPtr};
 
-/// A function pointer for a method with the default signature.
-pub type MethodWithDefaultSignature = component_entry_point_fn;
-/// A opaque type representing some method with an unknown signature.
-pub enum SomeMethod {}
-/// A function pointer for a method with an unknown signature.
-pub type MethodWithUnknownSignature = *const SomeMethod;
+/// A pointer to a function with the default signature.
+pub type ManagedFunctionWithDefaultSignature = ManagedFunction<component_entry_point_fn>;
+/// A pointer to a function with an unknown signature.
+pub type ManagedFunctionWithUnknownSignature = ManagedFunction<RawFunctionPtr>;
 
 /// A struct for loading pointers to managed functions for a given [`HostfxrContext`].
 ///
 /// [`HostfxrContext`]: super::HostfxrContext
-#[derive(Copy, Clone)]
-pub struct DelegateLoader<'a> {
+#[derive(Clone)]
+pub struct DelegateLoader {
     pub(crate) get_load_assembly_and_get_function_pointer:
         load_assembly_and_get_function_pointer_fn,
     pub(crate) get_function_pointer: get_function_pointer_fn,
-    pub(crate) phantom: PhantomData<&'a HostfxrContext<()>>,
+    pub(crate) hostfxr: Rc<HostfxrLibrary>,
 }
 
-impl<'a> DelegateLoader<'a> {
+impl DelegateLoader {
     unsafe fn _load_assembly_and_get_function_pointer(
-        &'a self,
+        &self,
         assembly_path: *const char_t,
         type_name: *const char_t,
         method_name: *const char_t,
         delegate_type_name: *const char_t,
-    ) -> Result<MethodWithUnknownSignature, GetFunctionPointerError> {
+    ) -> Result<RawFunctionPtr, GetManagedFunctionError> {
         let mut delegate = MaybeUninit::uninit();
 
         let result = unsafe {
@@ -59,27 +51,33 @@ impl<'a> DelegateLoader<'a> {
                 delegate.as_mut_ptr(),
             )
         };
-        GetFunctionPointerError::from_status_code(result)?;
+        GetManagedFunctionError::from_status_code(result)?;
 
         Ok(unsafe { delegate.assume_init() }.cast())
     }
 
     fn _validate_assembly_path(
         assembly_path: impl AsRef<PdCStr>,
-    ) -> Result<(), GetFunctionPointerError> {
-        if PathBuf::from(assembly_path.as_ref().to_os_string()).exists() {
+    ) -> Result<(), GetManagedFunctionError> {
+        #[cfg(windows)]
+        let assembly_path = assembly_path.as_ref().to_os_string();
+
+        #[cfg(not(windows))]
+        let assembly_path = assembly_path.as_ref().to_os_str();
+
+        if Path::new(&assembly_path).exists() {
             Ok(())
         } else {
-            Err(GetFunctionPointerError::AssemblyNotFound)
+            Err(GetManagedFunctionError::AssemblyNotFound)
         }
     }
 
     unsafe fn _get_function_pointer(
-        &'a self,
+        &self,
         type_name: *const char_t,
         method_name: *const char_t,
         delegate_type_name: *const char_t,
-    ) -> Result<MethodWithUnknownSignature, GetFunctionPointerError> {
+    ) -> Result<RawFunctionPtr, GetManagedFunctionError> {
         let mut delegate = MaybeUninit::uninit();
 
         let result = unsafe {
@@ -92,7 +90,7 @@ impl<'a> DelegateLoader<'a> {
                 delegate.as_mut_ptr(),
             )
         };
-        GetFunctionPointerError::from_status_code(result)?;
+        GetManagedFunctionError::from_status_code(result)?;
 
         Ok(unsafe { delegate.assume_init() }.cast())
     }
@@ -113,22 +111,26 @@ impl<'a> DelegateLoader<'a> {
     ///     Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
     ///  * `delegate_type_name`:
     ///     Assembly qualified delegate type name for the method signature.
-    pub fn load_assembly_and_get_function_pointer(
-        &'a self,
-        assembly_path: impl AsRef<PdCStr>,
-        type_name: impl AsRef<PdCStr>,
-        method_name: impl AsRef<PdCStr>,
-        delegate_type_name: impl AsRef<PdCStr>,
-    ) -> Result<MethodWithUnknownSignature, GetFunctionPointerError> {
-        Self::_validate_assembly_path(assembly_path.as_ref())?;
-        unsafe {
+    pub fn load_assembly_and_get_function<F: FunctionPtr>(
+        &self,
+        assembly_path: &PdCStr,
+        type_name: &PdCStr,
+        method_name: &PdCStr,
+        delegate_type_name: &PdCStr,
+    ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
+        Self::_validate_assembly_path(assembly_path)?;
+        let function = unsafe {
             self._load_assembly_and_get_function_pointer(
-                assembly_path.as_ref().as_ptr(),
-                type_name.as_ref().as_ptr(),
-                method_name.as_ref().as_ptr(),
-                delegate_type_name.as_ref().as_ptr(),
+                assembly_path.as_ptr(),
+                type_name.as_ptr(),
+                method_name.as_ptr(),
+                delegate_type_name.as_ptr(),
             )
-        }
+        }?;
+        Ok(ManagedFunction(
+            unsafe { F::Managed::from_ptr(function) },
+            self.hostfxr.clone(),
+        ))
     }
 
     /// Calling this function will load the specified assembly in isolation (into its own `AssemblyLoadContext`)
@@ -146,22 +148,25 @@ impl<'a> DelegateLoader<'a> {
     ///  * `method_name`:
     ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
     ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
-    pub fn load_assembly_and_get_function_pointer_with_default_signature(
-        &'a self,
-        assembly_path: impl AsRef<PdCStr>,
-        type_name: impl AsRef<PdCStr>,
-        method_name: impl AsRef<PdCStr>,
-    ) -> Result<MethodWithDefaultSignature, GetFunctionPointerError> {
-        Self::_validate_assembly_path(assembly_path.as_ref())?;
-        unsafe {
+    pub fn load_assembly_and_get_function_with_default_signature(
+        &self,
+        assembly_path: &PdCStr,
+        type_name: &PdCStr,
+        method_name: &PdCStr,
+    ) -> Result<ManagedFunctionWithDefaultSignature, GetManagedFunctionError> {
+        Self::_validate_assembly_path(assembly_path)?;
+        let function = unsafe {
             self._load_assembly_and_get_function_pointer(
-                assembly_path.as_ref().as_ptr(),
-                type_name.as_ref().as_ptr(),
-                method_name.as_ref().as_ptr(),
+                assembly_path.as_ptr(),
+                type_name.as_ptr(),
+                method_name.as_ptr(),
                 ptr::null(),
             )
-            .map(|fn_ptr| mem::transmute(fn_ptr))
-        }
+        }?;
+        Ok(ManagedFunction(
+            unsafe { FunctionPtr::from_ptr(function) },
+            self.hostfxr.clone(),
+        ))
     }
 
     /// Calling this function will load the specified assembly in isolation (into its own `AssemblyLoadContext`)
@@ -181,21 +186,25 @@ impl<'a> DelegateLoader<'a> {
     ///
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
-    pub fn load_assembly_and_get_function_pointer_for_unmanaged_callers_only_method(
-        &'a self,
-        assembly_path: impl AsRef<PdCStr>,
-        type_name: impl AsRef<PdCStr>,
-        method_name: impl AsRef<PdCStr>,
-    ) -> Result<MethodWithUnknownSignature, GetFunctionPointerError> {
-        Self::_validate_assembly_path(assembly_path.as_ref())?;
-        unsafe {
+    pub fn load_assembly_and_get_function_with_unmanaged_callers_only<F: FunctionPtr>(
+        &self,
+        assembly_path: &PdCStr,
+        type_name: &PdCStr,
+        method_name: &PdCStr,
+    ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
+        Self::_validate_assembly_path(assembly_path)?;
+        let function = unsafe {
             self._load_assembly_and_get_function_pointer(
-                assembly_path.as_ref().as_ptr(),
-                type_name.as_ref().as_ptr(),
-                method_name.as_ref().as_ptr(),
+                assembly_path.as_ptr(),
+                type_name.as_ptr(),
+                method_name.as_ptr(),
                 UNMANAGED_CALLERS_ONLY_METHOD,
             )
-        }
+        }?;
+        Ok(ManagedFunction(
+            unsafe { F::Managed::from_ptr(function) },
+            self.hostfxr.clone(),
+        ))
     }
 
     /// Calling this function will find the specified type and method and return a native function pointer to that method.
@@ -208,19 +217,23 @@ impl<'a> DelegateLoader<'a> {
     ///     Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
     ///  * `delegate_type_name`:
     ///     Assembly qualified delegate type name for the method signature.
-    pub fn get_function_pointer(
-        &'a self,
-        type_name: impl AsRef<PdCStr>,
-        method_name: impl AsRef<PdCStr>,
-        delegate_type_name: impl AsRef<PdCStr>,
-    ) -> Result<MethodWithUnknownSignature, GetFunctionPointerError> {
-        unsafe {
+    pub fn get_function<F: ManagedFunctionPtr>(
+        &self,
+        type_name: &PdCStr,
+        method_name: &PdCStr,
+        delegate_type_name: &PdCStr,
+    ) -> Result<ManagedFunction<F>, GetManagedFunctionError> {
+        let function = unsafe {
             self._get_function_pointer(
-                type_name.as_ref().as_ptr(),
-                method_name.as_ref().as_ptr(),
-                delegate_type_name.as_ref().as_ptr(),
+                type_name.as_ptr(),
+                method_name.as_ptr(),
+                delegate_type_name.as_ptr(),
             )
-        }
+        }?;
+        Ok(ManagedFunction(
+            unsafe { F::from_ptr(function) },
+            self.hostfxr.clone(),
+        ))
     }
 
     /// Calling this function will find the specified type and method and return a native function pointer to that method.
@@ -232,19 +245,18 @@ impl<'a> DelegateLoader<'a> {
     ///  * `method_name`:
     ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
     ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
-    pub fn get_function_pointer_with_default_signature(
-        &'a self,
-        type_name: impl AsRef<PdCStr>,
-        method_name: impl AsRef<PdCStr>,
-    ) -> Result<MethodWithDefaultSignature, GetFunctionPointerError> {
-        unsafe {
-            self._get_function_pointer(
-                type_name.as_ref().as_ptr(),
-                method_name.as_ref().as_ptr(),
-                ptr::null(),
-            )
-            .map(|fn_ptr| mem::transmute(fn_ptr))
-        }
+    pub fn get_function_with_default_signature(
+        &self,
+        type_name: &PdCStr,
+        method_name: &PdCStr,
+    ) -> Result<ManagedFunctionWithDefaultSignature, GetManagedFunctionError> {
+        let function = unsafe {
+            self._get_function_pointer(type_name.as_ptr(), method_name.as_ptr(), ptr::null())
+        }?;
+        Ok(ManagedFunction(
+            unsafe { FunctionPtr::from_ptr(function) },
+            self.hostfxr.clone(),
+        ))
     }
 
     /// Calling this function will find the specified type and method and return a native function pointer to that method.
@@ -258,18 +270,22 @@ impl<'a> DelegateLoader<'a> {
     ///
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
-    pub fn get_function_pointer_for_unmanaged_callers_only_method(
-        &'a self,
-        type_name: impl AsRef<PdCStr>,
-        method_name: impl AsRef<PdCStr>,
-    ) -> Result<MethodWithUnknownSignature, GetFunctionPointerError> {
-        unsafe {
+    pub fn get_function_with_unmanaged_callers_only<F: FunctionPtr>(
+        &self,
+        type_name: &PdCStr,
+        method_name: &PdCStr,
+    ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
+        let function = unsafe {
             self._get_function_pointer(
-                type_name.as_ref().as_ptr(),
-                method_name.as_ref().as_ptr(),
+                type_name.as_ptr(),
+                method_name.as_ptr(),
                 UNMANAGED_CALLERS_ONLY_METHOD,
             )
-        }
+        }?;
+        Ok(ManagedFunction(
+            unsafe { F::Managed::from_ptr(function) },
+            self.hostfxr.clone(),
+        ))
     }
 }
 
@@ -277,15 +293,15 @@ impl<'a> DelegateLoader<'a> {
 /// assembly from the given path on the first access.
 ///
 /// [`HostfxrContext`]: super::HostfxrContext
-pub struct AssemblyDelegateLoader<'a, A: AsRef<PdCStr>> {
-    loader: DelegateLoader<'a>,
+pub struct AssemblyDelegateLoader<A: AsRef<PdCStr>> {
+    loader: DelegateLoader,
     assembly_path: A,
 }
 
-impl<'a, A: AsRef<PdCStr>> AssemblyDelegateLoader<'a, A> {
+impl<'a, A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     /// Creates a new [`AssemblyDelegateLoader`] wrapping the given [`DelegateLoader`] loading the assembly
     /// from the given path on the first access.
-    pub fn new(loader: DelegateLoader<'a>, assembly_path: A) -> Self {
+    pub fn new(loader: DelegateLoader, assembly_path: A) -> Self {
         Self {
             loader,
             assembly_path,
@@ -305,13 +321,13 @@ impl<'a, A: AsRef<PdCStr>> AssemblyDelegateLoader<'a, A> {
     ///     Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
     ///  * `delegate_type_name`:
     ///     Assembly qualified delegate type name for the method signature.
-    pub fn get_function_pointer(
-        &'a self,
-        type_name: impl AsRef<PdCStr>,
-        method_name: impl AsRef<PdCStr>,
-        delegate_type_name: impl AsRef<PdCStr>,
-    ) -> Result<MethodWithUnknownSignature, GetFunctionPointerError> {
-        self.loader.load_assembly_and_get_function_pointer(
+    pub fn get_function<F: FunctionPtr>(
+        &self,
+        type_name: &PdCStr,
+        method_name: &PdCStr,
+        delegate_type_name: &PdCStr,
+    ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
+        self.loader.load_assembly_and_get_function::<F>(
             self.assembly_path.as_ref(),
             type_name,
             method_name,
@@ -331,13 +347,13 @@ impl<'a, A: AsRef<PdCStr>> AssemblyDelegateLoader<'a, A> {
     ///  * `method_name`:
     ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
     ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
-    pub fn get_function_pointer_with_default_signature(
-        &'a self,
-        type_name: impl AsRef<PdCStr>,
-        method_name: impl AsRef<PdCStr>,
-    ) -> Result<MethodWithDefaultSignature, GetFunctionPointerError> {
+    pub fn get_function_with_default_signature(
+        &self,
+        type_name: &PdCStr,
+        method_name: &PdCStr,
+    ) -> Result<ManagedFunctionWithDefaultSignature, GetManagedFunctionError> {
         self.loader
-            .load_assembly_and_get_function_pointer_with_default_signature(
+            .load_assembly_and_get_function_with_default_signature(
                 self.assembly_path.as_ref(),
                 type_name,
                 method_name,
@@ -358,13 +374,13 @@ impl<'a, A: AsRef<PdCStr>> AssemblyDelegateLoader<'a, A> {
     ///
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
-    pub fn get_function_pointer_for_unmanaged_callers_only_method(
-        &'a self,
-        type_name: impl AsRef<PdCStr>,
-        method_name: impl AsRef<PdCStr>,
-    ) -> Result<MethodWithUnknownSignature, GetFunctionPointerError> {
+    pub fn get_function_with_unmanaged_callers_only<F: FunctionPtr>(
+        &self,
+        type_name: &PdCStr,
+        method_name: &PdCStr,
+    ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
         self.loader
-            .load_assembly_and_get_function_pointer_for_unmanaged_callers_only_method(
+            .load_assembly_and_get_function_with_unmanaged_callers_only::<F>(
                 self.assembly_path.as_ref(),
                 type_name,
                 method_name,
@@ -374,7 +390,7 @@ impl<'a, A: AsRef<PdCStr>> AssemblyDelegateLoader<'a, A> {
 
 /// Enum for errors that can occur while loading a managed assembly or managed function pointers.
 #[derive(Error, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum GetFunctionPointerError {
+pub enum GetManagedFunctionError {
     /// An error occured inside the hosting components.
     #[error("Error from hosting components: {}.", .0)]
     Hosting(#[from] HostingError),
@@ -400,12 +416,12 @@ pub enum GetFunctionPointerError {
     Other(u32),
 }
 
-impl GetFunctionPointerError {
+impl GetManagedFunctionError {
     pub fn from_status_code(code: i32) -> Result<HostingSuccess, Self> {
         let code = code as u32;
         match HostingResult::known_from_status_code(code) {
             Ok(HostingResult(Ok(code))) => return Ok(code),
-            Ok(HostingResult(Err(code))) => return Err(GetFunctionPointerError::Hosting(code)),
+            Ok(HostingResult(Err(code))) => return Err(GetManagedFunctionError::Hosting(code)),
             _ => {}
         }
         match HResult::try_from(code) {
@@ -434,59 +450,4 @@ enum HResult {
     /*COR_E_*/FILE_NOT_FOUND = 0x8007_0002,  // assembly with specified name not found (from type name)
     COR_E_ARGUMENT = 0x8007_0057,            // invalid method signature or method not found
     COR_E_INVALIDOPERATION = 0x8013_1509,    // invalid assembly path or not unmanaged,
-}
-
-/// Macro for casting a [`MethodWithUnknownSignature`] to a concrete function signature with the correct calling convention.
-///
-/// # Example
-/// Type annotations are not needed and only for clarity.
-/// ```rust
-/// # #[path = "../../tests/common.rs"]
-/// # mod common;
-/// # common::setup();
-/// # use netcorehost::{nethost, pdcstr, cast_managed_fn, hostfxr::MethodWithUnknownSignature};
-/// # let hostfxr = nethost::load_hostfxr().unwrap();
-/// # let context =
-/// #     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json")).unwrap();
-/// # let fn_loader =
-/// #     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
-/// // Get a pointer to the managed "UnmanagedHello" method.
-/// let hello: MethodWithUnknownSignature = fn_loader.get_function_pointer_for_unmanaged_callers_only_method(
-///     pdcstr!("Test.Program, Test"),
-///     pdcstr!("UnmanagedHello"),
-/// ).unwrap();
-/// // Cast the unknown function pointer to the concrete function type with the correct signature and calling convention.
-/// let hello: extern "system" fn() = unsafe { cast_managed_fn!(hello, fn()) };
-/// # hello();
-/// ```
-#[macro_export]
-macro_rules! cast_managed_fn {
-    // fn()
-    ($fn_ptr:expr, $($fn_ty:tt)*) => {
-        ::core::mem::transmute::<
-            $crate::hostfxr::MethodWithUnknownSignature,
-            extern "system" $($fn_ty)*
-        >($fn_ptr)
-    };
-    // unsafe fn()
-    ($fn_ptr:expr, unsafe $($fn_ty:tt)*) => {
-        ::core::mem::transmute::<
-            $crate::hostfxr::MethodWithUnknownSignature,
-            unsafe extern "system" $($fn_ty)*
-        >($fn_ptr)
-    };
-    // extern "system" fn()
-    ($fn_ptr:expr, extern "system" $($fn_ty:tt)*) => {
-        ::core::mem::transmute::<
-            $crate::hostfxr::MethodWithUnknownSignature,
-            extern "system" $($fn_ty)*
-        >($fn_ptr)
-    };
-    // unsafe extern "system" fn()
-    ($fn_ptr:expr, unsafe extern "system" $($fn_ty:tt)*) => {
-        ::core::mem::transmute::<
-            $crate::hostfxr::MethodWithUnknownSignature,
-            unsafe extern "system" $($fn_ty)*
-        >($fn_ptr)
-    };
 }

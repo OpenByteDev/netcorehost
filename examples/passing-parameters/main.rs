@@ -1,6 +1,4 @@
-use netcorehost::{
-    cast_managed_fn, hostfxr::AssemblyDelegateLoader, nethost, pdcstr, pdcstring::PdCStr,
-};
+use netcorehost::{hostfxr::AssemblyDelegateLoader, nethost, pdcstr, pdcstring::PdCStr};
 
 #[path = "../helpers/dotnet-build.rs"]
 mod dotnet_build;
@@ -24,43 +22,33 @@ fn main() {
 
 fn print_utf8_example<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoader<A>) {
     let print_utf8 = delegate_loader
-        .get_function_pointer_for_unmanaged_callers_only_method(
+        .get_function_with_unmanaged_callers_only::<fn(text_ptr: *const u8, text_length: i32)>(
             pdcstr!("ExampleProject.Program, ExampleProject"),
             pdcstr!("PrintUtf8"),
         )
         .unwrap();
-    let print_utf8 =
-        unsafe { cast_managed_fn!(print_utf8, fn(text_ptr: *const u8, text_length: i32)) };
     let test_string = "Hello World!";
     print_utf8(test_string.as_ptr(), test_string.len() as i32);
 }
 
 fn print_utf16_example<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoader<A>) {
     let print_utf16 = delegate_loader
-        .get_function_pointer_for_unmanaged_callers_only_method(
+        .get_function_with_unmanaged_callers_only::<fn(text_ptr: *const u16, text_length: i32)>(
             pdcstr!("ExampleProject.Program, ExampleProject"),
             pdcstr!("PrintUtf16"),
         )
         .unwrap();
-    let print_utf16 =
-        unsafe { cast_managed_fn!(print_utf16, fn(text_ptr: *const u16, text_length: i32)) };
     let test_string = widestring::U16String::from_str("Hello World!");
     print_utf16(test_string.as_ptr(), test_string.len() as i32);
 }
 
 fn is_palindrom_example<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoader<A>) {
     let is_palindrom = delegate_loader
-        .get_function_pointer_for_unmanaged_callers_only_method(
+        .get_function_with_unmanaged_callers_only::<fn(text_ptr: *const u16, text_length: i32) -> i32>(
             pdcstr!("ExampleProject.Program, ExampleProject"),
             pdcstr!("IsPalindrom"),
         )
         .unwrap();
-    let is_palindrom = unsafe {
-        cast_managed_fn!(
-            is_palindrom,
-            fn(text_ptr: *const u16, text_length: i32) -> i32
-        )
-    };
     for s in ["Racecar", "stats", "hello", "test"].iter() {
         let widestring = widestring::U16String::from_str(s);
         let palindrom_answer = if is_palindrom(widestring.as_ptr(), widestring.len() as i32) != 0 {
@@ -74,12 +62,11 @@ fn is_palindrom_example<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoad
 
 fn get_length_example<A: AsRef<PdCStr>>(delegate_loader: &AssemblyDelegateLoader<A>) {
     let get_length = delegate_loader
-        .get_function_pointer_for_unmanaged_callers_only_method(
+        .get_function_with_unmanaged_callers_only::<fn(text_ptr: *const Vector2f) -> f32>(
             pdcstr!("ExampleProject.Program, ExampleProject"),
             pdcstr!("GetLength"),
         )
         .unwrap();
-    let get_length = unsafe { cast_managed_fn!(get_length, fn(text_ptr: *const Vector2f) -> f32) };
     let vec = Vector2f {
         x: 3.0f32,
         y: 4.0f32,

@@ -1,4 +1,4 @@
-use crate::{error::HostingError, hostfxr::GetFunctionPointerError, nethost::LoadHostfxrError};
+use crate::{error::HostingError, hostfxr::GetManagedFunctionError, nethost::LoadHostfxrError};
 use thiserror::Error;
 
 /// A universal error type encompassing all possible errors from the [`netcorehost`](crate) crate.
@@ -9,7 +9,7 @@ pub enum Error {
     Hosting(#[from] HostingError),
     /// An error while loading a function pointer to a managed method.
     #[error(transparent)]
-    GetFunctionPointer(#[from] GetFunctionPointerError),
+    GetFunctionPointer(#[from] GetManagedFunctionError),
     /// An error while loading the hostfxr library.
     #[error(transparent)]
     LoadHostfxr(#[from] LoadHostfxrError),
