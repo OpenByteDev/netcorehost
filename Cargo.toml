@@ -1,6 +1,6 @@
 [package]
 name = "netcorehost"
-version = "0.9.1"
+version = "0.9.2"
 description = "A Rust library for hosting the .NET Core runtime."
 readme = "README.md"
 repository = "https://github.com/OpenByteDev/netcorehost"
