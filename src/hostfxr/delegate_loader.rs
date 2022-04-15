@@ -13,7 +13,7 @@ use num_enum::TryFromPrimitive;
 use std::{convert::TryFrom, mem::MaybeUninit, path::Path, ptr, rc::Rc};
 use thiserror::Error;
 
-use super::{FunctionPtr, HostfxrLibrary, ManagedFunction, ManagedFunctionPtr, RawFunctionPtr};
+use super::{FunctionPtr, HostfxrLibrary, ManagedFunction, RawFunctionPtr};
 
 /// A pointer to a function with the default signature.
 pub type ManagedFunctionWithDefaultSignature = ManagedFunction<component_entry_point_fn>;
@@ -217,12 +217,12 @@ impl DelegateLoader {
     ///     Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
     ///  * `delegate_type_name`:
     ///     Assembly qualified delegate type name for the method signature.
-    pub fn get_function<F: ManagedFunctionPtr>(
+    pub fn get_function<F: FunctionPtr>(
         &self,
         type_name: &PdCStr,
         method_name: &PdCStr,
         delegate_type_name: &PdCStr,
-    ) -> Result<ManagedFunction<F>, GetManagedFunctionError> {
+    ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
         let function = unsafe {
             self._get_function_pointer(
                 type_name.as_ptr(),
@@ -231,7 +231,7 @@ impl DelegateLoader {
             )
         }?;
         Ok(ManagedFunction(
-            unsafe { F::from_ptr(function) },
+            unsafe { F::Managed::from_ptr(function) },
             self.hostfxr.clone(),
         ))
     }
