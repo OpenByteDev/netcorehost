@@ -2,7 +2,7 @@
     feature = "nightly",
     feature(try_trait_v2, maybe_uninit_uninit_array, maybe_uninit_slice)
 )]
-#![warn(clippy::pedantic, clippy::cargo, unsafe_op_in_unsafe_fn)]
+#![warn(clippy::pedantic, clippy::cargo, unsafe_op_in_unsafe_fn, missing_docs)]
 #![allow(
     clippy::missing_safety_doc,
     clippy::missing_errors_doc,
@@ -177,6 +177,7 @@ pub mod hostfxr;
 pub mod nethost;
 
 /// Module for a platform dependent c-like string type.
+#[allow(missing_docs)]
 pub mod pdcstring;
 
 /// Module containing error enums.

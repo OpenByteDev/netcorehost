@@ -417,6 +417,7 @@ pub enum GetManagedFunctionError {
 }
 
 impl GetManagedFunctionError {
+    /// Converts the given staus code to a [`GetManagedFunctionError`].
     pub fn from_status_code(code: i32) -> Result<HostingSuccess, Self> {
         let code = code as u32;
         match HostingResult::known_from_status_code(code) {

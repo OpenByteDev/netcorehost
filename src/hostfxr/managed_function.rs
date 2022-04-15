@@ -2,6 +2,7 @@ use std::{ops::Deref, rc::Rc};
 
 use super::HostfxrLibrary;
 
+/// A wrapper around a managed function pointer.
 pub struct ManagedFunction<F: ManagedFunctionPtr>(pub(crate) F, pub(crate) Rc<HostfxrLibrary>);
 
 impl<F: ManagedFunctionPtr> Deref for ManagedFunction<F> {
@@ -13,6 +14,7 @@ impl<F: ManagedFunctionPtr> Deref for ManagedFunction<F> {
 }
 
 ffi_opaque::opaque! {
+    /// A struct representing an opaque function.
     pub struct OpaqueFunction;
 }
 
