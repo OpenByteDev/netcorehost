@@ -67,6 +67,7 @@ pub struct HostfxrContext<I> {
     handle: HostfxrHandle,
     hostfxr: Rc<HostfxrLibrary>,
     context_type: PhantomData<I>,
+    is_primary: bool,
 }
 
 impl<I> HostfxrContext<I> {
@@ -80,10 +81,11 @@ impl<I> HostfxrContext<I> {
     /// [`initialize_for_dotnet_command_line`]: crate::hostfxr::Hostfxr::initialize_for_dotnet_command_line
     /// [`initialize_for_runtime_config`]: crate::hostfxr::Hostfxr::initialize_for_runtime_config
     #[must_use]
-    pub unsafe fn from_handle(handle: HostfxrHandle, hostfxr: Hostfxr) -> Self {
+    pub unsafe fn from_handle(handle: HostfxrHandle, hostfxr: Hostfxr, is_primary: bool) -> Self {
         Self {
             handle,
             hostfxr: hostfxr.0,
+            is_primary,
             context_type: PhantomData,
         }
     }
@@ -99,6 +101,16 @@ impl<I> HostfxrContext<I> {
     pub fn into_handle(self) -> HostfxrHandle {
         let this = ManuallyDrop::new(self);
         this.handle
+    }
+
+    /// Gets whether the context is the primary hostfxr context.
+    /// There can only be a single primary context in a process.
+    /// 
+    /// # Note
+    /// https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/native-hosting.md#synchronization
+    #[must_use]
+    pub fn is_primary(&self) -> bool {
+        self.is_primary
     }
 
     /// Gets the runtime property value for the given key of this host context.

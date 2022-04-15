@@ -3,7 +3,7 @@ use crate::{
         hostfxr_handle, hostfxr_initialize_parameters, wrapper::Hostfxr as HostfxrLib,
     },
     dlopen::wrapper::Container,
-    error::{HostingError, HostingResult},
+    error::{HostingError, HostingResult, HostingSuccess},
     hostfxr::{
         HostfxrContext, HostfxrHandle, InitializedForCommandLine, InitializedForRuntimeConfig,
     },
@@ -238,12 +238,15 @@ impl Hostfxr {
             )
         };
 
-        HostingResult::from(result).into_result()?;
+        let success_code = HostingResult::from(result).into_result()?;
+
+        let is_primary = matches!(success_code, HostingSuccess::Success);
 
         Ok(unsafe {
             HostfxrContext::from_handle(
                 HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()),
                 self.clone(),
+                is_primary,
             )
         })
     }
@@ -359,12 +362,15 @@ impl Hostfxr {
             )
         };
 
-        HostingResult::from(result).into_result()?;
+        let success_code = HostingResult::from(result).into_result()?;
+
+        let is_primary = matches!(success_code, HostingSuccess::Success);
 
         Ok(unsafe {
             HostfxrContext::from_handle(
                 HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()),
                 self.clone(),
+                is_primary
             )
         })
     }
