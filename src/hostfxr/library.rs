@@ -370,7 +370,7 @@ impl Hostfxr {
             HostfxrContext::from_handle(
                 HostfxrHandle::new_unchecked(hostfxr_handle.assume_init()),
                 self.clone(),
-                is_primary
+                is_primary,
             )
         })
     }

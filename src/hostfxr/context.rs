@@ -105,7 +105,7 @@ impl<I> HostfxrContext<I> {
 
     /// Gets whether the context is the primary hostfxr context.
     /// There can only be a single primary context in a process.
-    /// 
+    ///
     /// # Note
     /// https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/native-hosting.md#synchronization
     #[must_use]

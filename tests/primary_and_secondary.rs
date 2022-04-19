@@ -40,6 +40,6 @@ fn secondary_is_secondary() {
         ))
         .unwrap();
     assert!(!context2.is_primary());
-    
+
     context2.close().unwrap();
 }
