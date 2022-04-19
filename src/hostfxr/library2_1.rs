@@ -202,7 +202,7 @@ extern "C" fn resolve_sdk2_callback(key: hostfxr_resolve_sdk2_result_key_t, valu
     });
 }
 
-/// Result of [`Hostfxr::hostfxr_resolve_sdk`](struct.Hostfxr.html#method.hostfxr_resolve_sdk)
+/// Result of [`Hostfxr::resolve_sdk`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ResolveSdkResult {
     /// `global.json` was not present or did not impact the resolved SDK location.
