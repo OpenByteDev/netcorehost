@@ -1,11 +1,6 @@
-use crate::{
-    bindings::hostfxr::{
+use crate::{bindings::hostfxr::{
         hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t, PATH_SEPARATOR,
-    },
-    error::{HostingError, HostingResult},
-    hostfxr::{AppOrHostingResult, Hostfxr},
-    pdcstring::PdCStr,
-};
+    }, error::{HostingError, HostingResult}, hostfxr::{AppOrHostingResult, Hostfxr}, pdcstring::{PdCStr, PdUChar}};
 use coreclr_hosting_shared::char_t;
 #[cfg(feature = "sdk-resolver")]
 use once_cell::sync::Lazy;
@@ -123,14 +118,14 @@ impl Hostfxr {
         args: &[A],
     ) -> Result<Vec<PathBuf>, HostingError> {
         let args = args.iter().map(|s| s.as_ref().as_ptr()).collect::<Vec<_>>();
-        let mut buffer = Vec::new();
+        let mut buffer = Vec::<PdUChar>::new();
 
         let mut required_buffer_size = MaybeUninit::uninit();
         unsafe {
             self.0.hostfxr_get_native_search_directories(
                 args.len().try_into().unwrap(),
                 args.as_ptr(),
-                buffer.as_mut_ptr(),
+                buffer.as_mut_ptr().cast(),
                 0,
                 required_buffer_size.as_mut_ptr(),
             )
@@ -151,7 +146,7 @@ impl Hostfxr {
         unsafe { buffer.set_len(required_buffer_size.try_into().unwrap()) };
 
         let directories = buffer
-            .split(|&c| c == PATH_SEPARATOR)
+            .split(|&c| c == PATH_SEPARATOR as PdUChar)
             .map(|s| {
                 PdCStr::from_slice_with_nul(s)
                     .unwrap()
