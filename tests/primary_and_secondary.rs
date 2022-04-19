@@ -15,12 +15,6 @@ fn primary_is_primary() {
         .unwrap();
     assert!(context.is_primary());
     context.close().unwrap();
-
-    let context2 = hostfxr
-        .initialize_for_dotnet_command_line(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll"))
-        .unwrap();
-    assert!(context2.is_primary());
-    context2.close().unwrap();
 }
 
 #[test]
