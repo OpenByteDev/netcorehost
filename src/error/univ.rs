@@ -10,8 +10,8 @@ pub enum Error {
     #[error(transparent)]
     #[cfg(feature = "netcore3_0")]
     #[cfg_attr(
-        all(nightly, feature = "doc-cfg"),
-        attr(doc(cfg(feature = "netcore3_0")))
+        feature = "doc-cfg",
+        doc(cfg(feature = "netcore3_0"))
     )]
     GetFunctionPointer(#[from] crate::hostfxr::GetManagedFunctionError),
     /// An error while loading the hostfxr library.

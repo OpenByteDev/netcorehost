@@ -9,10 +9,6 @@ use crate::{
 };
 use std::{convert::TryInto, mem::MaybeUninit, ptr};
 
-#[cfg_attr(
-    all(nightly, feature = "doc-cfg"),
-    attr(doc(cfg(feature = "netcore3_0")))
-)]
 impl Hostfxr {
     /// Initializes the hosting components for a dotnet command line running an application
     ///
@@ -32,6 +28,10 @@ impl Hostfxr {
     /// This function parses the specified command-line arguments to determine the application to run. It will
     /// then find the corresponding `.runtimeconfig.json` and `.deps.json` with which to resolve frameworks and
     /// dependencies and prepare everything needed to load the runtime.
+    #[cfg_attr(
+        feature = "doc-cfg",
+        doc(cfg(feature = "netcore3_0"))
+    )]
     pub fn initialize_for_dotnet_command_line(
         &self,
         app_path: impl AsRef<PdCStr>,
@@ -63,6 +63,10 @@ impl Hostfxr {
     /// This function parses the specified command-line arguments to determine the application to run. It will
     /// then find the corresponding `.runtimeconfig.json` and `.deps.json` with which to resolve frameworks and
     /// dependencies and prepare everything needed to load the runtime.
+    #[cfg_attr(
+        feature = "doc-cfg",
+        doc(cfg(feature = "netcore3_0"))
+    )]
     pub fn initialize_for_dotnet_command_line_with_host_path(
         &self,
         app_path: impl AsRef<PdCStr>,
@@ -97,6 +101,10 @@ impl Hostfxr {
     /// This function parses the specified command-line arguments to determine the application to run. It will
     /// then find the corresponding `.runtimeconfig.json` and `.deps.json` with which to resolve frameworks and
     /// dependencies and prepare everything needed to load the runtime.
+    #[cfg_attr(
+        feature = "doc-cfg",
+        doc(cfg(feature = "netcore3_0"))
+    )]
     pub fn initialize_for_dotnet_command_line_with_dotnet_root(
         &self,
         app_path: impl AsRef<PdCStr>,
@@ -128,6 +136,10 @@ impl Hostfxr {
     /// This function parses the specified command-line arguments to determine the application to run. It will
     /// then find the corresponding `.runtimeconfig.json` and `.deps.json` with which to resolve frameworks and
     /// dependencies and prepare everything needed to load the runtime.
+    #[cfg_attr(
+        feature = "doc-cfg",
+        doc(cfg(feature = "netcore3_0"))
+    )]
     pub fn initialize_for_dotnet_command_line_with_args(
         &self,
         args: &[&PdCStr],
@@ -163,10 +175,9 @@ impl Hostfxr {
     /// This function parses the specified command-line arguments to determine the application to run. It will
     /// then find the corresponding `.runtimeconfig.json` and `.deps.json` with which to resolve frameworks and
     /// dependencies and prepare everything needed to load the runtime.
-    #[cfg(feature = "netcore3_0")]
     #[cfg_attr(
-        all(nightly, feature = "doc-cfg"),
-        attr(doc(cfg(feature = "netcore3_0")))
+        feature = "doc-cfg",
+        doc(cfg(feature = "netcore3_0"))
     )]
     pub fn initialize_for_dotnet_command_line_with_args_and_host_path(
         &self,
@@ -202,10 +213,9 @@ impl Hostfxr {
     /// This function parses the specified command-line arguments to determine the application to run. It will
     /// then find the corresponding `.runtimeconfig.json` and `.deps.json` with which to resolve frameworks and
     /// dependencies and prepare everything needed to load the runtime.
-    #[cfg(feature = "netcore3_0")]
     #[cfg_attr(
-        all(nightly, feature = "doc-cfg"),
-        attr(doc(cfg(feature = "netcore3_0")))
+        feature = "doc-cfg",
+        doc(cfg(feature = "netcore3_0"))
     )]
     pub fn initialize_for_dotnet_command_line_with_args_and_dotnet_root(
         &self,
@@ -217,11 +227,6 @@ impl Hostfxr {
         unsafe { self.initialize_for_dotnet_command_line_with_parameters(args, &parameters) }
     }
 
-    #[cfg(feature = "netcore3_0")]
-    #[cfg_attr(
-        all(nightly, feature = "doc-cfg"),
-        attr(doc(cfg(feature = "netcore3_0")))
-    )]
     unsafe fn initialize_for_dotnet_command_line_with_parameters(
         &self,
         args: &[&PdCStr],
@@ -269,6 +274,10 @@ impl Hostfxr {
     ///     Unlike with [`initialize_for_dotnet_command_line`], any `.deps.json` from the app/component will not be processed by the hosting layers.
     ///
     /// [`initialize_for_dotnet_command_line`]: Hostfxr::initialize_for_dotnet_command_line
+    #[cfg_attr(
+        feature = "doc-cfg",
+        doc(cfg(feature = "netcore3_0"))
+    )]
     pub fn initialize_for_runtime_config(
         &self,
         runtime_config_path: impl AsRef<PdCStr>,
@@ -302,6 +311,10 @@ impl Hostfxr {
     ///     This is used by PAL to initialize internal command line structures, process name and so on.
     ///
     /// [`initialize_for_dotnet_command_line`]: Hostfxr::initialize_for_dotnet_command_line
+    #[cfg_attr(
+        feature = "doc-cfg",
+        doc(cfg(feature = "netcore3_0"))
+    )]
     pub fn initialize_for_runtime_config_with_host_path(
         &self,
         runtime_config_path: impl AsRef<PdCStr>,
@@ -335,6 +348,10 @@ impl Hostfxr {
     ///     The path is used to search for shared frameworks and potentially SDKs.
     ///
     /// [`initialize_for_dotnet_command_line`]: Hostfxr::initialize_for_dotnet_command_line
+    #[cfg_attr(
+        feature = "doc-cfg",
+        doc(cfg(feature = "netcore3_0"))
+    )]
     pub fn initialize_for_runtime_config_with_dotnet_root(
         &self,
         runtime_config_path: impl AsRef<PdCStr>,

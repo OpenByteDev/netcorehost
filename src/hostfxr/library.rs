@@ -24,10 +24,6 @@ impl Hostfxr {
 
 /// Either the exit code of the app if it ran successful, otherwise the error from the hosting components.
 #[repr(transparent)]
-#[cfg_attr(
-    all(nightly, feature = "doc-cfg"),
-    attr(doc(cfg(feature = "netcore3_0")))
-)]
 pub struct AppOrHostingResult(i32);
 
 impl AppOrHostingResult {

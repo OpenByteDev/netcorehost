@@ -24,6 +24,10 @@ pub type ManagedFunctionWithUnknownSignature = ManagedFunction<RawFunctionPtr>;
 ///
 /// [`HostfxrContext`]: super::HostfxrContext
 #[derive(Clone)]
+#[cfg_attr(
+    feature = "doc-cfg",
+    doc(cfg(feature = "netcore3_0"))
+)]
 pub struct DelegateLoader {
     pub(crate) get_load_assembly_and_get_function_pointer:
         load_assembly_and_get_function_pointer_fn,
@@ -293,6 +297,11 @@ impl DelegateLoader {
 /// assembly from the given path on the first access.
 ///
 /// [`HostfxrContext`]: super::HostfxrContext
+#[cfg_attr(
+    feature = "doc-cfg",
+    doc(cfg(feature = "netcore3_0"))
+)]
+#[derive(Clone)]
 pub struct AssemblyDelegateLoader<A: AsRef<PdCStr>> {
     loader: DelegateLoader,
     assembly_path: A,
@@ -390,6 +399,10 @@ impl<'a, A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
 
 /// Enum for errors that can occur while loading a managed assembly or managed function pointers.
 #[derive(Error, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(
+    feature = "doc-cfg",
+    doc(cfg(feature = "netcore3_0"))
+)]
 pub enum GetManagedFunctionError {
     /// An error occured inside the hosting components.
     #[error("Error from hosting components: {}.", .0)]

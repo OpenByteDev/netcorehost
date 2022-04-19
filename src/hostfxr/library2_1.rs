@@ -13,10 +13,6 @@ use std::{
     slice,
 };
 
-#[cfg_attr(
-    all(nightly, feature = "doc-cfg"),
-    attr(doc(cfg(feature = "netcore2_1")))
-)]
 impl Hostfxr {
     /// Run an application.
     ///
@@ -34,6 +30,10 @@ impl Hostfxr {
     /// It will shutdown CoreCLR after the application executes.
     /// If the application is successfully executed, this value will return the exit code of the application.
     /// Otherwise, it will return an error code indicating the failure.
+    #[cfg_attr(
+        feature = "doc-cfg",
+        doc(cfg(feature = "netcore2_1"))
+    )]
     pub fn run_app_with_startup_info<A: AsRef<PdCStr>>(
         &self,
         args: &[A],
@@ -62,8 +62,8 @@ impl Hostfxr {
     ///  * `allow_prerelease` - allow resolution to return a pre-release SDK version
     #[cfg(feature = "sdk-resolver")]
     #[cfg_attr(
-        all(nightly, feature = "doc-cfg"),
-        attr(doc(cfg(feature = "sdk-resolver")))
+        feature = "doc-cfg",
+        doc(cfg(all(feature = "sdk-resolver", feature = "netcore2_1")))
     )]
     pub fn resolve_sdk(
         &self,
@@ -97,8 +97,8 @@ impl Hostfxr {
     ///  * `exe_dir` - path to the dotnet executable
     #[cfg(feature = "sdk-resolver")]
     #[cfg_attr(
-        all(nightly, feature = "doc-cfg"),
-        attr(doc(cfg(feature = "sdk-resolver")))
+        feature = "doc-cfg",
+        doc(cfg(all(feature = "sdk-resolver", feature = "netcore2_1")))
     )]
     pub fn get_available_sdks(&self, exe_dir: &PdCStr) -> Vec<PathBuf> {
         let sdk_dirs = GET_AVAILABLE_SDKS_MUTEX.lock();
