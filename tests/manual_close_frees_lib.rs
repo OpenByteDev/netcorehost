@@ -1,3 +1,5 @@
+#![cfg(feature = "netcore3_0")]
+
 use std::rc::Rc;
 
 use netcorehost::{nethost, pdcstr};

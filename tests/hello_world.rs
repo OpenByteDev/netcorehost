@@ -1,6 +1,7 @@
-use std::ptr;
+#![cfg(feature = "netcore3_0")]
 
 use netcorehost::{nethost, pdcstr};
+use std::ptr;
 
 #[path = "common.rs"]
 mod common;

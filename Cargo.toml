@@ -12,14 +12,16 @@ categories = ["api-bindings", "external-ffi-bindings"]
 keywords = ["nethost", "hostfxr", "dotnet", "bindings", "coreclr"]
 
 [dependencies]
-num_enum = "0.5"
-thiserror = "1.0"
+num_enum = { version = "0.5", default-features = false }
+thiserror = { version = "1.0", default-features = false }
 derive_more = { version = "0.99", default-features = false, features = ["deref", "from", "display"] }
 nethost-sys = { version = "0.2", optional = true, default-features = false }
-hostfxr-sys = "0.1"
-coreclr-hosting-shared = "0.1"
-destruct-drop = "0.1"
-ffi-opaque = "2.0"
+hostfxr-sys = { version = "0.3.1", default-features = false }
+coreclr-hosting-shared = { version = "0.1", default-features = false }
+destruct-drop = { version = "0.1", default-features = false }
+ffi-opaque = { version = "2.0", default-features = false }
+once_cell = { version = "1.5", optional = true, default-features = false, features = ["std"] }
+parking_lot = { version = "0.12", optional = true, default-features = false }
 
 [target.'cfg(windows)'.dependencies]
 widestring = "0.5"
@@ -35,9 +37,14 @@ glob = "0.3"
 widestring = "0.5"
 
 [features]
-default = ["nethost", "nethost-download"]
-nethost-download = ["nethost-sys/download-nuget"]
+default = ["nethost", "nethost-download", "netcore3_0", "sdk-resolver"]
+nethost-download = ["nethost", "nethost-sys/download-nuget"]
 nethost = ["nethost-sys"]
+sdk-resolver = ["once_cell", "parking_lot"]
+netcore1_0 = ["hostfxr-sys/netcore1_0"]
+netcore2_0 = ["hostfxr-sys/netcore2_0", "netcore1_0"]
+netcore2_1 = ["hostfxr-sys/netcore2_1", "netcore2_0"]
+netcore3_0 = ["hostfxr-sys/netcore3_0", "netcore2_1"]
 
 # Prevent downloading nethost library when building on docs.rs.
 [package.metadata.docs.rs]

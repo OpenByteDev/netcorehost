@@ -4,7 +4,8 @@ use netcorehost::{nethost, pdcstr};
 mod common;
 
 #[test]
-fn run_app() {
+#[cfg(feature = "netcore3_0")]
+fn run_app_with_context() {
     common::setup();
 
     let hostfxr = nethost::load_hostfxr().unwrap();
@@ -12,5 +13,15 @@ fn run_app() {
         .initialize_for_dotnet_command_line(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll"))
         .unwrap();
     let result = context.run_app().value();
+    assert_eq!(result, 42);
+}
+
+#[test]
+#[cfg(feature = "netcore4_0")]
+fn run_app_direct() {
+    common::setup();
+
+    let hostfxr = nethost::load_hostfxr().unwrap();
+    let result = hostfxr.run_app(&[]).value();
     assert_eq!(result, 42);
 }

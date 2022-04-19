@@ -1,3 +1,5 @@
+#![cfg(feature = "netcore3_0")]
+
 use netcorehost::{nethost, pdcstr};
 
 #[path = "common.rs"]

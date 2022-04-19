@@ -5,7 +5,9 @@ use crate::{
     },
     dlopen::wrapper::Container,
     error::{HostingError, HostingResult, HostingSuccess},
-    hostfxr::{AssemblyDelegateLoader, DelegateLoader, Hostfxr},
+    hostfxr::{
+        AppOrHostingResult, AssemblyDelegateLoader, DelegateLoader, Hostfxr, RawFunctionPtr,
+    },
     pdcstring::{PdCStr, PdCString},
 };
 
@@ -20,19 +22,29 @@ use std::{
 
 use destruct_drop::DestructDrop;
 
-use super::RawFunctionPtr;
-
 /// A marker struct indicating that the context was initialized with a runtime config.
 /// This means that it is not possible to run the application associated with the context.
+#[cfg_attr(
+    all(nightly, feature = "doc-cfg"),
+    attr(doc(cfg(feature = "netcore3_0")))
+)]
 pub struct InitializedForRuntimeConfig;
 
 /// A marker struct indicating that the context was initialized for the dotnet command line.
 /// This means that it is possible to run the application associated with the context.
+#[cfg_attr(
+    all(nightly, feature = "doc-cfg"),
+    attr(doc(cfg(feature = "netcore3_0")))
+)]
 pub struct InitializedForCommandLine;
 
 /// Handle of a loaded [`HostfxrContext`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(transparent)]
+#[cfg_attr(
+    all(nightly, feature = "doc-cfg"),
+    attr(doc(cfg(feature = "netcore3_0")))
+)]
 pub struct HostfxrHandle(NonNull<c_void>);
 
 impl HostfxrHandle {
@@ -63,6 +75,10 @@ pub(crate) type HostfxrLibrary = Container<wrapper::Hostfxr>;
 
 /// State which hostfxr creates and maintains and represents a logical operation on the hosting components.
 #[derive(DestructDrop)]
+#[cfg_attr(
+    all(nightly, feature = "doc-cfg"),
+    attr(doc(cfg(feature = "netcore3_0")))
+)]
 pub struct HostfxrContext<I> {
     handle: HostfxrHandle,
     hostfxr: Rc<HostfxrLibrary>,
@@ -408,33 +424,5 @@ impl HostfxrContext<InitializedForCommandLine> {
 impl<I> Drop for HostfxrContext<I> {
     fn drop(&mut self) {
         let _ = unsafe { self._close() };
-    }
-}
-
-/// Either the exit code of the app if it ran successful, otherwise the error from the hosting components.
-#[repr(transparent)]
-pub struct AppOrHostingResult(i32);
-
-impl AppOrHostingResult {
-    /// Gets the raw value of the result.
-    #[must_use]
-    pub fn value(self) -> i32 {
-        self.0
-    }
-    /// Converts the result to an hosting exit code.
-    pub fn as_hosting_exit_code(self) -> HostingResult {
-        HostingResult::from(self.0)
-    }
-}
-
-impl From<AppOrHostingResult> for i32 {
-    fn from(code: AppOrHostingResult) -> Self {
-        code.value()
-    }
-}
-
-impl From<i32> for AppOrHostingResult {
-    fn from(code: i32) -> Self {
-        Self(code)
     }
 }
