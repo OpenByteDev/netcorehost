@@ -107,7 +107,7 @@ impl<I> HostfxrContext<I> {
     /// There can only be a single primary context in a process.
     ///
     /// # Note
-    /// https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/native-hosting.md#synchronization
+    /// <https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/native-hosting.md#synchronization>
     #[must_use]
     pub fn is_primary(&self) -> bool {
         self.is_primary
