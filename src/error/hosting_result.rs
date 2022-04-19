@@ -1,5 +1,5 @@
 use std::convert::TryFrom;
-#[cfg(feature = "nightly")]
+#[cfg(nightly)]
 use std::ops::{ControlFlow, FromResidual, Try};
 
 use crate::bindings;
@@ -116,7 +116,7 @@ impl From<HostingError> for HostingResult {
     }
 }
 
-#[cfg(feature = "nightly")]
+#[cfg(nightly)]
 impl Try for HostingResult {
     type Output = HostingSuccess;
     type Residual = HostingError;
@@ -131,7 +131,7 @@ impl Try for HostingResult {
     }
 }
 
-#[cfg(feature = "nightly")]
+#[cfg(nightly)]
 impl FromResidual for HostingResult {
     fn from_residual(r: HostingError) -> Self {
         HostingResult(Err(r))
