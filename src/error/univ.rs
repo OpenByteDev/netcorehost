@@ -9,10 +9,7 @@ pub enum Error {
     /// An error while loading a function pointer to a managed method.
     #[error(transparent)]
     #[cfg(feature = "netcore3_0")]
-    #[cfg_attr(
-        feature = "doc-cfg",
-        doc(cfg(feature = "netcore3_0"))
-    )]
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
     GetFunctionPointer(#[from] crate::hostfxr::GetManagedFunctionError),
     /// An error while loading the hostfxr library.
     #[error(transparent)]

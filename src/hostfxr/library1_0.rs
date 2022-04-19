@@ -1,6 +1,6 @@
 use crate::{
+    hostfxr::{AppOrHostingResult, Hostfxr},
     pdcstring::PdCStr,
-    hostfxr::{Hostfxr, AppOrHostingResult}
 };
 
 impl Hostfxr {
@@ -14,16 +14,11 @@ impl Hostfxr {
     /// If the application is successfully executed, this value will return the exit code of the application.
     /// Otherwise, it will return an error code indicating the failure.
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore1_0")))]
-    pub fn run_app<A: AsRef<PdCStr>>(
-        &self,
-        args: &[A]
-    ) -> AppOrHostingResult {
+    pub fn run_app<A: AsRef<PdCStr>>(&self, args: &[A]) -> AppOrHostingResult {
         let args = args.iter().map(|s| s.as_ref().as_ptr()).collect::<Vec<_>>();
         let result = unsafe {
-            self.0.hostfxr_main(
-                args.len().try_into().unwrap(),
-                args.as_ptr(),
-            )
+            self.0
+                .hostfxr_main(args.len().try_into().unwrap(), args.as_ptr())
         };
         AppOrHostingResult::from(result)
     }

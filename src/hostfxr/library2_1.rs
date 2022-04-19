@@ -1,6 +1,11 @@
-use crate::{bindings::hostfxr::{
+use crate::{
+    bindings::hostfxr::{
         hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t, PATH_SEPARATOR,
-    }, error::{HostingError, HostingResult}, hostfxr::{AppOrHostingResult, Hostfxr}, pdcstring::{PdCStr, PdUChar}};
+    },
+    error::{HostingError, HostingResult},
+    hostfxr::{AppOrHostingResult, Hostfxr},
+    pdcstring::{PdCStr, PdUChar},
+};
 use coreclr_hosting_shared::char_t;
 #[cfg(feature = "sdk-resolver")]
 use once_cell::sync::Lazy;
@@ -30,10 +35,7 @@ impl Hostfxr {
     /// It will shutdown CoreCLR after the application executes.
     /// If the application is successfully executed, this value will return the exit code of the application.
     /// Otherwise, it will return an error code indicating the failure.
-    #[cfg_attr(
-        feature = "doc-cfg",
-        doc(cfg(feature = "netcore2_1"))
-    )]
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
     pub fn run_app_with_startup_info<A: AsRef<PdCStr>>(
         &self,
         args: &[A],

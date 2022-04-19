@@ -24,27 +24,18 @@ use destruct_drop::DestructDrop;
 
 /// A marker struct indicating that the context was initialized with a runtime config.
 /// This means that it is not possible to run the application associated with the context.
-#[cfg_attr(
-    feature = "doc-cfg",
-    doc(cfg(feature = "netcore3_0"))
-)]
+#[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
 pub struct InitializedForRuntimeConfig;
 
 /// A marker struct indicating that the context was initialized for the dotnet command line.
 /// This means that it is possible to run the application associated with the context.
-#[cfg_attr(
-    feature = "doc-cfg",
-    doc(cfg(feature = "netcore3_0"))
-)]
+#[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
 pub struct InitializedForCommandLine;
 
 /// Handle of a loaded [`HostfxrContext`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(transparent)]
-#[cfg_attr(
-    feature = "doc-cfg",
-    doc(cfg(feature = "netcore3_0"))
-)]
+#[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
 pub struct HostfxrHandle(NonNull<c_void>);
 
 impl HostfxrHandle {
@@ -75,10 +66,7 @@ pub(crate) type HostfxrLibrary = Container<wrapper::Hostfxr>;
 
 /// State which hostfxr creates and maintains and represents a logical operation on the hosting components.
 #[derive(DestructDrop)]
-#[cfg_attr(
-    feature = "doc-cfg",
-    doc(cfg(feature = "netcore3_0"))
-)]
+#[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
 pub struct HostfxrContext<I> {
     handle: HostfxrHandle,
     hostfxr: Rc<HostfxrLibrary>,
