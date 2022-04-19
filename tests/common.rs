@@ -1,10 +1,12 @@
 use glob::glob;
 use std::process::Command;
 
+#[allow(unused)]
 pub fn setup() {
     build_test_project();
 }
 
+#[allow(unused)]
 pub fn build_test_project() {
     if glob("tests/Test/bin/**/Test.runtimeconfig.json")
         .unwrap()
