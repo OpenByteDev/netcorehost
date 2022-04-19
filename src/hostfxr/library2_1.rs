@@ -216,8 +216,8 @@ impl ResolveSdkResult {
     #[must_use]
     pub fn into_path(self) -> PathBuf {
         match self {
-            ResolveSdkResult::ResolvedSdkDirectory(path) => path,
-            ResolveSdkResult::GlobalJsonPath(path) => path,
+            ResolveSdkResult::GlobalJsonPath(path)
+            | ResolveSdkResult::ResolvedSdkDirectory(path) => path,
         }
     }
 
@@ -225,8 +225,8 @@ impl ResolveSdkResult {
     #[must_use]
     pub fn path(&self) -> &Path {
         match self {
-            ResolveSdkResult::ResolvedSdkDirectory(path) => path,
-            ResolveSdkResult::GlobalJsonPath(path) => path,
+            ResolveSdkResult::GlobalJsonPath(path)
+            | ResolveSdkResult::ResolvedSdkDirectory(path) => path,
         }
     }
 }
