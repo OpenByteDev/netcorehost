@@ -1,4 +1,10 @@
+#![feature(exit_status_error)]
+
 use netcorehost::{nethost, pdcstr};
+use std::{
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 #[path = "common.rs"]
 mod common;
@@ -10,26 +16,42 @@ fn resolve_sdk() {
     let sdk = hostfxr
         .resolve_sdk(pdcstr!("."), pdcstr!("."), true)
         .unwrap();
-    let sdks = hostfxr.get_available_sdks(pdcstr!("."));
-    assert!(sdks.contains(&sdk.into_path()));
+
+    let actual_sdks = get_sdks();
+    assert!(actual_sdks.contains(&sdk.into_path()));
 }
 
 #[test]
 #[cfg(all(feature = "netcore3_0", feature = "sdk-resolver"))]
 fn list_sdks() {
     let hostfxr = nethost::load_hostfxr().unwrap();
-    let sdks = hostfxr.get_available_sdks(pdcstr!("."));
-    assert!(!sdks.is_empty());
+    let mut sdks = hostfxr.get_available_sdks(pdcstr!("."));
+    let mut actual_sdks = get_sdks();
+    sdks.sort();
+    actual_sdks.sort();
+    assert_eq!(actual_sdks, sdks);
 }
 
 #[test]
 #[cfg(all(feature = "netcore2_1"))]
 fn get_native_search_directories() {
-    use netcorehost::pdcstring::PdCStr;
+    common::setup();
 
     let hostfxr = nethost::load_hostfxr().unwrap();
-    let sdks = hostfxr
-        .get_native_search_directories::<&PdCStr>(&[])
+    hostfxr
+        .get_native_search_directories(pdcstr!(".\\tests\\Test\\bin\\Debug\\net5.0\\Test.exe"))
         .unwrap();
-    assert!(!sdks.is_empty());
+}
+
+fn get_sdks() -> Vec<PathBuf> {
+    let sdks_output = Command::new("dotnet").arg("--list-sdks").output().unwrap();
+    sdks_output.status.exit_ok().unwrap();
+
+    String::from_utf8_lossy(&sdks_output.stdout)
+        .lines()
+        .map(|line| {
+            let (version, path) = line.split_once(" ").unwrap();
+            Path::new(&path[1..(path.len() - 1)]).join(version)
+        })
+        .collect::<Vec<_>>()
 }

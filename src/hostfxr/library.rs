@@ -24,6 +24,7 @@ impl Hostfxr {
 
 /// Either the exit code of the app if it ran successful, otherwise the error from the hosting components.
 #[repr(transparent)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AppOrHostingResult(i32);
 
 impl AppOrHostingResult {

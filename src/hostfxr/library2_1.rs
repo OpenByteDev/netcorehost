@@ -13,6 +13,7 @@ use once_cell::sync::Lazy;
 use parking_lot::ReentrantMutex;
 use std::{
     cell::RefCell,
+    io, iter,
     mem::MaybeUninit,
     path::{Path, PathBuf},
     slice,
@@ -36,14 +37,17 @@ impl Hostfxr {
     /// If the application is successfully executed, this value will return the exit code of the application.
     /// Otherwise, it will return an error code indicating the failure.
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
-    pub fn run_app_with_startup_info<A: AsRef<PdCStr>>(
+    pub fn run_app_with_args_and_startup_info<A: AsRef<PdCStr>>(
         &self,
+        app_path: &PdCStr,
         args: &[A],
         host_path: &PdCStr,
         dotnet_root: &PdCStr,
-        app_path: &PdCStr,
-    ) -> AppOrHostingResult {
-        let args = args.iter().map(|s| s.as_ref().as_ptr()).collect::<Vec<_>>();
+    ) -> io::Result<AppOrHostingResult> {
+        let args = iter::once(app_path)
+            .chain(args.iter().map(|s| s.as_ref()))
+            .map(|s| s.as_ptr())
+            .collect::<Vec<_>>();
         let result = unsafe {
             self.0.hostfxr_main_startupinfo(
                 args.len().try_into().unwrap(),
@@ -53,7 +57,7 @@ impl Hostfxr {
                 app_path.as_ptr(),
             )
         };
-        AppOrHostingResult::from(result)
+        Ok(AppOrHostingResult::from(result))
     }
 
     /// Determine the directory location of the SDK, accounting for `global.json` and multi-level lookup policy.
@@ -115,18 +119,17 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `args` - command-line arguments
-    pub fn get_native_search_directories<A: AsRef<PdCStr>>(
+    pub fn get_native_search_directories(
         &self,
-        args: &[A],
+        app_path: &PdCStr,
     ) -> Result<Vec<PathBuf>, HostingError> {
-        let args = args.iter().map(|s| s.as_ref().as_ptr()).collect::<Vec<_>>();
         let mut buffer = Vec::<PdUChar>::new();
 
         let mut required_buffer_size = MaybeUninit::uninit();
         unsafe {
             self.0.hostfxr_get_native_search_directories(
-                args.len().try_into().unwrap(),
-                args.as_ptr(),
+                1,
+                [app_path.as_ptr()].as_ptr(),
                 buffer.as_mut_ptr().cast(),
                 0,
                 required_buffer_size.as_mut_ptr(),
@@ -137,8 +140,8 @@ impl Hostfxr {
         buffer.reserve(required_buffer_size.try_into().unwrap());
         let result = unsafe {
             self.0.hostfxr_get_native_search_directories(
-                args.len().try_into().unwrap(),
-                args.as_ptr(),
+                1,
+                [app_path.as_ptr()].as_ptr(),
                 buffer.spare_capacity_mut().as_mut_ptr().cast(),
                 buffer.spare_capacity_mut().len().try_into().unwrap(),
                 &mut required_buffer_size,
@@ -147,15 +150,16 @@ impl Hostfxr {
         HostingResult::from(result).into_result()?;
         unsafe { buffer.set_len(required_buffer_size.try_into().unwrap()) };
 
-        let directories = buffer
-            .split(|&c| c == PATH_SEPARATOR as PdUChar)
-            .map(|s| {
-                PdCStr::from_slice_with_nul(s)
-                    .unwrap()
-                    .to_os_string()
-                    .into()
-            })
-            .collect::<Vec<_>>();
+        let mut directories = Vec::new();
+        let last_start = 0;
+        for i in 0..buffer.len() {
+            if buffer[i] == PATH_SEPARATOR as PdUChar || buffer[i] == 0 {
+                buffer[i] = 0;
+                let directory = PdCStr::from_slice_with_nul(&buffer[last_start..=i]).unwrap();
+                directories.push(PathBuf::from(directory.to_os_string()));
+                break;
+            }
+        }
 
         Ok(directories)
     }
