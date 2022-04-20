@@ -1,5 +1,3 @@
-#![feature(exit_status_error)]
-
 use netcorehost::{nethost, pdcstr};
 use std::{
     path::{Path, PathBuf},
@@ -45,7 +43,7 @@ fn get_native_search_directories() {
 
 fn get_sdks() -> Vec<PathBuf> {
     let sdks_output = Command::new("dotnet").arg("--list-sdks").output().unwrap();
-    sdks_output.status.exit_ok().unwrap();
+    assert!(sdks_output.status.success());
 
     String::from_utf8_lossy(&sdks_output.stdout)
         .lines()
