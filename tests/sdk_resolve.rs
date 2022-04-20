@@ -37,7 +37,7 @@ fn get_native_search_directories() {
 
     let hostfxr = nethost::load_hostfxr().unwrap();
     hostfxr
-        .get_native_search_directories(pdcstr!(".\\tests\\Test\\bin\\Debug\\net5.0\\Test.exe"))
+        .get_native_search_directories(pdcstr!(".\\tests\\Test\\bin\\Debug\\net5.0\\Test.dll"))
         .unwrap();
 }
 
