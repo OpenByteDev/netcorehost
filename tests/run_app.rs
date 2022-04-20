@@ -24,7 +24,7 @@ rusty_fork_test! {
         common::setup();
 
         let hostfxr = nethost::load_hostfxr().unwrap();
-        let result = hostfxr.run_app(pdcstr!(".\\tests\\Test\\bin\\Debug\\net5.0\\Test.exe"));
+        let result = hostfxr.run_app(pdcstr!("./tests/Test/bin/Debug/net5.0/Test.dll"));
         assert_eq!(result.value(), 42);
     }
 }
