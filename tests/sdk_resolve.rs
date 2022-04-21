@@ -26,9 +26,12 @@ fn resolve_sdk() {
 #[cfg(all(feature = "netcore3_0", feature = "sdk-resolver"))]
 fn list_sdks() {
     let hostfxr = nethost::load_hostfxr().unwrap();
-    let dotnet_path = which::which("dotnet").unwrap();
-    let mut sdks = hostfxr.get_available_sdks(&PdCString::from_os_str(&dotnet_path).unwrap());
+    
     let mut actual_sdks = get_sdks();
+    let sdks_dir = actual_sdks.first().unwrap().parent().unwrap().parent().unwrap();
+
+    let mut sdks = hostfxr.get_available_sdks(&PdCString::from_os_str(sdks_dir).unwrap());
+
     sdks.sort();
     actual_sdks.sort();
     assert_eq!(actual_sdks, sdks);
@@ -41,7 +44,7 @@ fn get_native_search_directories() {
 
     let hostfxr = nethost::load_hostfxr().unwrap();
     hostfxr
-        .get_native_search_directories(pdcstr!(".\\tests\\Test\\bin\\Debug\\net6.0\\Test.dll"))
+        .get_native_search_directories(pdcstr!("./tests/Test/bin/Debug/net6.0/Test.dll"))
         .unwrap();
 }
 

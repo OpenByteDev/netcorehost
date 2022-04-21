@@ -36,7 +36,6 @@ platforms = "2.0"
 glob = "0.3"
 widestring = "0.5"
 rusty-fork = "0.3"
-which = "4.2"
 
 [features]
 default = ["nethost", "nethost-download", "netcore3_0", "sdk-resolver"]
