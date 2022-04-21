@@ -11,12 +11,14 @@ mod common;
 #[cfg(all(feature = "netcore3_0", feature = "sdk-resolver"))]
 fn resolve_sdk() {
     let hostfxr = nethost::load_hostfxr().unwrap();
-    let dotnet_path = which::which("dotnet").unwrap();
-    let sdk = hostfxr
-        .resolve_sdk(&PdCString::from_os_str(&dotnet_path).unwrap(), pdcstr!("."), true)
-        .unwrap();
 
     let actual_sdks = get_sdks();
+    let sdks_dir = actual_sdks.first().unwrap().parent().unwrap().parent().unwrap();
+
+    let sdk = hostfxr
+        .resolve_sdk(&PdCString::from_os_str(sdks_dir).unwrap(), pdcstr!("."), true)
+        .unwrap();
+
     assert!(actual_sdks.contains(&sdk.into_path()));
 }
 

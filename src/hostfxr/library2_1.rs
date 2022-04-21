@@ -67,7 +67,7 @@ impl Hostfxr {
     /// Determine the directory location of the SDK, accounting for `global.json` and multi-level lookup policy.
     ///
     /// # Arguments
-    ///  * `exe_dir` - main directory where SDKs are located in `sdk\[version]` sub-folders.
+    ///  * `sdk_dir` - main directory where SDKs are located in `sdk\[version]` sub-folders.
     ///  * `working_dir` - directory where the search for `global.json` will start and proceed upwards
     ///  * `allow_prerelease` - allow resolution to return a pre-release SDK version
     #[cfg(feature = "sdk-resolver")]
@@ -77,7 +77,7 @@ impl Hostfxr {
     )]
     pub fn resolve_sdk(
         &self,
-        exe_dir: &PdCStr,
+        sdk_dir: &PdCStr,
         working_dir: &PdCStr,
         allow_prerelease: bool,
     ) -> Result<ResolveSdkResult, HostingError> {
@@ -90,7 +90,7 @@ impl Hostfxr {
         };
         let result = unsafe {
             self.0.hostfxr_resolve_sdk2(
-                exe_dir.as_ptr(),
+                sdk_dir.as_ptr(),
                 working_dir.as_ptr(),
                 flags,
                 resolve_sdk2_callback,
