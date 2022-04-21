@@ -12,7 +12,7 @@ fn runtime_properties() {
     let hostfxr = nethost::load_hostfxr().unwrap();
     let context = hostfxr
         .initialize_for_runtime_config(pdcstr!(
-            "tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json"
+            "tests/Test/bin/Debug/net6.0/Test.runtimeconfig.json"
         ))
         .unwrap();
 

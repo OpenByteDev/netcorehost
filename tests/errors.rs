@@ -13,11 +13,11 @@ fn get_function_pointer() {
 
     let context = hostfxr
         .initialize_for_runtime_config(pdcstr!(
-            "tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json"
+            "tests/Test/bin/Debug/net6.0/Test.runtimeconfig.json"
         ))
         .unwrap();
     let fn_loader = context
-        .get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll"))
+        .get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net6.0/Test.dll"))
         .unwrap();
 
     let invalid_method_name = fn_loader.get_function_with_default_signature(
@@ -100,7 +100,7 @@ fn get_delegate_loader_for_assembly() {
 
     let context = hostfxr
         .initialize_for_runtime_config(pdcstr!(
-            "tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json"
+            "tests/Test/bin/Debug/net6.0/Test.runtimeconfig.json"
         ))
         .unwrap();
 

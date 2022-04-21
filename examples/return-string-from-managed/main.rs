@@ -22,10 +22,10 @@ fn main() {
     dotnet_build::build_example_project("return-string-from-managed");
 
     let hostfxr = nethost::load_hostfxr().unwrap();
-    let context = hostfxr.initialize_for_runtime_config(pdcstr!("examples/return-string-from-managed/ExampleProject/bin/Debug/net5.0/ExampleProject.runtimeconfig.json")).unwrap();
+    let context = hostfxr.initialize_for_runtime_config(pdcstr!("examples/return-string-from-managed/ExampleProject/bin/Debug/net6.0/ExampleProject.runtimeconfig.json")).unwrap();
     let delegate_loader = context
         .get_delegate_loader_for_assembly(pdcstr!(
-            "examples/return-string-from-managed/ExampleProject/bin/Debug/net5.0/ExampleProject.dll"
+            "examples/return-string-from-managed/ExampleProject/bin/Debug/net6.0/ExampleProject.dll"
         ))
         .unwrap();
 
