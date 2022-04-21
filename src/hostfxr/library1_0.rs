@@ -18,10 +18,7 @@ impl Hostfxr {
         self.run_app_with_args::<&PdCStr>(app_path, &[])
     }
 
-    /// Run an application.
-    ///
-    /// # Arguments
-    ///  * `args` - command-line arguments
+    /// Run an application with the specified arguments.
     ///
     /// # Note
     /// This function does not return until the application completes execution.

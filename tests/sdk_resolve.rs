@@ -1,4 +1,4 @@
-use netcorehost::{nethost, pdcstr};
+use netcorehost::{nethost, pdcstr, pdcstring::PdCString};
 use std::{
     path::{Path, PathBuf},
     process::Command,
@@ -11,8 +11,9 @@ mod common;
 #[cfg(all(feature = "netcore3_0", feature = "sdk-resolver"))]
 fn resolve_sdk() {
     let hostfxr = nethost::load_hostfxr().unwrap();
+    let dotnet_path = which::which("dotnet").unwrap();
     let sdk = hostfxr
-        .resolve_sdk(pdcstr!("."), pdcstr!("."), true)
+        .resolve_sdk(&PdCString::from_os_str(&dotnet_path).unwrap(), pdcstr!("."), true)
         .unwrap();
 
     let actual_sdks = get_sdks();
@@ -23,7 +24,8 @@ fn resolve_sdk() {
 #[cfg(all(feature = "netcore3_0", feature = "sdk-resolver"))]
 fn list_sdks() {
     let hostfxr = nethost::load_hostfxr().unwrap();
-    let mut sdks = hostfxr.get_available_sdks(pdcstr!("."));
+    let dotnet_path = which::which("dotnet").unwrap();
+    let mut sdks = hostfxr.get_available_sdks(&PdCString::from_os_str(&dotnet_path).unwrap());
     let mut actual_sdks = get_sdks();
     sdks.sort();
     actual_sdks.sort();

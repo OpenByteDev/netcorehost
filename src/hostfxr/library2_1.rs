@@ -122,7 +122,7 @@ impl Hostfxr {
     /// Get the native search directories of the runtime based upon the specified app.
     ///
     /// # Arguments
-    ///  * `args` - command-line arguments
+    ///  * `app_path` - path to application
     pub fn get_native_search_directories(
         &self,
         app_path: &PdCStr,
