@@ -4,7 +4,8 @@ use crate::{
     },
     error::{HostingError, HostingResult},
     hostfxr::{AppOrHostingResult, Hostfxr},
-    pdcstring::{PdCStr, PdUChar}, pdcstr,
+    pdcstr,
+    pdcstring::{PdCStr, PdUChar},
 };
 use coreclr_hosting_shared::char_t;
 #[cfg(feature = "sdk-resolver")]
@@ -44,11 +45,12 @@ impl Hostfxr {
         host_path: &PdCStr,
         dotnet_root: &PdCStr,
     ) -> io::Result<AppOrHostingResult> {
-        let args = [pdcstr!("dotnet"), app_path].into_iter()
+        let args = [pdcstr!("dotnet"), app_path]
+            .into_iter()
             .chain(args.iter().map(|s| s.as_ref()))
             .map(|s| s.as_ptr())
             .collect::<Vec<_>>();
-        
+
         let result = unsafe {
             self.0.hostfxr_main_startupinfo(
                 args.len().try_into().unwrap(),
@@ -58,7 +60,7 @@ impl Hostfxr {
                 app_path.as_ptr(),
             )
         };
-        
+
         Ok(AppOrHostingResult::from(result))
     }
 
