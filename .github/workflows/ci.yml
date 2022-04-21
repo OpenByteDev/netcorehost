@@ -30,10 +30,11 @@ jobs:
             os: macos-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install latest .NET SDK
+    - name: Install .NET SDK 6.0
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: '5.0.x'
+        dotnet-version: '6.0.x'
+        include-prerelease: true
     - name: Install latest ${{ matrix.toolchain }}
       uses: actions-rs/toolchain@v1
       with:
