@@ -13,7 +13,8 @@
     clippy::doc_markdown,
     clippy::cast_sign_loss,
     clippy::shadow_unrelated,
-    clippy::redundant_closure_for_method_calls
+    clippy::redundant_closure_for_method_calls,
+    clippy::transmute_ptr_to_ptr
 )]
 
 //! A Rust library for hosting the .NET Core runtime.
