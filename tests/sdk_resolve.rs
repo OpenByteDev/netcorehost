@@ -13,10 +13,20 @@ fn resolve_sdk() {
     let hostfxr = nethost::load_hostfxr().unwrap();
 
     let actual_sdks = get_sdks();
-    let sdks_dir = actual_sdks.first().unwrap().parent().unwrap().parent().unwrap();
+    let sdks_dir = actual_sdks
+        .first()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap();
 
     let sdk = hostfxr
-        .resolve_sdk(&PdCString::from_os_str(sdks_dir).unwrap(), pdcstr!("."), true)
+        .resolve_sdk(
+            &PdCString::from_os_str(sdks_dir).unwrap(),
+            pdcstr!("."),
+            true,
+        )
         .unwrap();
 
     assert!(actual_sdks.contains(&sdk.into_path()));
@@ -26,9 +36,15 @@ fn resolve_sdk() {
 #[cfg(all(feature = "netcore3_0", feature = "sdk-resolver"))]
 fn list_sdks() {
     let hostfxr = nethost::load_hostfxr().unwrap();
-    
+
     let mut actual_sdks = get_sdks();
-    let sdks_dir = actual_sdks.first().unwrap().parent().unwrap().parent().unwrap();
+    let sdks_dir = actual_sdks
+        .first()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap();
 
     let mut sdks = hostfxr.get_available_sdks(&PdCString::from_os_str(sdks_dir).unwrap());
 
@@ -38,14 +54,15 @@ fn list_sdks() {
 }
 
 #[test]
-#[cfg(all(feature = "netcore2_1"))]
+#[cfg(all(feature = "netcore2_1", windows))]
 fn get_native_search_directories() {
     common::setup();
 
     let hostfxr = nethost::load_hostfxr().unwrap();
-    hostfxr
-        .get_native_search_directories(pdcstr!("./tests/Test/bin/Debug/net6.0/Test.dll"))
+    let dirs = hostfxr
+        .get_native_search_directories(pdcstr!("tests/Test/bin/Debug/net6.0/Test.dll"))
         .unwrap();
+    dbg!(dirs);
 }
 
 fn get_sdks() -> Vec<PathBuf> {

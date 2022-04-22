@@ -1,23 +1,26 @@
 use crate::{
-    bindings::hostfxr::{
-        hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t, PATH_SEPARATOR,
-    },
-    error::{HostingError, HostingResult},
     hostfxr::{AppOrHostingResult, Hostfxr},
     pdcstr,
-    pdcstring::{PdCStr, PdUChar},
+    pdcstring::PdCStr,
 };
-use coreclr_hosting_shared::char_t;
-#[cfg(feature = "sdk-resolver")]
-use once_cell::sync::Lazy;
-#[cfg(feature = "sdk-resolver")]
-use parking_lot::ReentrantMutex;
 use std::{
-    cell::RefCell,
     io,
-    mem::MaybeUninit,
     path::{Path, PathBuf},
-    slice,
+};
+
+#[cfg(feature = "sdk-resolver")]
+use {
+    crate::{
+        bindings::hostfxr::{
+            hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t, PATH_SEPARATOR,
+        },
+        error::{HostingError, HostingResult},
+        pdcstring::{PdCString, PdUChar},
+    },
+    coreclr_hosting_shared::char_t,
+    once_cell::sync::Lazy,
+    parking_lot::ReentrantMutex,
+    std::{cell::RefCell, mem::MaybeUninit, slice},
 };
 
 impl Hostfxr {
@@ -123,17 +126,26 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `app_path` - path to application
+    #[cfg(feature = "sdk-resolver")]
+    #[cfg_attr(
+        feature = "doc-cfg",
+        doc(cfg(all(feature = "sdk-resolver", feature = "netcore2_1")))
+    )]
     pub fn get_native_search_directories(
         &self,
         app_path: &PdCStr,
     ) -> Result<Vec<PathBuf>, HostingError> {
         let mut buffer = Vec::<PdUChar>::new();
+        let args = [
+            pdcstr!("dotnet").as_ptr(),
+            app_path.as_ptr(),
+        ];
 
         let mut required_buffer_size = MaybeUninit::uninit();
         unsafe {
             self.0.hostfxr_get_native_search_directories(
-                2,
-                [pdcstr!("dotnet").as_ptr(), app_path.as_ptr()].as_ptr(),
+                args.len().try_into().unwrap(),
+                args.as_ptr(),
                 buffer.as_mut_ptr().cast(),
                 0,
                 required_buffer_size.as_mut_ptr(),
@@ -144,8 +156,8 @@ impl Hostfxr {
         buffer.reserve(required_buffer_size.try_into().unwrap());
         let result = unsafe {
             self.0.hostfxr_get_native_search_directories(
-                2,
-                [pdcstr!("dotnet").as_ptr(), app_path.as_ptr()].as_ptr(),
+                args.len().try_into().unwrap(),
+                args.as_ptr(),
                 buffer.spare_capacity_mut().as_mut_ptr().cast(),
                 buffer.spare_capacity_mut().len().try_into().unwrap(),
                 &mut required_buffer_size,
