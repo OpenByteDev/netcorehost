@@ -33,7 +33,7 @@ cstr = "0.2"
 
 [dev-dependencies]
 trybuild = "1.0"
-platforms = "2.0"
+current_platform = "0.2"
 glob = "0.3"
 widestring = "0.5"
 rusty-fork = "0.3"

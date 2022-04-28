@@ -24,7 +24,7 @@ fn correct_reexports() {
     let exit_status = Command::new("cargo")
         .arg("build")
         .arg("--target")
-        .arg(platforms::Platform::guess_current().unwrap().target_triple)
+        .arg(current_platform::CURRENT_PLATFORM)
         .current_dir("tests/macro-test-crate")
         .spawn()
         .unwrap()
