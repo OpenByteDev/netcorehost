@@ -1,5 +1,5 @@
 use crate::{
-    hostfxr::{AppOrHostingResult, Hostfxr, dotnet_paths::DOTNET_BIN_PDC},
+    hostfxr::{dotnet_paths::DOTNET_BIN_PDC, AppOrHostingResult, Hostfxr},
     pdcstring::PdCStr,
 };
 

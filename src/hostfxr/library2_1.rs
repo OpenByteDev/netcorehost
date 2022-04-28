@@ -15,8 +15,8 @@ use {
             hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t, PATH_SEPARATOR,
         },
         error::{HostingError, HostingResult},
+        hostfxr::dotnet_paths::DOTNET_BIN_PDC,
         pdcstring::PdUChar,
-        hostfxr::dotnet_paths::DOTNET_BIN_PDC
     },
     coreclr_hosting_shared::char_t,
     once_cell::sync::Lazy,
