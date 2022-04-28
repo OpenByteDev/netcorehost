@@ -42,3 +42,5 @@ mod managed_function;
 #[cfg(feature = "netcore3_0")]
 #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
 pub use managed_function::*;
+
+mod dotnet_paths;

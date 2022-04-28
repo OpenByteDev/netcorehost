@@ -54,15 +54,14 @@ fn list_sdks() {
 }
 
 #[test]
-#[cfg(all(feature = "netcore2_1", windows))]
+#[cfg(all(feature = "netcore2_1"))]
 fn get_native_search_directories() {
     common::setup();
 
     let hostfxr = nethost::load_hostfxr().unwrap();
-    let dirs = hostfxr
+    hostfxr
         .get_native_search_directories(pdcstr!("tests/Test/bin/Debug/net6.0/Test.dll"))
         .unwrap();
-    dbg!(dirs);
 }
 
 fn get_sdks() -> Vec<PathBuf> {

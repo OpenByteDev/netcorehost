@@ -1,4 +1,5 @@
 use netcorehost::{nethost, pdcstr};
+use rusty_fork::rusty_fork_test;
 
 #[path = "common.rs"]
 mod common;
@@ -16,7 +17,6 @@ fn run_app_with_context() {
     assert_eq!(result, 42);
 }
 
-/* fails on Github CI
 rusty_fork_test! {
     #[test]
     #[cfg(feature = "netcore1_0")]
@@ -24,8 +24,8 @@ rusty_fork_test! {
         common::setup();
 
         let hostfxr = nethost::load_hostfxr().unwrap();
-        let result = hostfxr.run_app(pdcstr!("./tests/Test/bin/Debug/net6.0/Test.dll"));
+        let result = hostfxr.run_app(pdcstr!("tests/Test/bin/Debug/net6.0/Test.dll"));
+        result.as_hosting_exit_code().unwrap();
         assert_eq!(result.value(), 42);
     }
 }
-*/

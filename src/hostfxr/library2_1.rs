@@ -15,7 +15,8 @@ use {
             hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t, PATH_SEPARATOR,
         },
         error::{HostingError, HostingResult},
-        pdcstring::{PdCString, PdUChar},
+        pdcstring::PdUChar,
+        hostfxr::dotnet_paths::DOTNET_BIN_PDC
     },
     coreclr_hosting_shared::char_t,
     once_cell::sync::Lazy,
@@ -136,10 +137,7 @@ impl Hostfxr {
         app_path: &PdCStr,
     ) -> Result<Vec<PathBuf>, HostingError> {
         let mut buffer = Vec::<PdUChar>::new();
-        let args = [
-            pdcstr!("dotnet").as_ptr(),
-            app_path.as_ptr(),
-        ];
+        let args = [DOTNET_BIN_PDC.as_ptr(), app_path.as_ptr()];
 
         let mut required_buffer_size = MaybeUninit::uninit();
         unsafe {

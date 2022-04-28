@@ -20,6 +20,7 @@ hostfxr-sys = { version = "0.3.1", default-features = false }
 coreclr-hosting-shared = { version = "0.1", default-features = false }
 destruct-drop = { version = "0.1", default-features = false }
 ffi-opaque = { version = "2.0", default-features = false }
+which = { version = "4.2", default-features = false }
 once_cell = { version = "1.10", optional = true, default-features = false, features = ["std"] }
 parking_lot = { version = "0.12", optional = true, default-features = false }
 
