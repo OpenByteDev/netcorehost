@@ -1,6 +1,5 @@
 use crate::{
     hostfxr::{AppOrHostingResult, Hostfxr},
-    pdcstr,
     pdcstring::PdCStr,
 };
 use std::{
@@ -49,7 +48,7 @@ impl Hostfxr {
         host_path: &PdCStr,
         dotnet_root: &PdCStr,
     ) -> io::Result<AppOrHostingResult> {
-        let args = [pdcstr!("dotnet"), app_path]
+        let args = [&*DOTNET_BIN_PDC, app_path]
             .into_iter()
             .chain(args.iter().map(|s| s.as_ref()))
             .map(|s| s.as_ptr())
