@@ -42,7 +42,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install .NET SDK 6.0
       run: |
-        curl --url https://dot.net/v1/dotnet-install${{ matrix.shell_ext }}
+        curl.exe --output "dotnet-install${{ matrix.shell_ext }}" --url "https://dot.net/v1/dotnet-install${{ matrix.shell_ext }}"
         ./dotnet-install${{ matrix.shell_ext }} -Architecture ${{ matrix.arch }} -Channel LTS -Runtime dotnet -Version 6.0.0
     - name: Install latest ${{ matrix.toolchain }}
       uses: actions-rs/toolchain@v1
