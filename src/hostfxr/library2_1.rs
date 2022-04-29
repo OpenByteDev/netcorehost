@@ -3,7 +3,7 @@ use crate::{
         hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t, PATH_SEPARATOR,
     },
     error::{HostingError, HostingResult},
-    hostfxr::{AppOrHostingResult, Hostfxr, helper},
+    hostfxr::{helper, AppOrHostingResult, Hostfxr},
     pdcstring::{PdCStr, PdUChar},
 };
 
@@ -34,7 +34,11 @@ impl Hostfxr {
     /// It will shutdown CoreCLR after the application executes.
     /// If the application is successfully executed, this value will return the exit code of the application.
     /// Otherwise, it will return an error code indicating the failure.
-    #[cfg_attr(feature = "netcore3_0", deprecated(note = "Use `HostfxrContext::run_app` instead"), allow(deprecated))]
+    #[cfg_attr(
+        feature = "netcore3_0",
+        deprecated(note = "Use `HostfxrContext::run_app` instead"),
+        allow(deprecated)
+    )]
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
     pub fn run_app_with_args_and_startup_info<A: AsRef<PdCStr>>(
         &self,
@@ -100,7 +104,10 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `exe_dir` - path to the dotnet executable
-    #[cfg_attr(feature = "doc-cfg", doc(cfg(all(feature = "netcore2_1", feature = "extra-apis"))))]
+    #[cfg_attr(
+        feature = "doc-cfg",
+        doc(cfg(all(feature = "netcore2_1", feature = "extra-apis")))
+    )]
     #[must_use]
     pub fn get_available_sdks(&self, exe_dir: &PdCStr) -> Vec<PathBuf> {
         unsafe {
@@ -116,7 +123,10 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `app_path` - path to application
-    #[cfg_attr(feature = "doc-cfg", doc(cfg(all(feature = "netcore2_1", feature = "extra-apis"))))]
+    #[cfg_attr(
+        feature = "doc-cfg",
+        doc(cfg(all(feature = "netcore2_1", feature = "extra-apis")))
+    )]
     pub fn get_native_search_directories(
         &self,
         app_path: &PdCStr,
