@@ -24,7 +24,7 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
-            dotnet_install_download_script: curl -sSL https://dot.net/v1/dotnet-install.sh > dotnet-install.sh
+            dotnet_install_download_script: curl -sSL https://dot.net/v1/dotnet-install.sh > dotnet-install.sh; chmod +x dotnet-install.sh
             dotnet_install_script: ./dotnet-install.sh
             arch: x64
           - target: x86_64-pc-windows-msvc
@@ -39,7 +39,7 @@ jobs:
             arch: x86
           - target: x86_64-apple-darwin
             os: macos-latest
-            dotnet_install_download_script: curl -sSL https://dot.net/v1/dotnet-install.sh > dotnet-install.sh
+            dotnet_install_download_script: curl -sSL https://dot.net/v1/dotnet-install.sh > dotnet-install.sh; chmod +x dotnet-install.sh
             dotnet_install_script: ./dotnet-install.sh
             arch: x64
     steps:
