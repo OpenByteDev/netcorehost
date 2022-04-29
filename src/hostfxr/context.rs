@@ -383,7 +383,7 @@ impl<I> HostfxrContext<I> {
 
     /// Closes an initialized host context.
     /// This method is automatically called on drop, but can be explicitely called to handle errors during closing.
-    /// This should only be called once active references to the underlying hostfxr library have been dropped (e.g. through [`ManagedFunction`]).
+    /// This should only be called once active references to the underlying hostfxr library have been dropped (e.g. through [`ManagedFunction`](crate::hostfxr::ManagedFunction)).
     pub unsafe fn close(self) -> Result<HostingSuccess, HostingError> {
         let result = unsafe { self._close() };
         self.destruct_drop();
