@@ -1,5 +1,5 @@
 use glob::glob;
-use std::{env, process::Command};
+use std::process::Command;
 
 #[allow(unused)]
 pub fn setup() {
