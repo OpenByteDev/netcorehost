@@ -25,22 +25,22 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             dotnet_install_download_script: curl -sSL https://dot.net/v1/dotnet-install.sh > dotnet-install.sh
-            dotnet_install_script: dotnet-install.sh
+            dotnet_install_script: ./dotnet-install.sh
             arch: x64
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             dotnet_install_download_script: Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
-            dotnet_install_script: dotnet-install.ps1
+            dotnet_install_script: ./dotnet-install.ps1
             arch: x64
           - target: i686-pc-windows-msvc
             os: windows-latest
             dotnet_install_download_script: Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
-            dotnet_install_script: dotnet-install.ps1
+            dotnet_install_script: ./dotnet-install.ps1
             arch: x86
           - target: x86_64-apple-darwin
             os: macos-latest
             dotnet_install_download_script: curl -sSL https://dot.net/v1/dotnet-install.sh > dotnet-install.sh
-            dotnet_install_script: dotnet-install.sh
+            dotnet_install_script: ./dotnet-install.sh
             arch: x64
     steps:
     - uses: actions/checkout@v2
@@ -48,7 +48,7 @@ jobs:
     - name: Install .NET SDK 6.0
       run: |
         ${{ matrix.dotnet_install_download_script }}
-        ./${{ matrix.dotnet_instal_script }} -Architecture ${{ matrix.arch }} -Channel LTS -Runtime dotnet -Version 6.0.0
+        ${{ matrix.dotnet_instal_script }} -Architecture ${{ matrix.arch }} -Channel LTS -Runtime dotnet -Version 6.0.0
         
     - name: Install latest ${{ matrix.toolchain }}
       uses: actions-rs/toolchain@v1
