@@ -1,8 +1,11 @@
 use glob::glob;
-use std::process::Command;
+use std::{process::Command, env};
 
 #[allow(unused)]
 pub fn setup() {
+    // This is a workaround for https://github.com/dotnet/sdk/issues/22647
+    env::remove_var("DOTNET_ROOT");
+
     build_test_project();
 }
 
