@@ -30,7 +30,7 @@
 //! # common::setup();
 //! # use netcorehost::{nethost, pdcstr};
 //! let hostfxr = nethost::load_hostfxr().unwrap();
-//! let context = hostfxr.initialize_for_dotnet_command_line(pdcstr!("tests/Test/bin/Debug/net6.0/Test.dll")).unwrap();
+//! let context = hostfxr.initialize_for_dotnet_command_line(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
 //! let result = context.run_app().value();
 //! ```
 //! The full example can be found in [examples/run-app](https://github.com/OpenByteDev/netcorehost/tree/master/examples/run-app).
@@ -69,9 +69,9 @@
 //! # use netcorehost::{nethost, pdcstr};
 //! let hostfxr = nethost::load_hostfxr().unwrap();
 //! let context =
-//!     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net6.0/Test.runtimeconfig.json")).unwrap();
+//!     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json")).unwrap();
 //! let fn_loader =
-//!     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net6.0/Test.dll")).unwrap();
+//!     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
 //! let hello = fn_loader.get_function_with_default_signature(
 //!     pdcstr!("Test.Program, Test"),
 //!     pdcstr!("Hello"),
@@ -107,9 +107,9 @@
 //! # use netcorehost::{nethost, pdcstr};
 //! let hostfxr = nethost::load_hostfxr().unwrap();
 //! let context =
-//!     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net6.0/Test.runtimeconfig.json")).unwrap();
+//!     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json")).unwrap();
 //! let fn_loader =
-//!     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net6.0/Test.dll")).unwrap();
+//!     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
 //! let hello = fn_loader.get_function_with_unmanaged_callers_only::<fn()>(
 //!     pdcstr!("Test.Program, Test"),
 //!     pdcstr!("UnmanagedHello"),
@@ -144,9 +144,9 @@
 //! # use netcorehost::{nethost, pdcstr};
 //! let hostfxr = nethost::load_hostfxr().unwrap();
 //! let context =
-//!     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net6.0/Test.runtimeconfig.json")).unwrap();
+//!     hostfxr.initialize_for_runtime_config(pdcstr!("tests/Test/bin/Debug/net5.0/Test.runtimeconfig.json")).unwrap();
 //! let fn_loader =
-//!     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net6.0/Test.dll")).unwrap();
+//!     context.get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll")).unwrap();
 //! let hello = fn_loader.get_function::<fn()>(
 //!     pdcstr!("Test.Program, Test"),
 //!     pdcstr!("CustomHello"),
