@@ -18,7 +18,7 @@ rusty_fork_test! {
             ))
             .unwrap();
         assert!(context.is_primary());
-        context.close().unwrap();
+        unsafe { context.close() }.unwrap();
     }
 
     #[test]
@@ -39,6 +39,6 @@ rusty_fork_test! {
             .unwrap();
         assert!(!context2.is_primary());
 
-        context2.close().unwrap();
+        unsafe { context2.close() }.unwrap();
     }
 }

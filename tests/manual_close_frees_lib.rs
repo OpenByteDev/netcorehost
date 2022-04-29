@@ -22,7 +22,7 @@ rusty_fork_test! {
 
         let weak = Rc::downgrade(&hostfxr.0);
         drop(hostfxr);
-        context.close().unwrap();
+        unsafe { context.close() }.unwrap();
 
         assert_eq!(weak.strong_count(), 0);
     }
