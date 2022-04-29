@@ -8,7 +8,7 @@ use std::{
 mod common;
 
 #[test]
-#[cfg(all(feature = "netcore3_0", feature = "sdk-resolver"))]
+#[cfg(all(feature = "netcore3_0"))]
 fn resolve_sdk() {
     let hostfxr = nethost::load_hostfxr().unwrap();
 
@@ -33,7 +33,7 @@ fn resolve_sdk() {
 }
 
 #[test]
-#[cfg(all(feature = "netcore3_0", feature = "sdk-resolver"))]
+#[cfg(all(feature = "netcore3_0"))]
 fn list_sdks() {
     let hostfxr = nethost::load_hostfxr().unwrap();
 

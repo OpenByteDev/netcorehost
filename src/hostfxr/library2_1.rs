@@ -1,26 +1,20 @@
 use crate::{
-    hostfxr::{AppOrHostingResult, Hostfxr},
-    pdcstring::PdCStr,
-};
-use std::{
-    io,
-    path::{Path, PathBuf},
+    bindings::hostfxr::{
+        hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t, PATH_SEPARATOR,
+    },
+    error::{HostingError, HostingResult},
+    hostfxr::{dotnet_paths::DOTNET_BIN_PDC, AppOrHostingResult, Hostfxr},
+    pdcstring::{PdCStr, PdUChar},
 };
 
-#[cfg(feature = "sdk-resolver")]
-use {
-    crate::{
-        bindings::hostfxr::{
-            hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t, PATH_SEPARATOR,
-        },
-        error::{HostingError, HostingResult},
-        hostfxr::dotnet_paths::DOTNET_BIN_PDC,
-        pdcstring::PdUChar,
-    },
-    coreclr_hosting_shared::char_t,
-    once_cell::sync::Lazy,
-    parking_lot::ReentrantMutex,
-    std::{cell::RefCell, mem::MaybeUninit, slice},
+use coreclr_hosting_shared::char_t;
+
+use std::{
+    cell::RefCell,
+    io,
+    mem::MaybeUninit,
+    path::{Path, PathBuf},
+    slice,
 };
 
 impl Hostfxr {
@@ -73,19 +67,13 @@ impl Hostfxr {
     ///  * `sdk_dir` - main directory where SDKs are located in `sdk\[version]` sub-folders.
     ///  * `working_dir` - directory where the search for `global.json` will start and proceed upwards
     ///  * `allow_prerelease` - allow resolution to return a pre-release SDK version
-    #[cfg(feature = "sdk-resolver")]
-    #[cfg_attr(
-        feature = "doc-cfg",
-        doc(cfg(all(feature = "sdk-resolver", feature = "netcore2_1")))
-    )]
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
     pub fn resolve_sdk(
         &self,
         sdk_dir: &PdCStr,
         working_dir: &PdCStr,
         allow_prerelease: bool,
     ) -> Result<ResolveSdkResult, HostingError> {
-        let sdk_path = RESOLVE_SDK2_MUTEX.lock();
-
         let flags = if allow_prerelease {
             hostfxr_resolve_sdk2_flags_t::none
         } else {
@@ -101,36 +89,32 @@ impl Hostfxr {
         };
         HostingResult::from(result).into_result()?;
 
-        Ok(sdk_path.take().unwrap())
+        let sdk_path = RESOLVE_SDK2_MUTEX
+            .with(|sdk| sdk.borrow_mut().take())
+            .unwrap();
+        Ok(sdk_path)
     }
 
     /// Get the list of all available SDKs ordered by ascending version.
     ///
     /// # Arguments
     ///  * `exe_dir` - path to the dotnet executable
-    #[cfg(feature = "sdk-resolver")]
-    #[cfg_attr(
-        feature = "doc-cfg",
-        doc(cfg(all(feature = "sdk-resolver", feature = "netcore2_1")))
-    )]
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
     pub fn get_available_sdks(&self, exe_dir: &PdCStr) -> Vec<PathBuf> {
-        let sdk_dirs = GET_AVAILABLE_SDKS_MUTEX.lock();
         unsafe {
             self.0
                 .hostfxr_get_available_sdks(exe_dir.as_ptr(), get_available_sdks_callback)
         };
-        sdk_dirs.take().unwrap()
+        GET_AVAILABLE_SDKS_MUTEX
+            .with(|sdks| sdks.borrow_mut().take())
+            .unwrap()
     }
 
     /// Get the native search directories of the runtime based upon the specified app.
     ///
     /// # Arguments
     ///  * `app_path` - path to application
-    #[cfg(feature = "sdk-resolver")]
-    #[cfg_attr(
-        feature = "doc-cfg",
-        doc(cfg(all(feature = "sdk-resolver", feature = "netcore2_1")))
-    )]
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
     pub fn get_native_search_directories(
         &self,
         app_path: &PdCStr,
@@ -178,54 +162,46 @@ impl Hostfxr {
     }
 }
 
-#[cfg(feature = "sdk-resolver")]
-static GET_AVAILABLE_SDKS_MUTEX: Lazy<ReentrantMutex<RefCell<Option<Vec<PathBuf>>>>> =
-    Lazy::new(|| ReentrantMutex::new(RefCell::new(None)));
-
-#[cfg(feature = "sdk-resolver")]
-extern "C" fn get_available_sdks_callback(sdk_count: i32, sdks_ptr: *const *const char_t) {
-    let sdks_guard = GET_AVAILABLE_SDKS_MUTEX.lock();
-    let mut sdks_holder = sdks_guard.borrow_mut();
-    let sdks = sdks_holder.get_or_insert_with(Vec::new);
-
-    let sdk_count = sdk_count as usize;
-    sdks.reserve(sdk_count as usize);
-
-    let raw_sdks = unsafe { slice::from_raw_parts(sdks_ptr, sdk_count) };
-
-    for &raw_sdk in raw_sdks {
-        let sdk = unsafe { PdCStr::from_str_ptr(raw_sdk) };
-        sdks.push(sdk.to_os_string().into());
-    }
+thread_local! {
+    static GET_AVAILABLE_SDKS_MUTEX: RefCell<Option<Vec<PathBuf>>> = RefCell::new(None);
+    static RESOLVE_SDK2_MUTEX: RefCell<Option<ResolveSdkResult>> = RefCell::new(None);
 }
 
-#[cfg(feature = "sdk-resolver")]
-static RESOLVE_SDK2_MUTEX: Lazy<ReentrantMutex<RefCell<Option<ResolveSdkResult>>>> =
-    Lazy::new(|| ReentrantMutex::new(RefCell::new(None)));
+extern "C" fn get_available_sdks_callback(sdk_count: i32, sdks_ptr: *const *const char_t) {
+    GET_AVAILABLE_SDKS_MUTEX.with(|sdks| {
+        let mut sdks_opt = sdks.borrow_mut();
+        let sdks = sdks_opt.get_or_insert_with(Vec::new);
 
-#[cfg(feature = "sdk-resolver")]
-extern "C" fn resolve_sdk2_callback(key: hostfxr_resolve_sdk2_result_key_t, value: *const char_t) {
-    let sdk_guard = RESOLVE_SDK2_MUTEX.lock();
-    let mut sdk_holder = sdk_guard.borrow_mut();
-    let path = unsafe { PdCStr::from_str_ptr(value) };
-    let path = PathBuf::from(path.to_os_string());
-    *sdk_holder = Some(match key {
-        hostfxr_resolve_sdk2_result_key_t::resolved_sdk_dir => {
-            ResolveSdkResult::ResolvedSdkDirectory(path)
-        }
-        hostfxr_resolve_sdk2_result_key_t::global_json_path => {
-            ResolveSdkResult::GlobalJsonPath(path)
+        let sdk_count = sdk_count as usize;
+        sdks.reserve(sdk_count as usize);
+
+        let raw_sdks = unsafe { slice::from_raw_parts(sdks_ptr, sdk_count) };
+
+        for &raw_sdk in raw_sdks {
+            let sdk = unsafe { PdCStr::from_str_ptr(raw_sdk) };
+            sdks.push(sdk.to_os_string().into());
         }
     });
 }
 
-#[cfg(feature = "sdk-resolver")]
-#[cfg_attr(
-    feature = "doc-cfg",
-    doc(cfg(all(feature = "sdk-resolver", feature = "netcore2_1")))
-)]
+extern "C" fn resolve_sdk2_callback(key: hostfxr_resolve_sdk2_result_key_t, value: *const char_t) {
+    RESOLVE_SDK2_MUTEX.with(|sdks| {
+        let path = unsafe { PdCStr::from_str_ptr(value) };
+        let path = PathBuf::from(path.to_os_string());
+        *sdks.borrow_mut() = Some(match key {
+            hostfxr_resolve_sdk2_result_key_t::resolved_sdk_dir => {
+                ResolveSdkResult::ResolvedSdkDirectory(path)
+            }
+            hostfxr_resolve_sdk2_result_key_t::global_json_path => {
+                ResolveSdkResult::GlobalJsonPath(path)
+            }
+        });
+    });
+}
+
 /// Result of [`Hostfxr::resolve_sdk`].
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
 pub enum ResolveSdkResult {
     /// `global.json` was not present or did not impact the resolved SDK location.
     ResolvedSdkDirectory(PathBuf),
@@ -233,7 +209,6 @@ pub enum ResolveSdkResult {
     GlobalJsonPath(PathBuf),
 }
 
-#[cfg(feature = "sdk-resolver")]
 impl ResolveSdkResult {
     /// Returns the path to the resolved SDK directory.
     #[must_use]
