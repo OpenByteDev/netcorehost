@@ -11,7 +11,7 @@ env:
   RUSTDOCFLAGS: "--deny warnings"
   RUSTFLAGS: "--deny warnings"
   RUST_TEST_THREADS: 1
-  COREHOST_TRACE: 1
+  COREHOST_TRACE: 2
 
 jobs:
   test:
@@ -24,20 +24,12 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
-            shell_ext: .sh
-            arch: x64
           - target: x86_64-pc-windows-msvc
             os: windows-latest
-            dotnet_install: .ps1
-            arch: x64
           - target: i686-pc-windows-msvc
             os: windows-latest
-            dotnet_install: .ps1
-            arch: x86
           - target: x86_64-apple-darwin
             os: macos-latest
-            dotnet_install: .sh
-            arch: x64
     steps:
     - uses: actions/checkout@v2
     - name: Install latest ${{ matrix.toolchain }}
@@ -49,7 +41,7 @@ jobs:
     - name: Build
       run: cargo build --target ${{ matrix.target }}
     - name: Test
-      run: cargo test --target ${{ matrix.target }} --all-targets
+      run: cargo test --target ${{ matrix.target }} --all-targets --no-fail-fast
 
   examples:
     runs-on: ubuntu-latest
