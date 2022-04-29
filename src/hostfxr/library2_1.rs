@@ -3,7 +3,7 @@ use crate::{
         hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t, PATH_SEPARATOR,
     },
     error::{HostingError, HostingResult},
-    hostfxr::{dotnet_paths::DOTNET_BIN_PDC, AppOrHostingResult, Hostfxr},
+    hostfxr::{AppOrHostingResult, Hostfxr, helper},
     pdcstring::{PdCStr, PdUChar},
 };
 
@@ -34,6 +34,7 @@ impl Hostfxr {
     /// It will shutdown CoreCLR after the application executes.
     /// If the application is successfully executed, this value will return the exit code of the application.
     /// Otherwise, it will return an error code indicating the failure.
+    #[cfg_attr(feature = "netcore3_0", deprecated(note = "Use `HostfxrContext::run_app` instead"), allow(deprecated))]
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
     pub fn run_app_with_args_and_startup_info<A: AsRef<PdCStr>>(
         &self,
@@ -42,7 +43,7 @@ impl Hostfxr {
         host_path: &PdCStr,
         dotnet_root: &PdCStr,
     ) -> io::Result<AppOrHostingResult> {
-        let args = [&*DOTNET_BIN_PDC, app_path]
+        let args = [helper::get_dotnet_bin_path(), app_path]
             .into_iter()
             .chain(args.iter().map(|s| s.as_ref()))
             .map(|s| s.as_ptr())
@@ -99,7 +100,7 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `exe_dir` - path to the dotnet executable
-    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(all(feature = "netcore2_1", feature = "extra-apis"))))]
     #[must_use]
     pub fn get_available_sdks(&self, exe_dir: &PdCStr) -> Vec<PathBuf> {
         unsafe {
@@ -115,13 +116,13 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `app_path` - path to application
-    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(all(feature = "netcore2_1", feature = "extra-apis"))))]
     pub fn get_native_search_directories(
         &self,
         app_path: &PdCStr,
     ) -> Result<Vec<PathBuf>, HostingError> {
         let mut buffer = Vec::<PdUChar>::new();
-        let args = [DOTNET_BIN_PDC.as_ptr(), app_path.as_ptr()];
+        let args = [helper::get_dotnet_bin_path().as_ptr(), app_path.as_ptr()];
 
         let mut required_buffer_size = MaybeUninit::uninit();
         unsafe {

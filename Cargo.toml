@@ -15,15 +15,11 @@ keywords = ["nethost", "hostfxr", "dotnet", "bindings", "coreclr"]
 num_enum = { version = "0.5", default-features = false }
 thiserror = { version = "1.0", default-features = false }
 derive_more = { version = "0.99", default-features = false, features = ["deref", "from", "display"] }
-nethost-sys = { version = "0.2", optional = true, default-features = false }
-hostfxr-sys = { version = "0.3.1", default-features = false }
+nethost-sys = { version = "0.4", optional = true, default-features = false }
+hostfxr-sys = { version = ">=0.3.1", default-features = false }
 coreclr-hosting-shared = { version = "0.1", default-features = false }
 destruct-drop = { version = "0.1", default-features = false }
 ffi-opaque = { version = "2.0", default-features = false }
-which = { version = "4.2", default-features = false }
-
-[target.'cfg(not(nightly))'.dependencies]
-once_cell = { version = "1.10", default-features = false, features = ["std"] }
 
 [target.'cfg(windows)'.dependencies]
 widestring = "0.5"
@@ -31,6 +27,10 @@ u16cstr = "0.3"
 
 [target.'cfg(not(windows))'.dependencies]
 cstr = "0.2"
+which = { version = "4.2", default-features = false }
+
+[target.'cfg(all(not(windows), not(nightly)))'.dependencies]
+once_cell = { version = "1.10", default-features = false, features = ["std"] }
 
 [dev-dependencies]
 trybuild = "1.0"

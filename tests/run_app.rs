@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use netcorehost::{nethost, pdcstr};
 use rusty_fork::rusty_fork_test;
 
