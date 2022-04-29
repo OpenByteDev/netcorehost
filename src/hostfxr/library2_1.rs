@@ -220,6 +220,11 @@ extern "C" fn resolve_sdk2_callback(key: hostfxr_resolve_sdk2_result_key_t, valu
     });
 }
 
+#[cfg(feature = "sdk-resolver")]
+#[cfg_attr(
+    feature = "doc-cfg",
+    doc(cfg(all(feature = "sdk-resolver", feature = "netcore2_1")))
+)]
 /// Result of [`Hostfxr::resolve_sdk`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ResolveSdkResult {
@@ -229,6 +234,7 @@ pub enum ResolveSdkResult {
     GlobalJsonPath(PathBuf),
 }
 
+#[cfg(feature = "sdk-resolver")]
 impl ResolveSdkResult {
     /// Returns the path to the resolved SDK directory.
     #[must_use]
