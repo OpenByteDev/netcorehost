@@ -100,6 +100,7 @@ impl Hostfxr {
     /// # Arguments
     ///  * `exe_dir` - path to the dotnet executable
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
+    #[must_use]
     pub fn get_available_sdks(&self, exe_dir: &PdCStr) -> Vec<PathBuf> {
         unsafe {
             self.0
@@ -202,6 +203,7 @@ extern "C" fn resolve_sdk2_callback(key: hostfxr_resolve_sdk2_result_key_t, valu
 /// Result of [`Hostfxr::resolve_sdk`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
+#[must_use]
 pub enum ResolveSdkResult {
     /// `global.json` was not present or did not impact the resolved SDK location.
     ResolvedSdkDirectory(PathBuf),
