@@ -24,19 +24,26 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
+            shell_ext: .sh
+            arch: x64
           - target: x86_64-pc-windows-msvc
             os: windows-latest
+            dotnet_install: .ps1
+            arch: x64
           - target: i686-pc-windows-msvc
             os: windows-latest
+            dotnet_install: .ps1
+            arch: x86
           - target: x86_64-apple-darwin
             os: macos-latest
+            dotnet_install: .sh
+            arch: x64
     steps:
     - uses: actions/checkout@v2
     - name: Install .NET SDK 6.0
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: '6.0.x'
-        include-prerelease: true
+      run: |
+        curl --url https://dot.net/v1/dotnet-install${{ matrix.shell_ext }}
+        ./dotnet-install${{ matrix.shell_ext }} -Architecture ${{ matrix.arch }} -Channel LTS -Runtime dotnet -Version 6.0.0
     - name: Install latest ${{ matrix.toolchain }}
       uses: actions-rs/toolchain@v1
       with:
