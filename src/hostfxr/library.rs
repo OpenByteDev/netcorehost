@@ -21,6 +21,7 @@ pub struct Hostfxr {
 fn find_dotnet_bin(hostfxr_path: impl AsRef<Path>) -> PathBuf {
     let mut p = hostfxr_path.as_ref().to_path_buf();
     loop {
+        dbg!(&p);
         if let Some(dir) = p.file_name() {
             if dir == "dotnet" || dir == ".dotnet" {
                 break;
@@ -42,7 +43,6 @@ impl Hostfxr {
     pub fn load_from_path(path: impl AsRef<OsStr>) -> Result<Self, crate::dlopen::Error> {
         let lib = Rc::new(unsafe { Container::load(&path) }?);
         let dotnet_bin = PdCString::from_os_str(find_dotnet_bin(path.as_ref())).unwrap();
-        dbg!(&dotnet_bin);
         Ok(Self { lib, dotnet_bin })
     }
 
