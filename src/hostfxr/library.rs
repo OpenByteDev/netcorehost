@@ -19,9 +19,8 @@ fn find_dotnet_bin(hostfxr_path: impl AsRef<Path>) -> PathBuf {
         if let Some(dir) = p.file_name() {
             if dir == "dotnet" {
                 break;
-            } else {
-                p.pop();
             }
+            p.pop();
         } else {
             p.clear();
             break;
