@@ -21,7 +21,6 @@ pub struct Hostfxr {
 fn find_dotnet_bin(hostfxr_path: impl AsRef<Path>) -> PathBuf {
     let mut p = hostfxr_path.as_ref().to_path_buf();
     loop {
-        dbg!(&p);
         if let Some(dir) = p.file_name() {
             if dir == "dotnet" || dir == ".dotnet" {
                 break;
