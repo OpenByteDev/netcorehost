@@ -3,7 +3,12 @@ use crate::{
     error::HostingResult, nethost::LoadHostfxrError, pdcstring::PdCString,
 };
 use derive_more::From;
-use std::{ffi::{OsStr, OsString}, rc::Rc, path::{Path, PathBuf}, env::consts::{EXE_SUFFIX}};
+use std::{
+    env::consts::EXE_SUFFIX,
+    ffi::{OsStr, OsString},
+    path::{Path, PathBuf},
+    rc::Rc,
+};
 
 /// A struct representing a loaded hostfxr library.
 #[derive(Clone, From)]
