@@ -11,7 +11,7 @@ env:
   RUSTDOCFLAGS: "--deny warnings"
   RUSTFLAGS: "--deny warnings"
   RUST_TEST_THREADS: 1
-  COREHOST_TRACE: 3
+  COREHOST_TRACE: 4
 
 jobs:
   test:
@@ -48,7 +48,7 @@ jobs:
     - name: Install .NET SDK 6.0
       run: |
         ${{ matrix.dotnet_install_download_script }}
-        ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel LTS -Runtime dotnet -Version 6.0.0
+        ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel 6.0 -Runtime dotnet
         
     - name: Install latest ${{ matrix.toolchain }}
       uses: actions-rs/toolchain@v1
