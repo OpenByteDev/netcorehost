@@ -1,18 +1,45 @@
 use crate::{
     bindings::hostfxr::wrapper::Hostfxr as HostfxrLib, dlopen::wrapper::Container,
-    error::HostingResult, nethost::LoadHostfxrError,
+    error::HostingResult, nethost::LoadHostfxrError, pdcstring::PdCString,
 };
 use derive_more::From;
-use std::{ffi::OsStr, rc::Rc};
+use std::{ffi::{OsStr, OsString}, rc::Rc, path::{Path, PathBuf}, env::consts::{EXE_SUFFIX}};
 
 /// A struct representing a loaded hostfxr library.
 #[derive(Clone, From)]
-pub struct Hostfxr(pub Rc<Container<HostfxrLib>>);
+pub struct Hostfxr {
+    /// The underlying hostfxr library.
+    pub lib: Rc<Container<HostfxrLib>>,
+    pub(crate) dotnet_bin: PdCString,
+}
+
+fn find_dotnet_bin(hostfxr_path: impl AsRef<Path>) -> PathBuf {
+    let mut p = hostfxr_path.as_ref().to_path_buf();
+    loop {
+        if let Some(dir) = p.file_name() {
+            if dir == "dotnet" {
+                break;
+            } else {
+                p.pop();
+            }
+        } else {
+            p.clear();
+            break;
+        }
+    }
+    p.push("dotnet");
+    let mut p = OsString::from(p);
+    p.extend(Path::new(EXE_SUFFIX));
+    PathBuf::from(p)
+}
 
 impl Hostfxr {
     /// Loads the hostfxr library from the given path.
     pub fn load_from_path(path: impl AsRef<OsStr>) -> Result<Self, crate::dlopen::Error> {
-        unsafe { Container::load(path) }.map(Rc::new).map(Self)
+        let lib = Rc::new(unsafe { Container::load(&path) }?);
+        let dotnet_bin = PdCString::from_os_str(find_dotnet_bin(path.as_ref())).unwrap();
+        dbg!(&dotnet_bin);
+        Ok(Self { lib, dotnet_bin })
     }
 
     /// Locates the hostfxr library using [`nethost`](crate::nethost) and loads it.

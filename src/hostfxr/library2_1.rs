@@ -3,7 +3,7 @@ use crate::{
         hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t, PATH_SEPARATOR,
     },
     error::{HostingError, HostingResult},
-    hostfxr::{helper, AppOrHostingResult, Hostfxr},
+    hostfxr::{AppOrHostingResult, Hostfxr},
     pdcstring::{PdCStr, PdUChar},
 };
 
@@ -47,14 +47,14 @@ impl Hostfxr {
         host_path: &PdCStr,
         dotnet_root: &PdCStr,
     ) -> io::Result<AppOrHostingResult> {
-        let args = [helper::get_dotnet_bin_path(), app_path]
+        let args = [&self.dotnet_bin, app_path]
             .into_iter()
             .chain(args.iter().map(|s| s.as_ref()))
             .map(|s| s.as_ptr())
             .collect::<Vec<_>>();
 
         let result = unsafe {
-            self.0.hostfxr_main_startupinfo(
+            self.lib.hostfxr_main_startupinfo(
                 args.len().try_into().unwrap(),
                 args.as_ptr(),
                 host_path.as_ptr(),
@@ -85,7 +85,7 @@ impl Hostfxr {
             hostfxr_resolve_sdk2_flags_t::disallow_prerelease
         };
         let result = unsafe {
-            self.0.hostfxr_resolve_sdk2(
+            self.lib.hostfxr_resolve_sdk2(
                 sdk_dir.as_ptr(),
                 working_dir.as_ptr(),
                 flags,
@@ -111,7 +111,7 @@ impl Hostfxr {
     #[must_use]
     pub fn get_available_sdks(&self, exe_dir: &PdCStr) -> Vec<PathBuf> {
         unsafe {
-            self.0
+            self.lib
                 .hostfxr_get_available_sdks(exe_dir.as_ptr(), get_available_sdks_callback)
         };
         GET_AVAILABLE_SDKS_MUTEX
@@ -132,11 +132,11 @@ impl Hostfxr {
         app_path: &PdCStr,
     ) -> Result<Vec<PathBuf>, HostingError> {
         let mut buffer = Vec::<PdUChar>::new();
-        let args = [helper::get_dotnet_bin_path().as_ptr(), app_path.as_ptr()];
+        let args = [self.dotnet_bin.as_ptr(), app_path.as_ptr()];
 
         let mut required_buffer_size = MaybeUninit::uninit();
         unsafe {
-            self.0.hostfxr_get_native_search_directories(
+            self.lib.hostfxr_get_native_search_directories(
                 args.len().try_into().unwrap(),
                 args.as_ptr(),
                 buffer.as_mut_ptr().cast(),
@@ -148,7 +148,7 @@ impl Hostfxr {
 
         buffer.reserve(required_buffer_size.try_into().unwrap());
         let result = unsafe {
-            self.0.hostfxr_get_native_search_directories(
+            self.lib.hostfxr_get_native_search_directories(
                 args.len().try_into().unwrap(),
                 args.as_ptr(),
                 buffer.spare_capacity_mut().as_mut_ptr().cast(),

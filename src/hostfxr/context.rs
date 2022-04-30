@@ -88,7 +88,7 @@ impl<I> HostfxrContext<I> {
     pub unsafe fn from_handle(handle: HostfxrHandle, hostfxr: Hostfxr, is_primary: bool) -> Self {
         Self {
             handle,
-            hostfxr: hostfxr.0,
+            hostfxr: hostfxr.lib,
             is_primary,
             context_type: PhantomData,
         }

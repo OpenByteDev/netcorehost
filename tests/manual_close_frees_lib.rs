@@ -20,7 +20,7 @@ rusty_fork_test! {
             ))
             .unwrap();
 
-        let weak = Rc::downgrade(&hostfxr.0);
+        let weak = Rc::downgrade(&hostfxr.lib);
         drop(hostfxr);
         unsafe { context.close() }.unwrap();
 

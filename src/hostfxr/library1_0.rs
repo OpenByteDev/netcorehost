@@ -1,5 +1,5 @@
 use crate::{
-    hostfxr::{helper, AppOrHostingResult, Hostfxr},
+    hostfxr::{AppOrHostingResult, Hostfxr},
     pdcstring::PdCStr,
 };
 
@@ -39,14 +39,14 @@ impl Hostfxr {
         app_path: &PdCStr,
         args: &[A],
     ) -> AppOrHostingResult {
-        let args = [helper::get_dotnet_bin_path(), app_path]
+        let args = [&self.dotnet_bin, app_path]
             .into_iter()
             .chain(args.iter().map(|s| s.as_ref()))
             .map(|s| s.as_ptr())
             .collect::<Vec<_>>();
 
         let result = unsafe {
-            self.0
+            self.lib
                 .hostfxr_main(args.len().try_into().unwrap(), args.as_ptr())
         };
 

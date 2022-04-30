@@ -217,7 +217,7 @@ impl Hostfxr {
         let mut hostfxr_handle = MaybeUninit::<hostfxr_handle>::uninit();
 
         let result = unsafe {
-            self.0.hostfxr_initialize_for_dotnet_command_line(
+            self.lib.hostfxr_initialize_for_dotnet_command_line(
                 args.len().try_into().unwrap(),
                 args.as_ptr().cast(),
                 parameters,
@@ -345,7 +345,7 @@ impl Hostfxr {
         let mut hostfxr_handle = MaybeUninit::uninit();
 
         let result = unsafe {
-            self.0.hostfxr_initialize_for_runtime_config(
+            self.lib.hostfxr_initialize_for_runtime_config(
                 runtime_config_path.as_ref().as_ptr(),
                 parameters,
                 hostfxr_handle.as_mut_ptr(),
