@@ -1,10 +1,6 @@
 # netcorehost
 
-[![CI](https://github.com/OpenByteDev/netcorehost/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenByteDev/netcorehost/actions/workflows/ci.yml)
-[![crates.io](https://img.shields.io/crates/v/netcorehost.svg)](https://crates.io/crates/netcorehost)
-[![Documentation](https://docs.rs/netcorehost/badge.svg)](https://docs.rs/netcorehost)
-[![dependency status](https://deps.rs/repo/github/openbytedev/netcorehost/status.svg)](https://deps.rs/repo/github/openbytedev/netcorehost)
-[![MIT](https://img.shields.io/crates/l/netcorehost.svg)](https://github.com/OpenByteDev/netcorehost/blob/master/LICENSE)
+[![CI](https://github.com/OpenByteDev/netcorehost/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenByteDev/netcorehost/actions/workflows/ci.yml) [![crates.io](https://img.shields.io/crates/v/netcorehost.svg)](https://crates.io/crates/netcorehost) [![Documentation](https://docs.rs/netcorehost/badge.svg)](https://docs.rs/netcorehost) [![dependency status](https://deps.rs/repo/github/openbytedev/netcorehost/status.svg)](https://deps.rs/repo/github/openbytedev/netcorehost) [![MIT](https://img.shields.io/crates/l/netcorehost.svg)](https://github.com/OpenByteDev/netcorehost/blob/master/LICENSE)
 
 <!-- cargo-sync-readme start -->
 
