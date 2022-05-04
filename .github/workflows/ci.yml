@@ -70,7 +70,7 @@ jobs:
     - name: Install latest beta
       uses: actions-rs/toolchain@v1
       with:
-          toolchain: beta
+          toolchain: nightly
           override: true
     - name: Run example 'run-app'
       run: cargo run --example run-app
@@ -92,7 +92,7 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
           profile: minimal
-          toolchain: beta
+          toolchain: nightly
           override: true
     - name: Generate documentation
       run: cargo doc --all-features
