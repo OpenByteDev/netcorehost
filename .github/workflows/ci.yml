@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: ["nightly", "stable"]
+        toolchain: ["nightly", "beta", "stable"]
         target: ["x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc", "i686-pc-windows-msvc", "x86_64-apple-darwin"]
         include:
           - target: x86_64-unknown-linux-gnu
@@ -67,10 +67,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install latest nightly
+    - name: Install latest beta
       uses: actions-rs/toolchain@v1
       with:
-          toolchain: nightly
+          toolchain: beta
           override: true
     - name: Run example 'run-app'
       run: cargo run --example run-app
@@ -88,11 +88,11 @@ jobs:
           - os: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install latest nightly
+    - name: Install latest beta
       uses: actions-rs/toolchain@v1
       with:
           profile: minimal
-          toolchain: nightly
+          toolchain: beta
           override: true
     - name: Generate documentation
       run: cargo doc --all-features
