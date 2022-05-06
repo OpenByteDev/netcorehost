@@ -301,7 +301,7 @@ pub struct AssemblyDelegateLoader<A: AsRef<PdCStr>> {
     assembly_path: A,
 }
 
-impl<'a, A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
+impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
     /// Creates a new [`AssemblyDelegateLoader`] wrapping the given [`DelegateLoader`] loading the assembly
     /// from the given path on the first access.
     pub fn new(loader: DelegateLoader, assembly_path: A) -> Self {
