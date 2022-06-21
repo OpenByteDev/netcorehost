@@ -1,6 +1,5 @@
 use std::ffi::{OsStr, OsString};
 use std::str::FromStr;
-use std::string;
 // use std::os::windows::ffi::OsStrExt;
 
 use widestring::{U16CStr, U16CString};
@@ -129,7 +128,8 @@ impl PdCStr {
     pub fn len(&self) -> usize {
         self.0.len()
     }
-    pub fn to_string(&self) -> Result<String, string::FromUtf16Error> {
+    // TODO: use abstract error type
+    pub fn to_string(&self) -> Result<String, widestring::error::Utf16Error> {
         self.0.to_string()
     }
     #[must_use]

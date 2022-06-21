@@ -125,6 +125,7 @@ impl PdCStr {
     pub fn len(&self) -> usize {
         self.0.to_bytes().len()
     }
+    // TODO: use abstract error type
     pub fn to_string(&self) -> Result<String, str::Utf8Error> {
         self.0.to_str().map(str::to_string)
     }

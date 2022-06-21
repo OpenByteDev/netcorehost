@@ -34,8 +34,8 @@ impl From<std::ffi::NulError> for NulError {
 }
 
 #[cfg(windows)]
-impl From<widestring::NulError<PdUChar>> for NulError {
-    fn from(err: widestring::NulError<PdUChar>) -> Self {
+impl From<widestring::error::ContainsNul<PdUChar>> for NulError {
+    fn from(err: widestring::error::ContainsNul<PdUChar>) -> Self {
         Self::new(err.nul_position(), err.into_vec().unwrap())
     }
 }
