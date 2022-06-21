@@ -1,4 +1,5 @@
 use std::ffi::{self, CStr, CString, OsStr, OsString};
+use std::os::raw::c_char;
 use std::os::unix::ffi::OsStrExt;
 use std::str::{self, FromStr};
 
@@ -36,7 +37,7 @@ impl PdCString {
         PdCString::from_vec(s.as_ref().as_bytes().to_vec())
     }
     #[must_use]
-    pub unsafe fn from_str_ptr(ptr: *const i8) -> Self {
+    pub unsafe fn from_str_ptr(ptr: *const c_char) -> Self {
         unsafe { PdCStr::from_str_ptr(ptr) }.to_owned()
     }
 }
@@ -80,11 +81,11 @@ impl PdCStr {
 // methods used by this crate
 impl PdCStr {
     #[must_use]
-    pub fn as_ptr(&self) -> *const i8 {
+    pub fn as_ptr(&self) -> *const c_char {
         self.0.as_ptr()
     }
     #[must_use]
-    pub unsafe fn from_str_ptr<'a>(ptr: *const i8) -> &'a Self {
+    pub unsafe fn from_str_ptr<'a>(ptr: *const c_char) -> &'a Self {
         let inner = unsafe { CStr::from_ptr(ptr) };
         PdCStr::from_inner(inner)
     }
