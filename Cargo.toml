@@ -29,9 +29,6 @@ u16cstr = "0.4"
 cstr = "0.2"
 which = { version = "4.2", default-features = false }
 
-[target.'cfg(all(not(windows), not(nightly)))'.dependencies]
-once_cell = { version = "1.12", default-features = false, features = ["std"] }
-
 [dev-dependencies]
 trybuild = "1.0"
 current_platform = "0.2"
