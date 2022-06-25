@@ -6,6 +6,7 @@ use std::{
 use super::{MissingNulTerminatorInnerImpl, PdUChar, ToStringErrorInner, ToStringErrorInnerImpl};
 
 // same definition as ffi::NulError and widestring::error::ContainsNul<u16>
+/// An error returned to indicate that an invalid nul value was found in a string.
 #[must_use]
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct ContainsNul(usize, Vec<PdUChar>);
@@ -62,6 +63,7 @@ impl From<ContainsNul> for Vec<PdUChar> {
 }
 
 // common definition of str::Utf8Error and widestring::error::Utf16Error
+/// Errors which can occur when attempting to interpret a sequence of platform-dependent characters as a string.
 #[must_use]
 #[derive(Clone, Debug)]
 pub struct ToStringError(pub(crate) ToStringErrorInnerImpl);
@@ -87,6 +89,7 @@ impl Error for ToStringError {
     }
 }
 
+/// An error returned from to indicate that a terminating nul value was missing.
 #[must_use]
 #[derive(Clone, Debug)]
 pub struct MissingNulTerminator(pub(crate) MissingNulTerminatorInnerImpl);
