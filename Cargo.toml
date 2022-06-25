@@ -47,5 +47,5 @@ netcore3_0 = ["hostfxr-sys/netcore3_0", "netcore2_1"]
 
 # Prevent downloading nethost library when building on docs.rs.
 [package.metadata.docs.rs]
-features = ["nethost"]
+features = ["nethost", "netcore3_0"]
 no-default-features = true
