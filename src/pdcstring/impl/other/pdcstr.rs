@@ -39,11 +39,11 @@ impl PdCStrInner for CStr {
         CStr::from_bytes_with_nul(slice).map_err(MissingNulTerminator)
     }
 
-    fn to_slice(&self) -> &[PdUChar] {
+    fn as_slice(&self) -> &[PdUChar] {
         CStr::to_bytes(self)
     }
 
-    fn to_slice_with_nul(&self) -> &[PdUChar] {
+    fn as_slice_with_nul(&self) -> &[PdUChar] {
         CStr::to_bytes_with_nul(self)
     }
 

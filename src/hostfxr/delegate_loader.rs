@@ -65,7 +65,7 @@ impl DelegateLoader {
 
         #[cfg(not(windows))]
         let assembly_path = <std::ffi::OsStr as std::os::unix::prelude::OsStrExt>::from_bytes(
-            assembly_path.as_ref().to_slice(),
+            assembly_path.as_ref().as_slice(),
         );
 
         if Path::new(&assembly_path).exists() {
