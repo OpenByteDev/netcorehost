@@ -7,15 +7,8 @@ pub type PdUChar = u16;
 #[cfg(not(windows))]
 pub type PdUChar = u8;
 
-#[cfg(windows)]
-mod windows;
-#[cfg(windows)]
-pub use windows::*;
-
-#[cfg(not(windows))]
-mod other;
-#[cfg(not(windows))]
-pub use other::*;
+mod r#impl;
+pub use r#impl::*;
 
 mod shared;
 pub use shared::*;

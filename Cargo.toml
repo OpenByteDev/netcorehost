@@ -27,7 +27,6 @@ u16cstr = "0.4"
 
 [target.'cfg(not(windows))'.dependencies]
 cstr = "0.2"
-which = { version = "4.2", default-features = false }
 
 [dev-dependencies]
 trybuild = "1.0"

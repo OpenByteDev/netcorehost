@@ -15,9 +15,3 @@ error: C-style string cannot contain nul characters
   |
 5 |     let _ = netcorehost::pdcstr!("somerandomteststring\0somerandomteststring");
   |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-error: C-style string cannot contain nul characters
- --> $DIR/pdcstr-compile-fail.rs:6:34
-  |
-6 |     let _ = netcorehost::pdcstr!("somerandomteststring\0somerandomteststring");
-  |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
