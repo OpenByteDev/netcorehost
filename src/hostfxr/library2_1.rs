@@ -1,6 +1,6 @@
 use crate::{
     bindings::hostfxr::{
-        hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t, PATH_SEPARATOR,
+        hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t, PATH_LIST_SEPARATOR,
     },
     error::{HostingError, HostingResult},
     hostfxr::{AppOrHostingResult, Hostfxr},
@@ -162,7 +162,7 @@ impl Hostfxr {
         let mut directories = Vec::new();
         let last_start = 0;
         for i in 0..buffer.len() {
-            if buffer[i] == PATH_SEPARATOR as PdUChar || buffer[i] == 0 {
+            if buffer[i] == PATH_LIST_SEPARATOR as PdUChar || buffer[i] == 0 {
                 buffer[i] = 0;
                 let directory = PdCStr::from_slice_with_nul(&buffer[last_start..=i]).unwrap();
                 directories.push(PathBuf::from(directory.to_os_string()));
