@@ -71,7 +71,7 @@ fn get_sdks() -> Vec<PathBuf> {
     String::from_utf8_lossy(&sdks_output.stdout)
         .lines()
         .map(|line| {
-            let (version, path) = line.split_once(" ").unwrap();
+            let (version, path) = line.split_once(' ').unwrap();
             Path::new(&path[1..(path.len() - 1)]).join(version)
         })
         .collect::<Vec<_>>()
