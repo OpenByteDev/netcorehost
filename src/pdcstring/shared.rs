@@ -80,6 +80,10 @@ impl PdCStr {
         Self::from_inner(unsafe { PdCStrInner::from_str_ptr(ptr) })
     }
     #[inline]
+    pub fn from_slice_with_nul(slice: &[PdUChar]) -> Result<&Self, MissingNulTerminator> {
+        PdCStrInner::from_slice_with_nul(slice).map(Self::from_inner)
+    }
+    #[inline]
     pub unsafe fn from_slice_with_nul_unchecked(slice: &[PdUChar]) -> &Self {
         Self::from_inner(unsafe { PdCStrInner::from_slice_with_nul_unchecked(slice) })
     }
@@ -88,16 +92,12 @@ impl PdCStr {
         PdCStrInner::to_os_string(self.as_inner())
     }
     #[inline]
-    pub fn from_slice_with_nul(slice: &[PdUChar]) -> Result<&Self, MissingNulTerminator> {
-        PdCStrInner::from_slice_with_nul(slice).map(Self::from_inner)
+    pub fn as_slice(&self) -> &[PdUChar] {
+        PdCStrInner::as_slice(self.as_inner())
     }
     #[inline]
-    pub fn to_slice(&self) -> &[PdUChar] {
-        PdCStrInner::to_slice(self.as_inner())
-    }
-    #[inline]
-    pub fn to_slice_with_nul(&self) -> &[PdUChar] {
-        PdCStrInner::to_slice_with_nul(self.as_inner())
+    pub fn as_slice_with_nul(&self) -> &[PdUChar] {
+        PdCStrInner::as_slice_with_nul(self.as_inner())
     }
     #[inline]
     pub fn is_empty(&self) -> bool {

@@ -24,8 +24,8 @@ pub(crate) trait PdCStrInner {
     unsafe fn from_slice_with_nul_unchecked(slice: &[PdUChar]) -> &Self;
     fn to_os_string(&self) -> OsString;
     fn from_slice_with_nul(slice: &[PdUChar]) -> Result<&Self, MissingNulTerminator>;
-    fn to_slice(&self) -> &[PdUChar];
-    fn to_slice_with_nul(&self) -> &[PdUChar];
+    fn as_slice(&self) -> &[PdUChar];
+    fn as_slice_with_nul(&self) -> &[PdUChar];
     fn is_empty(&self) -> bool;
     fn len(&self) -> usize;
     fn to_string(&self) -> Result<String, ToStringError>;

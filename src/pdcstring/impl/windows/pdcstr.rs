@@ -35,11 +35,11 @@ impl PdCStrInner for U16CStr {
         U16CStr::from_slice_truncate(slice).map_err(MissingNulTerminator)
     }
 
-    fn to_slice(&self) -> &[PdChar] {
+    fn as_slice(&self) -> &[PdChar] {
         U16CStr::as_slice(self)
     }
 
-    fn to_slice_with_nul(&self) -> &[PdChar] {
+    fn as_slice_with_nul(&self) -> &[PdChar] {
         U16CStr::as_slice_with_nul(self)
     }
 
