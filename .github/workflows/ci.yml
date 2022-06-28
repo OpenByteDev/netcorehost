@@ -24,52 +24,29 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
-            test: true
-            use_cross: false
             dotnet_install_download_script: curl -sSL https://dot.net/v1/dotnet-install.sh > dotnet-install.sh; chmod +x dotnet-install.sh
             dotnet_install_script: ./dotnet-install.sh
             arch: x64
           - target: x86_64-pc-windows-msvc
             os: windows-latest
-            test: true
-            use_cross: false
             dotnet_install_download_script: Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
             dotnet_install_script: ./dotnet-install.ps1
             arch: x64
           - target: i686-pc-windows-msvc
             os: windows-latest
-            test: true
-            use_cross: false
             dotnet_install_download_script: Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
             dotnet_install_script: ./dotnet-install.ps1
             arch: x86
           - target: x86_64-apple-darwin
             os: macos-latest
-            test: true
-            use_cross: false
             dotnet_install_download_script: curl -sSL https://dot.net/v1/dotnet-install.sh > dotnet-install.sh; chmod +x dotnet-install.sh
             dotnet_install_script: ./dotnet-install.sh
             arch: x64
-          - target: aarch64-unknown-linux-gnu
-            os: ubuntu-latest
-            test: false
-            use_cross: true
-            dotnet_install_download_script: none
-            dotnet_install_script: none
-            arch: none
-          - target: armv7-unknown-linux-gnueabihf
-            os: ubuntu-latest
-            test: false
-            use_cross: true
-            dotnet_install_download_script: none
-            dotnet_install_script: none
-            arch: none
           
     steps:
     - uses: actions/checkout@v2
 
     - name: Install .NET SDK 6.0
-      if: matrix.test
       run: |
         ${{ matrix.dotnet_install_download_script }}
         ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel 6.0 -Runtime dotnet
@@ -84,18 +61,42 @@ jobs:
     - name: Build
       uses: actions-rs/cargo@v1
       with:
-        use-cross: matrix.use_cross
+        use-cross: false
         command: build
         args: --release --target ${{ matrix.target }}
       
     - name: Test
-      if: matrix.test
       uses: actions-rs/cargo@v1
       with:
-        use-cross: matrix.use_cross
+        use-cross: false
         command: test
         args: --target ${{ matrix.target }} --all-targets --no-fail-fast
-            
+ 
+  build-arm:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: ["nightly", "stable"]
+        target: ["aarch64-unknown-linux-gnu", "armv7-unknown-linux-gnueabihf"]
+          
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install latest ${{ matrix.toolchain }}
+      uses: actions-rs/toolchain@v1
+      with:
+          target: ${{ matrix.target }}
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+      
+    - name: Build
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: true
+        command: build
+        args: --release --target ${{ matrix.target }}
+        
   examples:
     runs-on: ubuntu-latest
     steps:
