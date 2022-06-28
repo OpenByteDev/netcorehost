@@ -10,7 +10,7 @@ env:
   CARGO_TERM_COLOR: always
   RUSTDOCFLAGS: "--deny warnings"
   RUSTFLAGS: "--deny warnings"
-  RUST_TEST_THREADS: 1
+  # RUST_TEST_THREADS: 1
   # COREHOST_TRACE: 4
 
 jobs:
@@ -56,13 +56,30 @@ jobs:
           target: ${{ matrix.target }}
           toolchain: ${{ matrix.toolchain }}
           override: true
-          
+      
     - name: Build
-      run: cargo build --target ${{ matrix.target }}
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: true
+        command: build
+        args: --release --target ${{ matrix.target }}
       
     - name: Test
-      run: cargo test --target ${{ matrix.target }} --all-targets --no-fail-fast
-
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: true
+        command: test
+        args: --target ${{ matrix.target }} --all-targets --no-fail-fast
+      
+  build-arm:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: pguyot/arm-runner-action@v2
+      with:
+        commands: |
+            commands to run tests
+            
   examples:
     runs-on: ubuntu-latest
     steps:
