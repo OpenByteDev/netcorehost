@@ -39,6 +39,7 @@ rusty-fork = "0.3"
 default = ["nethost", "nethost-download", "netcore3_0"]
 nethost-download = ["nethost", "nethost-sys/download-nuget"]
 nethost = ["nethost-sys"]
+nightly = []
 doc-cfg = []
 netcore1_0 = ["hostfxr-sys/netcore1_0"]
 netcore2_0 = ["hostfxr-sys/netcore2_0", "netcore1_0"]
@@ -47,5 +48,5 @@ netcore3_0 = ["hostfxr-sys/netcore3_0", "netcore2_1"]
 
 # Prevent downloading nethost library when building on docs.rs.
 [package.metadata.docs.rs]
-features = ["nethost", "netcore3_0"]
+features = ["nethost", "netcore3_0", "doc-cfg", "nightly"]
 no-default-features = true

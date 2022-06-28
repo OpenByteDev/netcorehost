@@ -1,5 +1,5 @@
 #![cfg_attr(
-    nightly,
+    any(nightly, feature="nightly"),
     feature(try_trait_v2, maybe_uninit_uninit_array, maybe_uninit_slice)
 )]
 #![cfg_attr(feature = "doc-cfg", feature(doc_cfg))]
