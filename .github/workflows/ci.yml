@@ -89,6 +89,9 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           override: true
       
+    - name: Install OpenSSL
+      run: sudo apt-get install libssl-dev
+      
     - name: Build
       uses: actions-rs/cargo@v1
       with:
@@ -121,7 +124,7 @@ jobs:
           - os: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install latest beta
+    - name: Install latest nightly
       uses: actions-rs/toolchain@v1
       with:
           profile: minimal
@@ -142,13 +145,39 @@ jobs:
           - os: ubuntu-latest
           - os: windows-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v2
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
         with:
             toolchain: nightly
             components: clippy
             override: true
-      - uses: actions-rs/clippy-check@v1
+            
+      - name: Clippy check
+        uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-features
+          
+  fmt:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+          - os: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install latest nightly
+      uses: actions-rs/toolchain@v1
+      with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+          components: rustfmt
+          
+    - name: Format check
+      uses: actions-rs/cargo@v1
+      with:
+          command: fmt
+          args: --all -- --check
