@@ -3,7 +3,8 @@ use std::{
     convert::TryFrom,
     ffi::{OsStr, OsString},
     fmt::{self, Debug, Display, Formatter},
-    ops::Deref, str::FromStr,
+    ops::Deref,
+    str::FromStr,
 };
 
 use super::{
