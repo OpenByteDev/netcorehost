@@ -186,4 +186,5 @@ pub mod pdcstring;
 /// Module containing error enums.
 pub mod error;
 
-pub use hostfxr_sys::dlopen;
+#[doc(hidden)]
+pub use hostfxr_sys::dlopen2;

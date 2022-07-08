@@ -108,7 +108,7 @@ pub enum LoadHostfxrError {
     Hosting(#[from] HostingError),
     /// An error occured while loading the hostfxr library.
     #[error(transparent)]
-    DlOpen(#[from] crate::dlopen::Error),
+    DlOpen(#[from] crate::dlopen2::Error),
 }
 
 const unsafe fn maybe_uninit_slice_assume_init_ref<T>(slice: &[MaybeUninit<T>]) -> &[T] {

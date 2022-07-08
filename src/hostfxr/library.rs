@@ -1,5 +1,5 @@
 use crate::{
-    bindings::hostfxr::wrapper::Hostfxr as HostfxrLib, dlopen::wrapper::Container,
+    bindings::hostfxr::wrapper::Hostfxr as HostfxrLib, dlopen2::wrapper::Container,
     error::HostingResult, nethost::LoadHostfxrError, pdcstring::PdCString,
 };
 use derive_more::From;
@@ -39,7 +39,7 @@ fn find_dotnet_bin(hostfxr_path: impl AsRef<Path>) -> PathBuf {
 
 impl Hostfxr {
     /// Loads the hostfxr library from the given path.
-    pub fn load_from_path(path: impl AsRef<OsStr>) -> Result<Self, crate::dlopen::Error> {
+    pub fn load_from_path(path: impl AsRef<OsStr>) -> Result<Self, crate::dlopen2::Error> {
         let lib = Rc::new(unsafe { Container::load(&path) }?);
         let dotnet_bin = PdCString::from_os_str(find_dotnet_bin(path.as_ref())).unwrap();
         Ok(Self { lib, dotnet_bin })

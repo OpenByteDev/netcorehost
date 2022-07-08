@@ -16,8 +16,8 @@ pub enum Error {
     LoadHostfxr(#[from] crate::nethost::LoadHostfxrError),
 }
 
-impl From<crate::dlopen::Error> for Error {
-    fn from(err: crate::dlopen::Error) -> Self {
+impl From<crate::dlopen2::Error> for Error {
+    fn from(err: crate::dlopen2::Error) -> Self {
         Self::LoadHostfxr(crate::nethost::LoadHostfxrError::DlOpen(err))
     }
 }

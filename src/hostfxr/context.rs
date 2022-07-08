@@ -3,7 +3,7 @@ use crate::{
         get_function_pointer_fn, hostfxr_delegate_type, hostfxr_handle,
         load_assembly_and_get_function_pointer_fn, wrapper,
     },
-    dlopen::wrapper::Container,
+    dlopen2::wrapper::Container,
     error::{HostingError, HostingResult, HostingSuccess},
     hostfxr::{
         AppOrHostingResult, AssemblyDelegateLoader, DelegateLoader, Hostfxr, RawFunctionPtr,
