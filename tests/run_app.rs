@@ -14,7 +14,7 @@ rusty_fork_test! {
 
         let hostfxr = nethost::load_hostfxr().unwrap();
         let context = hostfxr
-            .initialize_for_dotnet_command_line(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll"))
+            .initialize_for_dotnet_command_line(pdcstr!("tests/Test/bin/Debug/net6.0/Test.dll"))
             .unwrap();
         let result = context.run_app().value();
         assert_eq!(result, 42);
@@ -26,7 +26,7 @@ rusty_fork_test! {
         common::setup();
 
         let hostfxr = nethost::load_hostfxr().unwrap();
-        let result = hostfxr.run_app(pdcstr!("tests/Test/bin/Debug/net5.0/Test.dll"));
+        let result = hostfxr.run_app(pdcstr!("tests/Test/bin/Debug/net6.0/Test.dll"));
         result.as_hosting_exit_code().unwrap();
         assert_eq!(result.value(), 42);
     }

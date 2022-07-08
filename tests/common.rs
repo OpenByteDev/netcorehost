@@ -1,5 +1,4 @@
-use glob::glob;
-use std::process::Command;
+use std::{path::Path, process::Command};
 
 #[allow(unused)]
 pub fn setup() {
@@ -8,11 +7,7 @@ pub fn setup() {
 
 #[allow(unused)]
 pub fn build_test_project() {
-    if glob("tests/Test/bin/**/Test.runtimeconfig.json")
-        .unwrap()
-        .next()
-        .is_some()
-    {
+    if Path::new("tests/Test/bin/Debug/net6.0/Test.runtimeconfig.json").exists() {
         return;
     }
 
