@@ -32,7 +32,13 @@ pub fn build_test_project() {
         return;
     }
 
-    Command::new("dotnet")
+    let dotnet = if let Ok(dotnet_root) = env::var("DOTNET_ROOT") {
+        Path::new(&dotnet_root).join("dotnet")
+    } else {
+        Path::new("dotnet").to_owned()
+    };
+
+    Command::new(&dotnet)
         .arg("build")
         .arg("--framework")
         .arg(&test_netcore_version())
