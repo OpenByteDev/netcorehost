@@ -24,8 +24,7 @@ pub fn test_dll_path() -> PdCString {
 }
 
 pub fn setup() {
-    build_test_project();
-    dbg!(test_dll_path());
+    build_test_project()
 }
 
 pub fn build_test_project() {
