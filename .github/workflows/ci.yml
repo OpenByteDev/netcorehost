@@ -19,8 +19,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: ["nightly", "beta", "stable"]
+        toolchain: ["nightly", "stable"]
         target: ["x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc", "i686-pc-windows-msvc", "x86_64-apple-darwin"]
+        dotnet: ["5.0", "6.0", "7.0"]
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
@@ -41,14 +42,16 @@ jobs:
             os: macos-latest
             dotnet_install_download_script: curl -sSL https://dot.net/v1/dotnet-install.sh > dotnet-install.sh; chmod +x dotnet-install.sh
             dotnet_install_script: ./dotnet-install.sh
-            arch: x64 
+            arch: x64
+    env:
+      NETCOREHOST_TEST_NETCORE_VERSION: ${{ matrix.dotnet }}
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install .NET SDK 6.0
+    - name: Install .NET SDK ${{ matrix.dotnet }}
       run: |
         ${{ matrix.dotnet_install_download_script }}
-        ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel 6.0 -Runtime dotnet
+        ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel ${{ matrix.dotnet }} -Runtime dotnet
         
     - name: Install latest ${{ matrix.toolchain }}
       uses: actions-rs/toolchain@v1
@@ -62,7 +65,7 @@ jobs:
       with:
         use-cross: false
         command: build
-        args: --release --target ${{ matrix.target }}
+        args: --target ${{ matrix.target }}
       
     - name: Test
       uses: actions-rs/cargo@v1
@@ -71,13 +74,13 @@ jobs:
         command: test
         args: --target ${{ matrix.target }} --all-targets --no-fail-fast
  
-  build-arm:
+  build:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        toolchain: ["nightly", "stable"]
-        target: ["aarch64-unknown-linux-gnu", "armv7-unknown-linux-gnueabihf"]
+        toolchain: ["nightly", "beta", "stable"]
+        target: ["aarch64-unknown-linux-gnu", "armv7-unknown-linux-gnueabihf", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc", "i686-pc-windows-msvc", "x86_64-apple-darwin"]
           
     steps:
     - uses: actions/checkout@v2
