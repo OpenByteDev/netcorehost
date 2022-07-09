@@ -34,6 +34,8 @@ pub fn build_test_project() {
 
     Command::new("dotnet")
         .arg("build")
+        .arg("--framework")
+        .arg(&test_netcore_version())
         .current_dir("tests/Test")
         .spawn()
         .expect("dotnet build failed")
