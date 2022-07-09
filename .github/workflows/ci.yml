@@ -44,7 +44,7 @@ jobs:
             dotnet_install_script: ./dotnet-install.sh
             arch: x64
     env:
-      NETCOREHOST_TEST_NETCORE_VERSION: ${{ matrix.dotnet }}
+      NETCOREHOST_TEST_NETCORE_VERSION: net${{ matrix.dotnet }}
     steps:
     - uses: actions/checkout@v2
 
