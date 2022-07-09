@@ -1,17 +1,15 @@
-$dotnetInstallDir = Get-Variable DOTNET_INSTALL_DIR -ErrorAction SilentlyContinue
-Write-Output "DOTNET=$dotnetInstallDir"
-if ($dotnetInstallDir) {
-    Write-Output $dotnetInstallDir >> $GITHUB_PATH
-    Write-Output "DOTNET_ROOT=$dotnetInstallDir" >> $GITHUB_ENV
+#!/usr/bin/env pwsh
+
+if ($Env:DOTNET_INSTALL_DIR) {
+    $dotnetRoot = $Env:DOTNET_INSTALL_DIR
 } else {
-    if ($IsWindows) {
-        $localAppData = Get-Variable LocalAppData
-        $dotnetRoot = Join-Path $localAppData "Microsoft" "dotnet"
+    if ([System.Environment]::OSVersion.Platform -eq "Win32NT") {
+        $dotnetRoot = [IO.Path]::Combine($Env:LOCALAPPDATA, "Microsoft", "dotnet")
     } else {
-        $homeVar = Get-Variable HOME
-        $dotnetRoot = Join-Path $homeVar ".dotnet"
+        $dotnetRoot = [IO.Path]::Combine($Env:HOME, ".dotnet")
     }
-        
-    Write-Output $dotnetRoot >> $GITHUB_PATH
-    Write-Output "DOTNET_ROOT=$dotnetRoot" >> $GITHUB_ENV
 }
+
+Write-Output "DOTNET_ROOT=$dotnetRoot"
+Write-Output $dotnetRoot >> $GITHUB_PATH
+Write-Output "DOTNET_ROOT=$dotnetRoot" >> $GITHUB_ENV
