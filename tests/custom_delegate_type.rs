@@ -13,12 +13,10 @@ rusty_fork_test! {
         let hostfxr = nethost::load_hostfxr().unwrap();
 
         let context = hostfxr
-            .initialize_for_runtime_config(pdcstr!(
-                "tests/Test/bin/Debug/net6.0/Test.runtimeconfig.json"
-            ))
+            .initialize_for_runtime_config(common::test_runtime_config_path())
             .unwrap();
         let fn_loader = context
-            .get_delegate_loader_for_assembly(pdcstr!("tests/Test/bin/Debug/net6.0/Test.dll"))
+            .get_delegate_loader_for_assembly(common::test_dll_path())
             .unwrap();
         let hello = fn_loader
             .get_function::<fn()>(

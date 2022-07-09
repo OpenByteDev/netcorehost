@@ -1,6 +1,6 @@
 #![allow(deprecated)]
 
-use netcorehost::{nethost, pdcstr};
+use netcorehost::nethost;
 use rusty_fork::rusty_fork_test;
 
 #[path = "common.rs"]
@@ -14,7 +14,7 @@ rusty_fork_test! {
 
         let hostfxr = nethost::load_hostfxr().unwrap();
         let context = hostfxr
-            .initialize_for_dotnet_command_line(pdcstr!("tests/Test/bin/Debug/net6.0/Test.dll"))
+            .initialize_for_dotnet_command_line(common::test_dll_path())
             .unwrap();
         let result = context.run_app().value();
         assert_eq!(result, 42);
@@ -26,7 +26,7 @@ rusty_fork_test! {
         common::setup();
 
         let hostfxr = nethost::load_hostfxr().unwrap();
-        let result = hostfxr.run_app(pdcstr!("tests/Test/bin/Debug/net6.0/Test.dll"));
+        let result = hostfxr.run_app(&common::test_dll_path());
         result.as_hosting_exit_code().unwrap();
         assert_eq!(result.value(), 42);
     }

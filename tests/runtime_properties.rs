@@ -13,9 +13,7 @@ rusty_fork_test! {
 
         let hostfxr = nethost::load_hostfxr().unwrap();
         let context = hostfxr
-            .initialize_for_runtime_config(pdcstr!(
-                "tests/Test/bin/Debug/net6.0/Test.runtimeconfig.json"
-            ))
+            .initialize_for_runtime_config(common::test_runtime_config_path())
             .unwrap();
 
         let test_property_name = pdcstr!("TEST_PROPERTY");

@@ -2,7 +2,7 @@
 
 use std::rc::Rc;
 
-use netcorehost::{nethost, pdcstr};
+use netcorehost::nethost;
 use rusty_fork::rusty_fork_test;
 
 #[path = "common.rs"]
@@ -15,9 +15,7 @@ rusty_fork_test! {
 
         let hostfxr = nethost::load_hostfxr().unwrap();
         let context = hostfxr
-            .initialize_for_runtime_config(pdcstr!(
-                "tests/Test/bin/Debug/net6.0/Test.runtimeconfig.json"
-            ))
+            .initialize_for_runtime_config(common::test_runtime_config_path())
             .unwrap();
 
         let weak = Rc::downgrade(&hostfxr.lib);
