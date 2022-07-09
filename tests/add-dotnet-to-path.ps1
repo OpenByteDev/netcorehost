@@ -10,8 +10,9 @@ if ($Env:DOTNET_INSTALL_DIR) {
     }
 }
 
+$dotnetRoot >> $GITHUB_PATH
+"DOTNET_ROOT=$dotnetRoot" >> $GITHUB_ENV
+
 Write-Output "DOTNET_ROOT=$dotnetRoot"
-Write-Output $dotnetRoot >> $GITHUB_PATH
-Write-Output "DOTNET_ROOT=$dotnetRoot" >> $GITHUB_ENV
 Write-Output "GITHUB_PATH=$GITHUB_PATH"
 Write-Output "GITHUB_ENV=$GITHUB_ENV"
