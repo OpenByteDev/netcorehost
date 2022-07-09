@@ -10,9 +10,13 @@ if ($Env:DOTNET_INSTALL_DIR) {
     }
 }
 
+[Environment]::SetEnvironmentVariable("PATH", [Environment]::GetEnvironmentVariable("PATH", [EnvironmentVariableTarget]::Process) + ";$dotnetRoot", [EnvironmentVariableTarget]::Process)
+[Environment]::SetEnvironmentVariable("DOTNET_ROOT", $dotnetRoot, [EnvironmentVariableTarget]::Process)
+
+# $env:PATH += ";$dotnetRoot"
+# $env:DOTNET_ROOT=$dotnetRoot
+
 $dotnetRoot >> $GITHUB_PATH
 "DOTNET_ROOT=$dotnetRoot" >> $GITHUB_ENV
 
 Write-Output "DOTNET_ROOT=$dotnetRoot"
-Write-Output "GITHUB_PATH=$GITHUB_PATH"
-Write-Output "GITHUB_ENV=$GITHUB_ENV"
