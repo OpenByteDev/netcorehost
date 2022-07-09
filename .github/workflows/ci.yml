@@ -52,6 +52,8 @@ jobs:
       run: |
         ${{ matrix.dotnet_install_download_script }}
         ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel ${{ matrix.dotnet }} -Runtime dotnet
+        ./tests/add-dotnet-to-path.ps1
+      shell: pwsh  
         
     - name: Install latest ${{ matrix.toolchain }}
       uses: actions-rs/toolchain@v1
