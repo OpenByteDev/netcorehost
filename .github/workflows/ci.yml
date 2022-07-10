@@ -66,8 +66,8 @@ jobs:
         [Environment]::SetEnvironmentVariable("PATH", "$dotnetRoot;" + [Environment]::GetEnvironmentVariable("PATH", [EnvironmentVariableTarget]::User), [EnvironmentVariableTarget]::User)
         [Environment]::SetEnvironmentVariable("DOTNET_ROOT", $dotnetRoot, [EnvironmentVariableTarget]::User)
 
-        $dotnetRoot >> $GITHUB_PATH
-        "DOTNET_ROOT=$dotnetRoot" >> $GITHUB_ENV
+        Write-Output $dotnetRoot >> $GITHUB_PATH
+        Write-Output "DOTNET_ROOT=$dotnetRoot" >> $GITHUB_ENV
         
         dotnet --info
       shell: pwsh  
