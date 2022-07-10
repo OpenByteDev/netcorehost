@@ -26,7 +26,7 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             dotnet_install_download_script: curl -sSL https://dot.net/v1/dotnet-install.sh > dotnet-install.sh; chmod +x dotnet-install.sh
-            dotnet_install_script: ./dotnet-install.sh -InstallDir /usr/share/dotnet
+            dotnet_install_script: ./dotnet-install.sh
             arch: x64
           - target: x86_64-pc-windows-msvc
             os: windows-latest
@@ -51,7 +51,7 @@ jobs:
     - name: Install .NET SDK ${{ matrix.dotnet }}
       run: |
         ${{ matrix.dotnet_install_download_script }}
-        ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel ${{ matrix.dotnet }} 
+        ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel 7.0
 
         if ($Env:DOTNET_INSTALL_DIR) {
             $dotnetRoot = $Env:DOTNET_INSTALL_DIR
