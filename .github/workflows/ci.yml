@@ -63,16 +63,11 @@ jobs:
             }
         }
 
-        [Environment]::SetEnvironmentVariable("PATH", "$dotnetRoot;" + [Environment]::GetEnvironmentVariable("PATH", [EnvironmentVariableTarget]::Process), [EnvironmentVariableTarget]::Process)
-        [Environment]::SetEnvironmentVariable("DOTNET_ROOT", $dotnetRoot, [EnvironmentVariableTarget]::Process)
-
-        # $env:PATH += ";$dotnetRoot"
-        # $env:DOTNET_ROOT=$dotnetRoot
+        [Environment]::SetEnvironmentVariable("PATH", "$dotnetRoot;" + [Environment]::GetEnvironmentVariable("PATH", [EnvironmentVariableTarget]::User), [EnvironmentVariableTarget]::User)
+        [Environment]::SetEnvironmentVariable("DOTNET_ROOT", $dotnetRoot, [EnvironmentVariableTarget]::User)
 
         $dotnetRoot >> $GITHUB_PATH
         "DOTNET_ROOT=$dotnetRoot" >> $GITHUB_ENV
-
-        Write-Output "DOTNET_ROOT=$dotnetRoot"
         
         dotnet --info
       shell: pwsh  
