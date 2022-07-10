@@ -11,7 +11,7 @@ env:
   RUSTDOCFLAGS: "--deny warnings"
   RUSTFLAGS: "--deny warnings"
   RUST_TEST_THREADS: 1
-  COREHOST_TRACE: 2
+  # COREHOST_TRACE: 2
 
 jobs:
   test:
@@ -63,7 +63,7 @@ jobs:
             }
         }
 
-        [Environment]::SetEnvironmentVariable("PATH", [Environment]::GetEnvironmentVariable("PATH", [EnvironmentVariableTarget]::Process) + ";$dotnetRoot", [EnvironmentVariableTarget]::Process)
+        [Environment]::SetEnvironmentVariable("PATH", "$dotnetRoot;" + [Environment]::GetEnvironmentVariable("PATH", [EnvironmentVariableTarget]::Process), [EnvironmentVariableTarget]::Process)
         [Environment]::SetEnvironmentVariable("DOTNET_ROOT", $dotnetRoot, [EnvironmentVariableTarget]::Process)
 
         # $env:PATH += ";$dotnetRoot"
@@ -74,7 +74,7 @@ jobs:
 
         Write-Output "DOTNET_ROOT=$dotnetRoot"
         
-        dotnet --list-sdks
+        dotnet --info
       shell: pwsh  
         
     - name: Install latest ${{ matrix.toolchain }}
