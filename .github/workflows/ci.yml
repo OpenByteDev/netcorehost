@@ -11,7 +11,7 @@ env:
   RUSTDOCFLAGS: "--deny warnings"
   RUSTFLAGS: "--deny warnings"
   RUST_TEST_THREADS: 1
-  # COREHOST_TRACE: 4
+  COREHOST_TRACE: 4
 
 jobs:
   test:
@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: ["nightly", "stable"]
+        toolchain: ["beta"]
         target: ["x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc", "i686-pc-windows-msvc", "x86_64-apple-darwin"]
         dotnet: ["5.0", "6.0", "7.0"]
         include:
@@ -96,13 +96,13 @@ jobs:
         command: test
         args: --target ${{ matrix.target }} --all-targets --no-fail-fast
  
-  build:
+  cross:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        toolchain: ["nightly", "beta", "stable"]
-        target: ["aarch64-unknown-linux-gnu", "armv7-unknown-linux-gnueabihf", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc", "i686-pc-windows-msvc", "x86_64-apple-darwin"]
+        toolchain: ["beta"]
+        target: ["aarch64-unknown-linux-gnu", "armv7-unknown-linux-gnueabihf", "aarch64-pc-windows-msvc"]
           
     steps:
     - uses: actions/checkout@v2
