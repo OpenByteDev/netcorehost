@@ -106,9 +106,7 @@ jobs:
           override: true
           
     - name: Install cross
-      uses: taiki-e/setup-cross-toolchain-action@v1
-      with:
-        target: ${{ matrix.target }}
+      run: cargo install cross --git https://github.com/cross-rs/cross
           
     - name: Build
       run: cross build --target ${{ matrix.target }}
