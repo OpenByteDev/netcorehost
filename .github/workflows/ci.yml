@@ -104,7 +104,12 @@ jobs:
           target: ${{ matrix.target }}
           toolchain: ${{ matrix.toolchain }}
           override: true
-      
+          
+    - name: Install cross
+      uses: taiki-e/setup-cross-toolchain-action@v1
+      with:
+        target: ${{ matrix.target }}
+          
     - name: Build
       run: cross build --target ${{ matrix.target }}
         
