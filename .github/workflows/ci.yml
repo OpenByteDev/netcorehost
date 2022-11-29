@@ -84,14 +84,14 @@ jobs:
     - name: Build
       uses: ructions/cargo@master
       with:
-        use-cross: false
+        use_cross: false
         command: build
         args: --target ${{ matrix.target }}
       
     - name: Test
       uses: ructions/cargo@master
       with:
-        use-cross: false
+        use_cross: false
         command: test
         args: --target ${{ matrix.target }} --all-targets --no-fail-fast
  
@@ -116,7 +116,7 @@ jobs:
     - name: Build
       uses: ructions/cargo@master
       with:
-        use-cross: true
+        use_cross: true
         command: build
         args: --release --target ${{ matrix.target }}
         
