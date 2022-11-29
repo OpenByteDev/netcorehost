@@ -165,7 +165,7 @@ pub enum HostingSuccess {
     DifferentRuntimeProperties,
 
     /// Unknown success status code.
-    #[display(fmt = "Unknown success status code: {:#08X}", _0)]
+    #[display(fmt = "Unknown success status code: {_0:#08X}")]
     Unknown(u32),
 }
 
@@ -492,7 +492,7 @@ pub enum HostingError {
     HostFeatureDisabled,
 
     /// Unknown error status code.
-    #[display(fmt = "Unknown error status code: {:#08X}", _0)]
+    #[display(fmt = "Unknown error status code: {_0:#08X}")]
     Unknown(u32),
 }
 

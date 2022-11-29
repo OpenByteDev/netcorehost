@@ -185,7 +185,7 @@ extern "C" fn get_available_sdks_callback(sdk_count: i32, sdks_ptr: *const *cons
         let sdks = sdks_opt.get_or_insert_with(Vec::new);
 
         let sdk_count = sdk_count as usize;
-        sdks.reserve(sdk_count as usize);
+        sdks.reserve(sdk_count);
 
         let raw_sdks = unsafe { slice::from_raw_parts(sdks_ptr, sdk_count) };
 
