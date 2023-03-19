@@ -1,6 +1,6 @@
 #![cfg(feature = "netcore3_0")]
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 use netcorehost::nethost;
 use rusty_fork::rusty_fork_test;
@@ -18,7 +18,7 @@ rusty_fork_test! {
             .initialize_for_runtime_config(common::test_runtime_config_path())
             .unwrap();
 
-        let weak = Rc::downgrade(&hostfxr.lib);
+        let weak = Arc::downgrade(&hostfxr.lib);
         drop(hostfxr);
         unsafe { context.close() }.unwrap();
 

@@ -10,10 +10,10 @@ use crate::{
     pdcstring::PdCStr,
 };
 use num_enum::TryFromPrimitive;
-use std::{convert::TryFrom, mem::MaybeUninit, path::Path, ptr, rc::Rc};
+use std::{convert::TryFrom, mem::MaybeUninit, path::Path, ptr};
 use thiserror::Error;
 
-use super::{FunctionPtr, HostfxrLibrary, ManagedFunction, RawFunctionPtr};
+use super::{FunctionPtr, ManagedFunction, RawFunctionPtr, SharedHostfxrLibrary};
 
 /// A pointer to a function with the default signature.
 pub type ManagedFunctionWithDefaultSignature = ManagedFunction<component_entry_point_fn>;
@@ -29,7 +29,7 @@ pub struct DelegateLoader {
     pub(crate) get_load_assembly_and_get_function_pointer:
         load_assembly_and_get_function_pointer_fn,
     pub(crate) get_function_pointer: get_function_pointer_fn,
-    pub(crate) hostfxr: Rc<HostfxrLibrary>,
+    pub(crate) hostfxr: SharedHostfxrLibrary,
 }
 
 impl DelegateLoader {

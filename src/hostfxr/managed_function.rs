@@ -1,9 +1,9 @@
-use std::{ops::Deref, rc::Rc};
+use std::ops::Deref;
 
-use super::HostfxrLibrary;
+use super::SharedHostfxrLibrary;
 
 /// A wrapper around a managed function pointer.
-pub struct ManagedFunction<F: ManagedFunctionPtr>(pub(crate) F, pub(crate) Rc<HostfxrLibrary>);
+pub struct ManagedFunction<F: ManagedFunctionPtr>(pub(crate) F, pub(crate) SharedHostfxrLibrary);
 
 impl<F: ManagedFunctionPtr> Deref for ManagedFunction<F> {
     type Target = F;

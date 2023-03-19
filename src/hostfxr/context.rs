@@ -1,12 +1,12 @@
 use crate::{
     bindings::hostfxr::{
         get_function_pointer_fn, hostfxr_delegate_type, hostfxr_handle,
-        load_assembly_and_get_function_pointer_fn, wrapper,
+        load_assembly_and_get_function_pointer_fn,
     },
-    dlopen2::wrapper::Container,
     error::{HostingError, HostingResult, HostingSuccess},
     hostfxr::{
-        AppOrHostingResult, AssemblyDelegateLoader, DelegateLoader, Hostfxr, RawFunctionPtr,
+        AppOrHostingResult, AssemblyDelegateLoader, DelegateLoader, Hostfxr, HostfxrLibrary,
+        RawFunctionPtr, SharedHostfxrLibrary,
     },
     pdcstring::{PdCStr, PdCString},
 };
@@ -62,16 +62,15 @@ impl From<HostfxrHandle> for hostfxr_handle {
     }
 }
 
-pub(crate) type HostfxrLibrary = Container<wrapper::Hostfxr>;
-
 /// State which hostfxr creates and maintains and represents a logical operation on the hosting components.
 #[derive(DestructDrop)]
 #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
 pub struct HostfxrContext<I> {
     handle: HostfxrHandle,
-    hostfxr: Rc<HostfxrLibrary>,
+    hostfxr: SharedHostfxrLibrary,
     context_type: PhantomData<I>,
     is_primary: bool,
+    not_thread_safe: PhantomData<Rc<HostfxrLibrary>>,
 }
 
 impl<I> HostfxrContext<I> {
@@ -91,6 +90,7 @@ impl<I> HostfxrContext<I> {
             hostfxr: hostfxr.lib,
             is_primary,
             context_type: PhantomData,
+            not_thread_safe: PhantomData,
         }
     }
 
