@@ -5,14 +5,14 @@ use widestring::U16CStr;
 use crate::pdcstring::{MissingNulTerminator, PdCStrInner, PdChar, ToStringError};
 
 #[doc(hidden)]
-pub extern crate u16cstr;
+pub extern crate widestring;
 
 #[macro_export]
 /// A macro for creating a [`PdCStr`](crate::pdcstring::PdCStr) at compile time.
 macro_rules! pdcstr {
     ($expression:expr) => {
         <$crate::pdcstring::PdCStr as $crate::pdcstring::windows::PdCStrExt>::from_u16_c_str(
-            $crate::pdcstring::windows::u16cstr::u16cstr!($expression),
+            $crate::pdcstring::windows::widestring::u16cstr!($expression),
         )
     };
 }
