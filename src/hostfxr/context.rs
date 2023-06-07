@@ -46,7 +46,7 @@ impl HostfxrHandle {
     /// - The given handle has to be valid and has to represent a hostfxr context.
     #[must_use]
     pub unsafe fn new_unchecked(ptr: hostfxr_handle) -> Self {
-        Self(unsafe { NonNull::new_unchecked(ptr as *mut _) })
+        Self(unsafe { NonNull::new_unchecked(ptr.cast_mut()) })
     }
 
     /// Returns the raw underlying handle.
