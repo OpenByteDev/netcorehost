@@ -373,10 +373,10 @@ impl<I> HostfxrContext<I> {
 
     /// Gets a delegate loader for loading function pointers of the assembly with the given path.
     /// The assembly will be loaded lazily when the first function pointer is loaded.
-    pub fn get_delegate_loader_for_assembly<A: AsRef<PdCStr>>(
+    pub fn get_delegate_loader_for_assembly(
         &self,
-        assembly_path: A,
-    ) -> Result<AssemblyDelegateLoader<A>, HostingError> {
+        assembly_path: impl Into<PdCString>,
+    ) -> Result<AssemblyDelegateLoader, HostingError> {
         self.get_delegate_loader()
             .map(|loader| AssemblyDelegateLoader::new(loader, assembly_path))
     }

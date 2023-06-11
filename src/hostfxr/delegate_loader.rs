@@ -298,15 +298,16 @@ impl DelegateLoader {
 /// [`HostfxrContext`]: super::HostfxrContext
 #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
 #[derive(Clone)]
-pub struct AssemblyDelegateLoader<A: AsRef<PdCStr>> {
+pub struct AssemblyDelegateLoader {
     loader: DelegateLoader,
-    assembly_path: A,
+    assembly_path: PdCString,
 }
 
-impl<A: AsRef<PdCStr>> AssemblyDelegateLoader<A> {
+impl AssemblyDelegateLoader {
     /// Creates a new [`AssemblyDelegateLoader`] wrapping the given [`DelegateLoader`] loading the assembly
     /// from the given path on the first access.
-    pub fn new(loader: DelegateLoader, assembly_path: A) -> Self {
+    pub fn new(loader: DelegateLoader, assembly_path: impl Into<PdCString>) -> Self {
+        let assembly_path = assembly_path.into();
         Self {
             loader,
             assembly_path,

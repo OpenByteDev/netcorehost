@@ -12,7 +12,6 @@ use std::{
 use netcorehost::{
     hostfxr::{AssemblyDelegateLoader, ManagedFunction},
     nethost, pdcstr,
-    pdcstring::PdCStr,
 };
 
 #[path = "../helpers/dotnet-build.rs"]
@@ -36,8 +35,8 @@ fn main() {
 }
 
 // Method 1: using CString
-fn print_string_from_csharp_using_c_string<A: AsRef<PdCStr>>(
-    delegate_loader: &AssemblyDelegateLoader<A>,
+fn print_string_from_csharp_using_c_string(
+    delegate_loader: &AssemblyDelegateLoader,
 ) {
     let set_copy_to_c_string = delegate_loader
         .get_function_with_unmanaged_callers_only::<fn(f: unsafe extern "system" fn(*const u16, i32) -> *mut c_char)>(
@@ -69,8 +68,8 @@ unsafe extern "system" fn copy_to_c_string(ptr: *const u16, length: i32) -> *mut
 }
 
 // Method 2: using GCHandle
-fn print_string_from_csharp_using_unmanaged_alloc<A: AsRef<PdCStr>>(
-    delegate_loader: &AssemblyDelegateLoader<A>,
+fn print_string_from_csharp_using_unmanaged_alloc(
+    delegate_loader: &AssemblyDelegateLoader,
 ) {
     // one time setup
     let free_h_global = delegate_loader
@@ -128,8 +127,8 @@ impl Drop for HGlobalString {
 }
 
 // Method 3: using GCHandle
-fn print_string_from_csharp_using_gc_handle<A: AsRef<PdCStr>>(
-    delegate_loader: &AssemblyDelegateLoader<A>,
+fn print_string_from_csharp_using_gc_handle(
+    delegate_loader: &AssemblyDelegateLoader,
 ) {
     // one time setup
     let free_gc_handle_string = delegate_loader
@@ -202,8 +201,8 @@ impl Drop for GcHandleString {
 }
 
 // Method 4: using rust allocate
-fn print_string_from_csharp_using_rust_allocate<A: AsRef<PdCStr>>(
-    delegate_loader: &AssemblyDelegateLoader<A>,
+fn print_string_from_csharp_using_rust_allocate(
+    delegate_loader: &AssemblyDelegateLoader,
 ) {
     // one time setup
     let set_rust_allocate_memory = delegate_loader
