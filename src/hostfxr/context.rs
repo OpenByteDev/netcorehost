@@ -8,15 +8,14 @@ use crate::{
         AppOrHostingResult, AssemblyDelegateLoader, DelegateLoader, Hostfxr, HostfxrLibrary,
         RawFunctionPtr, SharedHostfxrLibrary,
     },
-    pdcstring::{PdCStr, PdCString},
+    pdcstring::PdCString,
 };
 
 use std::{
-    collections::HashMap,
     ffi::c_void,
     marker::PhantomData,
     mem::{self, ManuallyDrop, MaybeUninit},
-    ptr::{self, NonNull},
+    ptr::NonNull,
     rc::Rc,
 };
 
@@ -117,197 +116,9 @@ impl<I> HostfxrContext<I> {
         self.is_primary
     }
 
-    /// Gets the runtime property value for the given key of this host context.
-    pub fn get_runtime_property_value(
-        &self,
-        name: impl AsRef<PdCStr>,
-    ) -> Result<PdCString, HostingError> {
-        unsafe { self.get_runtime_property_value_ref(name) }.map(PdCStr::to_owned)
-    }
-
-    /// Gets the runtime property value for the given key of this host context.
-    ///
-    /// # Safety
-    /// The value string is owned by the host context. The lifetime of the buffer is only
-    /// guaranteed until any of the below occur:
-    ///  * [`run_app`] is called for this host context
-    ///  * properties are changed via [`set_runtime_property_value`] or [`remove_runtime_property_value`]
-    ///
-    /// [`run_app`]: HostfxrContext::run_app
-    /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
-    /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
-    pub unsafe fn get_runtime_property_value_ref(
-        &self,
-        name: impl AsRef<PdCStr>,
-    ) -> Result<&PdCStr, HostingError> {
-        let mut value = MaybeUninit::uninit();
-
-        let result = unsafe {
-            self.hostfxr.hostfxr_get_runtime_property_value(
-                self.handle.as_raw(),
-                name.as_ref().as_ptr(),
-                value.as_mut_ptr(),
-            )
-        };
-        HostingResult::from(result).into_result()?;
-
-        Ok(unsafe { PdCStr::from_str_ptr(value.assume_init()) })
-    }
-
-    /// Sets the value of a runtime property for this host context.
-    pub fn set_runtime_property_value(
-        &self,
-        name: impl AsRef<PdCStr>,
-        value: impl AsRef<PdCStr>,
-    ) -> Result<HostingSuccess, HostingError> {
-        let result = unsafe {
-            self.hostfxr.hostfxr_set_runtime_property_value(
-                self.handle.as_raw(),
-                name.as_ref().as_ptr(),
-                value.as_ref().as_ptr(),
-            )
-        };
-        HostingResult::from(result).into_result()
-    }
-
-    /// Remove a runtime property for this host context.
-    pub fn remove_runtime_property_value(
-        &self,
-        name: impl AsRef<PdCStr>,
-    ) -> Result<HostingSuccess, HostingError> {
-        let result = unsafe {
-            self.hostfxr.hostfxr_set_runtime_property_value(
-                self.handle.as_raw(),
-                name.as_ref().as_ptr(),
-                ptr::null(),
-            )
-        };
-        HostingResult::from(result).into_result()
-    }
-
-    /// Get all runtime properties for this host context.
-    ///
-    /// # Safety
-    /// The strings returned are owned by the host context. The lifetime of the buffers is only
-    /// guaranteed until any of the below occur:
-    ///  * [`run_app`] is called for this host context
-    ///  * properties are changed via [`set_runtime_property_value`] or [`remove_runtime_property_value`]
-    ///  * the host context is dropped
-    ///
-    /// [`run_app`]: HostfxrContext::run_app
-    /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
-    /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
-    pub unsafe fn get_runtime_properties_ref(
-        &self,
-    ) -> Result<(Vec<&PdCStr>, Vec<&PdCStr>), HostingError> {
-        // get count
-        let mut count = MaybeUninit::uninit();
-        let mut result = unsafe {
-            self.hostfxr.hostfxr_get_runtime_properties(
-                self.handle.as_raw(),
-                count.as_mut_ptr(),
-                ptr::null_mut(),
-                ptr::null_mut(),
-            )
-        };
-
-        // ignore buffer too small error as the first call is only to get the required buffer size.
-        match HostingResult::from(result).into_result() {
-            Ok(_) | Err(HostingError::HostApiBufferTooSmall) => {}
-            Err(e) => return Err(e),
-        };
-
-        // get values / fill buffer
-        let mut count = unsafe { count.assume_init() };
-        let mut keys = Vec::with_capacity(count);
-        let mut values = Vec::with_capacity(count);
-        result = unsafe {
-            self.hostfxr.hostfxr_get_runtime_properties(
-                self.handle.as_raw(),
-                &mut count,
-                keys.as_mut_ptr(),
-                values.as_mut_ptr(),
-            )
-        };
-        HostingResult::from(result).into_result()?;
-
-        unsafe { keys.set_len(count) };
-        unsafe { values.set_len(count) };
-
-        let keys = keys
-            .into_iter()
-            .map(|e| unsafe { PdCStr::from_str_ptr(e) })
-            .collect();
-        let values = values
-            .into_iter()
-            .map(|e| unsafe { PdCStr::from_str_ptr(e) })
-            .collect();
-
-        Ok((keys, values))
-    }
-
-    /// Get all runtime properties for this host context as owned strings.
-    pub fn get_runtime_properties_owned(
-        &self,
-    ) -> Result<(Vec<PdCString>, Vec<PdCString>), HostingError> {
-        unsafe { self.get_runtime_properties_ref() }.map(|(keys, values)| {
-            let owned_keys = keys.into_iter().map(PdCStr::to_owned).collect();
-            let owned_values = values.into_iter().map(PdCStr::to_owned).collect();
-            (owned_keys, owned_values)
-        })
-    }
-
-    /// Get all runtime properties for this host context as an iterator over borrowed key-value pairs.
-    ///
-    /// # Safety
-    /// The strings returned are owned by the host context. The lifetime of the buffers is only
-    /// guaranteed until any of the below occur:
-    ///  * [`run_app`] is called for this host context
-    ///  * properties are changed via [`set_runtime_property_value`] or [`remove_runtime_property_value`]
-    ///  * the host context is dropped
-    ///
-    /// [`run_app`]: HostfxrContext::run_app
-    /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
-    /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
-    pub unsafe fn get_runtime_properties_ref_iter(
-        &self,
-    ) -> Result<impl Iterator<Item = (&PdCStr, &PdCStr)>, HostingError> {
-        unsafe { self.get_runtime_properties_ref() }
-            .map(|(keys, values)| keys.into_iter().zip(values.into_iter()))
-    }
-
-    /// Get all runtime properties for this host context as an iterator over owned key-value pairs.
-    pub fn get_runtime_properties_iter(
-        &self,
-    ) -> Result<impl Iterator<Item = (PdCString, PdCString)>, HostingError> {
-        self.get_runtime_properties_owned()
-            .map(|(keys, values)| keys.into_iter().zip(values.into_iter()))
-    }
-
-    /// Get all runtime properties for this host context as an hashmap of borrowed strings.
-    ///
-    /// # Safety
-    /// The strings returned are owned by the host context. The lifetime of the buffers is only
-    /// guaranteed until any of the below occur:
-    ///  * [`run_app`] is called for this host context
-    ///  * properties are changed via [`set_runtime_property_value`] or [`remove_runtime_property_value`]
-    ///  * the host context is dropped
-    ///
-    /// [`run_app`]: HostfxrContext::run_app
-    /// [`set_runtime_property_value`]: HostfxrContext::set_runtime_property_value
-    /// [`remove_runtime_property_value`]: HostfxrContext::remove_runtime_property_value
-    pub unsafe fn get_runtime_properties_ref_as_map(
-        &self,
-    ) -> Result<HashMap<&PdCStr, &PdCStr>, HostingError> {
-        unsafe { self.get_runtime_properties_ref() }
-            .map(|(keys, values)| keys.into_iter().zip(values.into_iter()).collect())
-    }
-
-    /// Get all runtime properties for this host context as an hashmap of owned strings.
-    pub fn get_runtime_properties_as_map(
-        &self,
-    ) -> Result<HashMap<PdCString, PdCString>, HostingError> {
-        self.get_runtime_properties_iter().map(Iterator::collect)
+    #[must_use]
+    pub(crate) fn library(&self) -> &SharedHostfxrLibrary {
+        &self.hostfxr
     }
 
     /// Gets a typed delegate from the currently loaded `CoreCLR` or from a newly created one.

@@ -12,7 +12,7 @@ rusty_fork_test! {
         common::setup();
 
         let hostfxr = nethost::load_hostfxr().unwrap();
-        let context = hostfxr
+        let mut context = hostfxr
             .initialize_for_runtime_config(common::test_runtime_config_path())
             .unwrap();
 
@@ -26,7 +26,7 @@ rusty_fork_test! {
             .unwrap();
         assert_eq!(test_property_value, property_value.as_ref());
 
-        let properties = context.get_runtime_properties_as_map().unwrap();
+        let properties = context.runtime_properties().unwrap();
         let property_value = properties.get(test_property_name).unwrap();
         assert_eq!(test_property_value, property_value.as_ref());
     }

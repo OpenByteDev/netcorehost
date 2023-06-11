@@ -38,6 +38,12 @@ mod delegate_loader;
 pub use delegate_loader::*;
 
 #[cfg(feature = "netcore3_0")]
+mod runtime_property;
+#[cfg(feature = "netcore3_0")]
+#[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
+pub use runtime_property::*;
+
+#[cfg(feature = "netcore3_0")]
 mod managed_function;
 #[cfg(feature = "netcore3_0")]
 #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
