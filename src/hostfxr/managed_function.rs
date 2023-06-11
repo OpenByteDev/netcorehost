@@ -1,9 +1,7 @@
 use std::ops::Deref;
 
-use super::SharedHostfxrLibrary;
-
 /// A wrapper around a managed function pointer.
-pub struct ManagedFunction<F: ManagedFunctionPtr>(pub(crate) F, pub(crate) SharedHostfxrLibrary);
+pub struct ManagedFunction<F: ManagedFunctionPtr>(pub(crate) F);
 
 impl<F: ManagedFunctionPtr> Deref for ManagedFunction<F> {
     type Target = F;

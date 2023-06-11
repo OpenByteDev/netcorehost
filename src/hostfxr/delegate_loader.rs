@@ -7,7 +7,7 @@ use crate::{
         },
     },
     error::{HostingError, HostingResult, HostingSuccess},
-    pdcstring::PdCStr,
+    pdcstring::{PdCStr, PdCString},
 };
 use num_enum::TryFromPrimitive;
 use std::{convert::TryFrom, mem::MaybeUninit, path::Path, ptr};
@@ -29,6 +29,7 @@ pub struct DelegateLoader {
     pub(crate) get_load_assembly_and_get_function_pointer:
         load_assembly_and_get_function_pointer_fn,
     pub(crate) get_function_pointer: get_function_pointer_fn,
+    #[allow(unused)]
     pub(crate) hostfxr: SharedHostfxrLibrary,
 }
 
@@ -131,8 +132,7 @@ impl DelegateLoader {
             )
         }?;
         Ok(ManagedFunction(
-            unsafe { F::Managed::from_ptr(function) },
-            self.hostfxr.clone(),
+            unsafe { F::Managed::from_ptr(function) }
         ))
     }
 
@@ -167,8 +167,7 @@ impl DelegateLoader {
             )
         }?;
         Ok(ManagedFunction(
-            unsafe { FunctionPtr::from_ptr(function) },
-            self.hostfxr.clone(),
+            unsafe { FunctionPtr::from_ptr(function) }
         ))
     }
 
@@ -205,8 +204,7 @@ impl DelegateLoader {
             )
         }?;
         Ok(ManagedFunction(
-            unsafe { F::Managed::from_ptr(function) },
-            self.hostfxr.clone(),
+            unsafe { F::Managed::from_ptr(function) }
         ))
     }
 
@@ -235,7 +233,6 @@ impl DelegateLoader {
         }?;
         Ok(ManagedFunction(
             unsafe { F::Managed::from_ptr(function) },
-            self.hostfxr.clone(),
         ))
     }
 
@@ -258,7 +255,6 @@ impl DelegateLoader {
         }?;
         Ok(ManagedFunction(
             unsafe { FunctionPtr::from_ptr(function) },
-            self.hostfxr.clone(),
         ))
     }
 
@@ -287,7 +283,6 @@ impl DelegateLoader {
         }?;
         Ok(ManagedFunction(
             unsafe { F::Managed::from_ptr(function) },
-            self.hostfxr.clone(),
         ))
     }
 }
