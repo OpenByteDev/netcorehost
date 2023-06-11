@@ -170,19 +170,19 @@ impl Display for PdCStr {
     }
 }
 
-impl <'a> From<&'a PdCString> for &'a PdCStr {
+impl<'a> From<&'a PdCString> for &'a PdCStr {
     fn from(s: &'a PdCString) -> Self {
         s.as_ref()
     }
 }
 
-impl <'a> From<&'a PdCStr> for PdCString {
+impl<'a> From<&'a PdCStr> for PdCString {
     fn from(s: &'a PdCStr) -> Self {
         s.to_owned()
     }
 }
 
-/* 
+/*
 impl From<PdCStringInnerImpl> for PdCString {
     fn from(s: PdCStringInnerImpl) -> Self {
         Self::from_inner(s)

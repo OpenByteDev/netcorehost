@@ -1,10 +1,13 @@
-use std::{collections::HashMap, ptr, mem::MaybeUninit};
+use std::{collections::HashMap, mem::MaybeUninit, ptr};
 
-use crate::{pdcstring::PdCStr, error::{HostingError, HostingResult}};
+use crate::{
+    error::{HostingError, HostingResult},
+    pdcstring::PdCStr,
+};
 
 use super::HostfxrContext;
 
-impl <I> HostfxrContext<I> {
+impl<I> HostfxrContext<I> {
     /// Gets the runtime property value for the given key of this host context.
     pub fn get_runtime_property_value(
         &self,
@@ -56,9 +59,7 @@ impl <I> HostfxrContext<I> {
     }
 
     /// Get all runtime properties for this host context.
-    pub fn runtime_properties(
-        &self,
-    ) -> Result<HashMap<&'_ PdCStr, &'_ PdCStr>, HostingError> {
+    pub fn runtime_properties(&self) -> Result<HashMap<&'_ PdCStr, &'_ PdCStr>, HostingError> {
         // get count
         let mut count = MaybeUninit::uninit();
         let mut result = unsafe {
@@ -93,9 +94,7 @@ impl <I> HostfxrContext<I> {
         unsafe { keys.set_len(count) };
         unsafe { values.set_len(count) };
 
-        let keys = keys
-            .into_iter()
-            .map(|e| unsafe { PdCStr::from_str_ptr(e) });
+        let keys = keys.into_iter().map(|e| unsafe { PdCStr::from_str_ptr(e) });
         let values = values
             .into_iter()
             .map(|e| unsafe { PdCStr::from_str_ptr(e) });

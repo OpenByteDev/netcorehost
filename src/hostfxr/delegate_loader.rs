@@ -131,9 +131,7 @@ impl DelegateLoader {
                 delegate_type_name.as_ptr(),
             )
         }?;
-        Ok(ManagedFunction(
-            unsafe { F::Managed::from_ptr(function) }
-        ))
+        Ok(ManagedFunction(unsafe { F::Managed::from_ptr(function) }))
     }
 
     /// Calling this function will load the specified assembly in isolation (into its own `AssemblyLoadContext`)
@@ -166,9 +164,7 @@ impl DelegateLoader {
                 ptr::null(),
             )
         }?;
-        Ok(ManagedFunction(
-            unsafe { FunctionPtr::from_ptr(function) }
-        ))
+        Ok(ManagedFunction(unsafe { FunctionPtr::from_ptr(function) }))
     }
 
     /// Calling this function will load the specified assembly in isolation (into its own `AssemblyLoadContext`)
@@ -203,9 +199,7 @@ impl DelegateLoader {
                 UNMANAGED_CALLERS_ONLY_METHOD,
             )
         }?;
-        Ok(ManagedFunction(
-            unsafe { F::Managed::from_ptr(function) }
-        ))
+        Ok(ManagedFunction(unsafe { F::Managed::from_ptr(function) }))
     }
 
     /// Calling this function will find the specified type and method and return a native function pointer to that method.
@@ -231,9 +225,7 @@ impl DelegateLoader {
                 delegate_type_name.as_ptr(),
             )
         }?;
-        Ok(ManagedFunction(
-            unsafe { F::Managed::from_ptr(function) },
-        ))
+        Ok(ManagedFunction(unsafe { F::Managed::from_ptr(function) }))
     }
 
     /// Calling this function will find the specified type and method and return a native function pointer to that method.
@@ -253,9 +245,7 @@ impl DelegateLoader {
         let function = unsafe {
             self._get_function_pointer(type_name.as_ptr(), method_name.as_ptr(), ptr::null())
         }?;
-        Ok(ManagedFunction(
-            unsafe { FunctionPtr::from_ptr(function) },
-        ))
+        Ok(ManagedFunction(unsafe { FunctionPtr::from_ptr(function) }))
     }
 
     /// Calling this function will find the specified type and method and return a native function pointer to that method.
@@ -281,9 +271,7 @@ impl DelegateLoader {
                 UNMANAGED_CALLERS_ONLY_METHOD,
             )
         }?;
-        Ok(ManagedFunction(
-            unsafe { F::Managed::from_ptr(function) },
-        ))
+        Ok(ManagedFunction(unsafe { F::Managed::from_ptr(function) }))
     }
 }
 
