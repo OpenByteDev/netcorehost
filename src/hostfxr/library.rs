@@ -63,9 +63,10 @@ pub struct AppOrHostingResult(i32);
 impl AppOrHostingResult {
     /// Gets the raw value of the result.
     #[must_use]
-    pub fn value(self) -> i32 {
+    pub fn value(&self) -> i32 {
         self.0
     }
+
     /// Converts the result to an hosting exit code.
     pub fn as_hosting_exit_code(self) -> HostingResult {
         HostingResult::from(self.0)

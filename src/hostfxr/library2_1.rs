@@ -94,7 +94,7 @@ impl Hostfxr {
         };
         HostingResult::from(result).into_result()?;
 
-        let sdk_path = RESOLVE_SDK2_MUTEX
+        let sdk_path = RESOLVE_SDK2_DATA
             .with(|sdk| sdk.borrow_mut().take())
             .unwrap();
         Ok(sdk_path)
@@ -111,7 +111,7 @@ impl Hostfxr {
             self.lib
                 .hostfxr_get_available_sdks(exe_dir.as_ptr(), get_available_sdks_callback)
         };
-        GET_AVAILABLE_SDKS_MUTEX
+        GET_AVAILABLE_SDKS_DATA
             .with(|sdks| sdks.borrow_mut().take())
             .unwrap()
     }
@@ -169,31 +169,27 @@ impl Hostfxr {
 }
 
 thread_local! {
-    static GET_AVAILABLE_SDKS_MUTEX: RefCell<Option<Vec<PathBuf>>> = RefCell::new(None);
-    static RESOLVE_SDK2_MUTEX: RefCell<Option<ResolveSdkResult>> = RefCell::new(None);
+    static GET_AVAILABLE_SDKS_DATA: RefCell<Option<Vec<PathBuf>>> = RefCell::new(None);
+    static RESOLVE_SDK2_DATA: RefCell<Option<ResolveSdkResult>> = RefCell::new(None);
 }
 
 extern "C" fn get_available_sdks_callback(sdk_count: i32, sdks_ptr: *const *const char_t) {
-    GET_AVAILABLE_SDKS_MUTEX.with(|sdks| {
+    GET_AVAILABLE_SDKS_DATA.with(|sdks| {
         let mut sdks_opt = sdks.borrow_mut();
         let sdks = sdks_opt.get_or_insert_with(Vec::new);
 
-        let sdk_count = sdk_count as usize;
-        sdks.reserve(sdk_count);
-
-        let raw_sdks = unsafe { slice::from_raw_parts(sdks_ptr, sdk_count) };
-
-        for &raw_sdk in raw_sdks {
-            let sdk = unsafe { PdCStr::from_str_ptr(raw_sdk) };
-            sdks.push(sdk.to_os_string().into());
-        }
+        let raw_sdks = unsafe { slice::from_raw_parts(sdks_ptr, sdk_count as usize) };
+        sdks.extend(raw_sdks.iter().copied().map(|raw_sdk| {
+            unsafe { PdCStr::from_str_ptr(raw_sdk) }
+                .to_os_string()
+                .into()
+        }));
     });
 }
 
 extern "C" fn resolve_sdk2_callback(key: hostfxr_resolve_sdk2_result_key_t, value: *const char_t) {
-    RESOLVE_SDK2_MUTEX.with(|sdks| {
-        let path = unsafe { PdCStr::from_str_ptr(value) };
-        let path = PathBuf::from(path.to_os_string());
+    RESOLVE_SDK2_DATA.with(|sdks| {
+        let path = unsafe { PdCStr::from_str_ptr(value) }.to_os_string().into();
         *sdks.borrow_mut() = Some(match key {
             hostfxr_resolve_sdk2_result_key_t::resolved_sdk_dir => {
                 ResolveSdkResult::ResolvedSdkDirectory(path)
