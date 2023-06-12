@@ -1,6 +1,6 @@
 use crate::{
     bindings::hostfxr::{
-        get_function_pointer_fn, hostfxr_delegate_type, hostfxr_handle,
+        hostfxr_delegate_type, hostfxr_handle,
         load_assembly_and_get_function_pointer_fn,
     },
     error::{HostingError, HostingResult, HostingSuccess},
@@ -10,6 +10,9 @@ use crate::{
     },
     pdcstring::PdCString,
 };
+
+#[cfg(feature = "net5_0")]
+use crate::bindings::hostfxr::get_function_pointer_fn;
 
 use std::{
     ffi::c_void,
@@ -165,6 +168,7 @@ impl<I> HostfxrContext<I> {
             .map(|ptr| mem::transmute(ptr))
         }
     }
+    #[cfg(feature = "net5_0")]
     fn get_get_function_pointer_delegate(&self) -> Result<get_function_pointer_fn, HostingError> {
         unsafe {
             self.get_runtime_delegate(hostfxr_delegate_type::hdt_get_function_pointer)
@@ -177,6 +181,7 @@ impl<I> HostfxrContext<I> {
         Ok(DelegateLoader {
             get_load_assembly_and_get_function_pointer: self
                 .get_load_assembly_and_get_function_pointer_delegate()?,
+            #[cfg(feature = "net5_0")]
             get_function_pointer: self.get_get_function_pointer_delegate()?,
             hostfxr: self.hostfxr.clone(),
         })

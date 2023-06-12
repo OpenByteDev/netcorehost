@@ -2,8 +2,8 @@ use crate::{
     bindings::{
         char_t,
         hostfxr::{
-            component_entry_point_fn, get_function_pointer_fn,
-            load_assembly_and_get_function_pointer_fn, UNMANAGED_CALLERS_ONLY_METHOD,
+            component_entry_point_fn,
+            load_assembly_and_get_function_pointer_fn,
         },
     },
     error::{HostingError, HostingResult, HostingSuccess},
@@ -15,6 +15,12 @@ use thiserror::Error;
 
 use super::{FunctionPtr, ManagedFunction, RawFunctionPtr, SharedHostfxrLibrary};
 
+#[cfg(feature = "net5_0")]
+use crate::bindings::hostfxr::{
+    get_function_pointer_fn,
+    UNMANAGED_CALLERS_ONLY_METHOD,
+};
+
 /// A pointer to a function with the default signature.
 pub type ManagedFunctionWithDefaultSignature = ManagedFunction<component_entry_point_fn>;
 /// A pointer to a function with an unknown signature.
@@ -23,14 +29,25 @@ pub type ManagedFunctionWithUnknownSignature = ManagedFunction<RawFunctionPtr>;
 /// A struct for loading pointers to managed functions for a given [`HostfxrContext`].
 ///
 /// [`HostfxrContext`]: super::HostfxrContext
-#[derive(Clone)]
 #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
 pub struct DelegateLoader {
     pub(crate) get_load_assembly_and_get_function_pointer:
         load_assembly_and_get_function_pointer_fn,
+    #[cfg(feature = "net5_0")]
     pub(crate) get_function_pointer: get_function_pointer_fn,
     #[allow(unused)]
     pub(crate) hostfxr: SharedHostfxrLibrary,
+}
+
+impl Clone for DelegateLoader {
+    fn clone(&self) -> Self {
+        Self {
+            get_load_assembly_and_get_function_pointer: self.get_load_assembly_and_get_function_pointer.clone(),
+            #[cfg(feature = "net5_0")]
+            get_function_pointer: self.get_function_pointer.clone(),
+            hostfxr: self.hostfxr.clone()
+        }
+    }
 }
 
 impl DelegateLoader {
@@ -76,6 +93,7 @@ impl DelegateLoader {
         }
     }
 
+    #[cfg(feature = "net5_0")]
     unsafe fn _get_function_pointer(
         &self,
         type_name: *const char_t,
@@ -184,6 +202,8 @@ impl DelegateLoader {
     ///
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
+    #[cfg(feature = "net5_0")]
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net5_0")))]
     pub fn load_assembly_and_get_function_with_unmanaged_callers_only<F: FunctionPtr>(
         &self,
         assembly_path: &PdCStr,
@@ -212,6 +232,8 @@ impl DelegateLoader {
     ///     Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
     ///  * `delegate_type_name`:
     ///     Assembly qualified delegate type name for the method signature.
+    #[cfg(feature = "net5_0")]
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net5_0")))]
     pub fn get_function<F: FunctionPtr>(
         &self,
         type_name: &PdCStr,
@@ -237,6 +259,7 @@ impl DelegateLoader {
     ///  * `method_name`:
     ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
     ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
+    #[cfg(feature = "net5_0")]
     pub fn get_function_with_default_signature(
         &self,
         type_name: &PdCStr,
@@ -259,6 +282,8 @@ impl DelegateLoader {
     ///
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
+    #[cfg(feature = "net5_0")]
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net5_0")))]
     pub fn get_function_with_unmanaged_callers_only<F: FunctionPtr>(
         &self,
         type_name: &PdCStr,
@@ -363,6 +388,8 @@ impl AssemblyDelegateLoader {
     ///
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
+    #[cfg(feature = "net5_0")]
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net5_0")))]
     pub fn get_function_with_unmanaged_callers_only<F: FunctionPtr>(
         &self,
         type_name: &PdCStr,

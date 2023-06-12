@@ -16,7 +16,7 @@ num_enum = { version = "0.6", default-features = false }
 thiserror = { version = "1.0", default-features = false }
 derive_more = { version = "0.99", features = ["deref", "from", "display"], default-features = false }
 nethost-sys = { version = ">=0.6.2", optional = true, default-features = false }
-hostfxr-sys = { version = "0.6", default-features = false }
+hostfxr-sys = { version = ">=0.7.1", default-features = false }
 coreclr-hosting-shared = { version = "0.1", default-features = false }
 destruct-drop = { version = "0.2", default-features = false }
 ffi-opaque = { version = "2.0", default-features = false }
@@ -35,7 +35,7 @@ widestring = "1.0"
 rusty-fork = "0.3"
 
 [features]
-default = ["nethost", "nethost-download", "netcore3_0"]
+default = ["nethost-download", "net6_0"]
 nethost-download = ["nethost", "nethost-sys/download-nuget"]
 nethost = ["nethost-sys"]
 nightly = []
@@ -44,8 +44,13 @@ netcore1_0 = ["hostfxr-sys/netcore1_0"]
 netcore2_0 = ["hostfxr-sys/netcore2_0", "netcore1_0"]
 netcore2_1 = ["hostfxr-sys/netcore2_1", "netcore2_0"]
 netcore3_0 = ["hostfxr-sys/netcore3_0", "netcore2_1"]
+net5_0 = ["hostfxr-sys/net5_0", "netcore3_0"]
+net6_0 = ["hostfxr-sys/net6_0", "net5_0"]
+net7_0 = ["hostfxr-sys/net7_0", "net6_0"]
+net8_0 = ["hostfxr-sys/net8_0", "net7_0"]
+latest = ["hostfxr-sys/latest", "net8_0"]
 
 # Prevent downloading nethost library when building on docs.rs.
 [package.metadata.docs.rs]
-features = ["nethost", "netcore3_0", "doc-cfg", "nightly"]
+features = ["nethost", "net8_0", "doc-cfg", "nightly"]
 no-default-features = true
