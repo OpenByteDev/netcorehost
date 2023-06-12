@@ -37,10 +37,9 @@ impl Clone for DelegateLoader {
     fn clone(&self) -> Self {
         Self {
             get_load_assembly_and_get_function_pointer: self
-                .get_load_assembly_and_get_function_pointer
-                .clone(),
+                .get_load_assembly_and_get_function_pointer,
             #[cfg(feature = "net5_0")]
-            get_function_pointer: self.get_function_pointer.clone(),
+            get_function_pointer: self.get_function_pointer,
             hostfxr: self.hostfxr.clone(),
         }
     }
