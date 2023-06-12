@@ -7,11 +7,11 @@ use std::{
     env::consts::EXE_SUFFIX,
     ffi::{OsStr, OsString},
     path::{Path, PathBuf},
-    sync::Arc,
+    rc::Rc,
 };
 
 pub(crate) type HostfxrLibrary = Container<crate::bindings::hostfxr::wrapper::Hostfxr>;
-pub(crate) type SharedHostfxrLibrary = Arc<HostfxrLibrary>;
+pub(crate) type SharedHostfxrLibrary = Rc<HostfxrLibrary>;
 
 /// A struct representing a loaded hostfxr library.
 #[derive(Clone, From)]
