@@ -104,10 +104,7 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `exe_dir` - path to the dotnet executable
-    #[cfg_attr(
-        feature = "doc-cfg",
-        doc(cfg(all(feature = "netcore2_1", feature = "extra-apis")))
-    )]
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
     #[must_use]
     pub fn get_available_sdks(&self, exe_dir: &PdCStr) -> Vec<PathBuf> {
         unsafe {
@@ -123,10 +120,7 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `app_path` - path to application
-    #[cfg_attr(
-        feature = "doc-cfg",
-        doc(cfg(all(feature = "netcore2_1", feature = "extra-apis")))
-    )]
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
     pub fn get_native_search_directories(
         &self,
         app_path: &PdCStr,
