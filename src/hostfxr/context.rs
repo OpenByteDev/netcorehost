@@ -1,7 +1,6 @@
 use crate::{
     bindings::hostfxr::{
-        hostfxr_delegate_type, hostfxr_handle,
-        load_assembly_and_get_function_pointer_fn,
+        hostfxr_delegate_type, hostfxr_handle, load_assembly_and_get_function_pointer_fn,
     },
     error::{HostingError, HostingResult, HostingSuccess},
     hostfxr::{

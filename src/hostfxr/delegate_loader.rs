@@ -1,10 +1,7 @@
 use crate::{
     bindings::{
         char_t,
-        hostfxr::{
-            component_entry_point_fn,
-            load_assembly_and_get_function_pointer_fn,
-        },
+        hostfxr::{component_entry_point_fn, load_assembly_and_get_function_pointer_fn},
     },
     error::{HostingError, HostingResult, HostingSuccess},
     pdcstring::{PdCStr, PdCString},
@@ -16,10 +13,7 @@ use thiserror::Error;
 use super::{FunctionPtr, ManagedFunction, RawFunctionPtr, SharedHostfxrLibrary};
 
 #[cfg(feature = "net5_0")]
-use crate::bindings::hostfxr::{
-    get_function_pointer_fn,
-    UNMANAGED_CALLERS_ONLY_METHOD,
-};
+use crate::bindings::hostfxr::{get_function_pointer_fn, UNMANAGED_CALLERS_ONLY_METHOD};
 
 /// A pointer to a function with the default signature.
 pub type ManagedFunctionWithDefaultSignature = ManagedFunction<component_entry_point_fn>;
@@ -42,10 +36,12 @@ pub struct DelegateLoader {
 impl Clone for DelegateLoader {
     fn clone(&self) -> Self {
         Self {
-            get_load_assembly_and_get_function_pointer: self.get_load_assembly_and_get_function_pointer.clone(),
+            get_load_assembly_and_get_function_pointer: self
+                .get_load_assembly_and_get_function_pointer
+                .clone(),
             #[cfg(feature = "net5_0")]
             get_function_pointer: self.get_function_pointer.clone(),
-            hostfxr: self.hostfxr.clone()
+            hostfxr: self.hostfxr.clone(),
         }
     }
 }
