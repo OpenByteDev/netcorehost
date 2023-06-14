@@ -12,6 +12,8 @@ use crate::{
 
 #[cfg(feature = "net5_0")]
 use crate::bindings::hostfxr::get_function_pointer_fn;
+#[cfg(feature = "net8_0")]
+use crate::{bindings::hostfxr::{load_assembly_bytes_fn, load_assembly_fn}, pdcstring::PdCStr};
 
 use std::{
     ffi::c_void,
@@ -20,6 +22,9 @@ use std::{
     ptr::NonNull,
     rc::Rc,
 };
+
+#[cfg(feature = "net8_0")]
+use std::ptr;
 
 use destruct_drop::DestructDrop;
 use enum_map::EnumMap;
@@ -186,6 +191,20 @@ impl<I> HostfxrContext<I> {
                 .map(|ptr| mem::transmute(ptr))
         }
     }
+    #[cfg(feature = "net8_0")]
+    fn get_load_assembly_delegate(&self) -> Result<load_assembly_fn, HostingError> {
+        unsafe {
+            self.get_runtime_delegate(hostfxr_delegate_type::hdt_load_assembly)
+                .map(|ptr| mem::transmute(ptr))
+        }
+    }
+    #[cfg(feature = "net8_0")]
+    fn get_load_assembly_bytes_delegate(&self) -> Result<load_assembly_bytes_fn, HostingError> {
+        unsafe {
+            self.get_runtime_delegate(hostfxr_delegate_type::hdt_load_assembly_bytes)
+                .map(|ptr| mem::transmute(ptr))
+        }
+    }
 
     /// Gets a delegate loader for loading an assembly and contained function pointers.
     pub fn get_delegate_loader(&self) -> Result<DelegateLoader, HostingError> {
@@ -206,6 +225,56 @@ impl<I> HostfxrContext<I> {
     ) -> Result<AssemblyDelegateLoader, HostingError> {
         self.get_delegate_loader()
             .map(|loader| AssemblyDelegateLoader::new(loader, assembly_path))
+    }
+
+    /// Loads the specified assembly in the default load context from the given path.
+    /// It uses [`AssemblyDependencyResolver`] to register additional dependency resolution for the load context.
+    /// Function pointers to methods in the assembly can then be loaded using a [`DelegateLoader`].
+    ///
+    /// [`AssemblyDependencyResolver`]: https://learn.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblydependencyresolver
+    /// [`AssemblyLoadContext.LoadFromAssembly`]: https://learn.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext.loadfromassemblypath
+    #[cfg(feature = "net8_0")]
+    pub fn load_assembly_from_path(
+        &self,
+        assembly_path: impl AsRef<PdCStr>,
+    ) -> Result<(), HostingError> {
+        let assembly_path = assembly_path.as_ref();
+        let load_assembly = self.get_load_assembly_delegate()?;
+        let result =
+            unsafe { load_assembly(assembly_path.as_ptr(), ptr::null_mut(), ptr::null_mut()) };
+        HostingResult::from(result).into_result()?;
+        Ok(())
+    }
+
+    /// Loads the specified assembly in the default load context from the given buffers.
+    /// It does not provide a mechanism for registering additional dependency resolution, as mechanisms like `.deps.json` and [`AssemblyDependencyResolver`] are file-based.
+    /// Dependencies can be pre-loaded (for example, via a previous call to this function) or the specified assembly can explicitly register its own resolution logic (for example, via the [`AssemblyLoadContext.Resolving`] event).
+    /// It uses [`AssemblyDependencyResolver`] to register additional dependency resolution for the load context.
+    /// Function pointers to methods in the assembly can then be loaded using a [`DelegateLoader`].
+    ///
+    /// [`AssemblyDependencyResolver`]: https://learn.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblydependencyresolver
+    /// [`AssemblyLoadContext.Resolving`]: https://learn.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext.resolving?view=net-7.0
+    #[cfg(feature = "net8_0")]
+    pub fn load_assembly_from_bytes(
+        &self,
+        symbols_bytes: impl AsRef<[u8]>,
+        assembly_bytes: impl AsRef<[u8]>,
+    ) -> Result<(), HostingError> {
+        let symbols_bytes = symbols_bytes.as_ref();
+        let assembly_bytes = assembly_bytes.as_ref();
+        let load_assembly_bytes = self.get_load_assembly_bytes_delegate()?;
+        let result = unsafe {
+            load_assembly_bytes(
+                symbols_bytes.as_ptr(),
+                symbols_bytes.len(),
+                assembly_bytes.as_ptr(),
+                assembly_bytes.len(),
+                ptr::null_mut(),
+                ptr::null_mut(),
+            )
+        };
+        HostingResult::from(result).into_result()?;
+        Ok(())
     }
 
     /// Closes an initialized host context.
