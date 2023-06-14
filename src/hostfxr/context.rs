@@ -22,6 +22,8 @@ use std::{
 };
 
 use destruct_drop::DestructDrop;
+use enum_map::EnumMap;
+use once_cell::unsync::OnceCell;
 
 /// A marker struct indicating that the context was initialized with a runtime config.
 /// This means that it is not possible to run the application associated with the context.
@@ -69,8 +71,9 @@ impl From<HostfxrHandle> for hostfxr_handle {
 pub struct HostfxrContext<I> {
     handle: HostfxrHandle,
     hostfxr: SharedHostfxrLibrary,
-    context_type: PhantomData<I>,
     is_primary: bool,
+    runtime_delegates: EnumMap<hostfxr_delegate_type, OnceCell<RawFunctionPtr>>,
+    context_type: PhantomData<I>,
     not_thread_safe: PhantomData<Rc<HostfxrLibrary>>,
 }
 
@@ -90,6 +93,7 @@ impl<I> HostfxrContext<I> {
             handle,
             hostfxr: hostfxr.lib,
             is_primary,
+            runtime_delegates: EnumMap::default(),
             context_type: PhantomData,
             not_thread_safe: PhantomData,
         }
@@ -141,6 +145,14 @@ impl<I> HostfxrContext<I> {
     /// [`initialize_for_runtime_config`]: Hostfxr::initialize_for_runtime_config
     /// [`initialize_for_dotnet_command_line`]: Hostfxr::initialize_for_dotnet_command_line
     pub fn get_runtime_delegate(
+        &self,
+        r#type: hostfxr_delegate_type,
+    ) -> Result<RawFunctionPtr, HostingError> {
+        self.runtime_delegates[r#type]
+            .get_or_try_init(|| self.get_runtime_delegate_uncached(r#type))
+            .copied()
+    }
+    fn get_runtime_delegate_uncached(
         &self,
         r#type: hostfxr_delegate_type,
     ) -> Result<RawFunctionPtr, HostingError> {
