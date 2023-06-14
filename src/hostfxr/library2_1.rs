@@ -21,14 +21,14 @@ impl Hostfxr {
     /// Run an application.
     ///
     /// # Arguments
+    ///  * `app_path`
+    ///     path to the application to run
     ///  * `args`
     ///     command-line arguments
     ///  * `host_path`
     ///     path to the host application
     ///  * `dotnet_root`
     ///     path to the .NET Core installation root
-    ///  * `app_path`
-    ///     path to the application to run
     ///
     /// This function does not return until the application completes execution.
     /// It will shutdown CoreCLR after the application executes.
@@ -40,16 +40,16 @@ impl Hostfxr {
         allow(deprecated)
     )]
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
-    pub fn run_app_with_args_and_startup_info<A: AsRef<PdCStr>>(
-        &self,
-        app_path: &PdCStr,
-        args: &[A],
+    pub fn run_app_with_args_and_startup_info<'a, A: AsRef<PdCStr>>(
+        &'a self,
+        app_path: &'a PdCStr,
+        args: impl IntoIterator<Item = &'a PdCStr>,
         host_path: &PdCStr,
         dotnet_root: &PdCStr,
     ) -> io::Result<AppOrHostingResult> {
         let args = [&self.dotnet_bin, app_path]
             .into_iter()
-            .chain(args.iter().map(|s| s.as_ref()))
+            .chain(args.into_iter())
             .map(|s| s.as_ptr())
             .collect::<Vec<_>>();
 
