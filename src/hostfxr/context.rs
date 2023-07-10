@@ -257,8 +257,7 @@ impl<I> HostfxrContext<I> {
     ) -> Result<(), HostingError> {
         let assembly_path = assembly_path.as_ref();
         let load_assembly = self.get_load_assembly_delegate()?;
-        let result =
-            unsafe { load_assembly(assembly_path.as_ptr(), ptr::null_mut(), ptr::null_mut()) };
+        let result = unsafe { load_assembly(assembly_path.as_ptr(), ptr::null(), ptr::null()) };
         HostingResult::from(result).into_result()?;
         Ok(())
     }
