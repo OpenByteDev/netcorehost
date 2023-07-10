@@ -4,7 +4,7 @@ use netcorehost::pdcstring::PdCString;
 use std::{env, path::Path, process::Command, str::FromStr};
 
 pub fn test_netcore_version() -> String {
-    env::var("NETCOREHOST_TEST_NETCORE_VERSION").unwrap_or_else(|_| "net5.0".to_string())
+    env::var("NETCOREHOST_TEST_NETCORE_VERSION").unwrap_or_else(|_| "net8.0".to_string())
 }
 
 pub fn test_runtime_config_path() -> PdCString {
