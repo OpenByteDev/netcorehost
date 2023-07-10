@@ -13,10 +13,14 @@ use crate::{
 #[cfg(feature = "net5_0")]
 use crate::bindings::hostfxr::get_function_pointer_fn;
 #[cfg(feature = "net8_0")]
-use crate::{bindings::hostfxr::{load_assembly_bytes_fn, load_assembly_fn}, pdcstring::PdCStr};
+use crate::{
+    bindings::hostfxr::{load_assembly_bytes_fn, load_assembly_fn},
+    pdcstring::PdCStr,
+};
 
 use std::{
     ffi::c_void,
+    fmt::{self, Debug},
     marker::PhantomData,
     mem::{self, ManuallyDrop, MaybeUninit},
     ptr::NonNull,
@@ -33,11 +37,13 @@ use once_cell::unsync::OnceCell;
 /// A marker struct indicating that the context was initialized with a runtime config.
 /// This means that it is not possible to run the application associated with the context.
 #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
+#[derive(Debug, Clone, Copy)]
 pub struct InitializedForRuntimeConfig;
 
 /// A marker struct indicating that the context was initialized for the dotnet command line.
 /// This means that it is possible to run the application associated with the context.
 #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
+#[derive(Debug, Clone, Copy)]
 pub struct InitializedForCommandLine;
 
 /// Handle of a loaded [`HostfxrContext`].
@@ -80,6 +86,17 @@ pub struct HostfxrContext<I> {
     runtime_delegates: EnumMap<hostfxr_delegate_type, OnceCell<RawFunctionPtr>>,
     context_type: PhantomData<I>,
     not_thread_safe: PhantomData<Rc<HostfxrLibrary>>,
+}
+
+impl<I> Debug for HostfxrContext<I> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("HostfxrContext")
+            .field("handle", &self.handle)
+            .field("is_primary", &self.is_primary)
+            .field("runtime_delegates", &self.runtime_delegates)
+            .field("context_type", &self.context_type)
+            .finish_non_exhaustive()
+    }
 }
 
 impl<I> HostfxrContext<I> {
