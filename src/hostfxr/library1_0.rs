@@ -39,7 +39,7 @@ impl Hostfxr {
         app_path: &PdCStr,
         args: &[A],
     ) -> AppOrHostingResult {
-        let args = [&self.dotnet_bin, app_path]
+        let args = [&self.dotnet_exe, app_path]
             .into_iter()
             .chain(args.iter().map(|s| s.as_ref()))
             .map(|s| s.as_ptr())

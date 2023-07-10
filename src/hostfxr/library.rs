@@ -5,7 +5,7 @@ use crate::{
 use derive_more::From;
 use std::{
     env::consts::EXE_SUFFIX,
-    ffi::{OsStr, OsString},
+    ffi::OsString,
     path::{Path, PathBuf},
     rc::Rc,
 };
@@ -18,7 +18,7 @@ pub(crate) type SharedHostfxrLibrary = Rc<HostfxrLibrary>;
 pub struct Hostfxr {
     /// The underlying hostfxr library.
     pub lib: SharedHostfxrLibrary,
-    pub(crate) dotnet_bin: PdCString,
+    pub(crate) dotnet_exe: PdCString,
 }
 
 fn find_dotnet_bin(hostfxr_path: impl AsRef<Path>) -> PathBuf {
@@ -42,10 +42,12 @@ fn find_dotnet_bin(hostfxr_path: impl AsRef<Path>) -> PathBuf {
 
 impl Hostfxr {
     /// Loads the hostfxr library from the given path.
-    pub fn load_from_path(path: impl AsRef<OsStr>) -> Result<Self, crate::dlopen2::Error> {
-        let lib = SharedHostfxrLibrary::new(unsafe { Container::load(&path) }?);
-        let dotnet_bin = PdCString::from_os_str(find_dotnet_bin(path.as_ref())).unwrap();
-        Ok(Self { lib, dotnet_bin })
+    pub fn load_from_path(path: impl AsRef<Path>) -> Result<Self, crate::dlopen2::Error> {
+        let path = path.as_ref();
+        let lib = SharedHostfxrLibrary::new(unsafe { Container::load(path) }?);
+        let dotnet_exe = PdCString::from_os_str(find_dotnet_bin(path)).unwrap();
+
+        Ok(Self { lib, dotnet_exe })
     }
 
     /// Locates the hostfxr library using [`nethost`](crate::nethost) and loads it.

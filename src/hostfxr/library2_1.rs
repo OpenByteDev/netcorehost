@@ -4,7 +4,7 @@ use crate::{
     },
     error::{HostingError, HostingResult},
     hostfxr::{AppOrHostingResult, Hostfxr},
-    pdcstring::{PdCStr, PdUChar},
+    pdcstring::{PdCStr, PdCString, PdUChar},
 };
 
 use coreclr_hosting_shared::char_t;
@@ -47,7 +47,7 @@ impl Hostfxr {
         host_path: &PdCStr,
         dotnet_root: &PdCStr,
     ) -> io::Result<AppOrHostingResult> {
-        let args = [&self.dotnet_bin, app_path]
+        let args = [&self.dotnet_exe, app_path]
             .into_iter()
             .chain(args.into_iter())
             .map(|s| s.as_ptr())
@@ -101,15 +101,25 @@ impl Hostfxr {
     }
 
     /// Get the list of all available SDKs ordered by ascending version.
-    ///
-    /// # Arguments
-    ///  * `exe_dir` - path to the dotnet executable
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
     #[must_use]
-    pub fn get_available_sdks(&self, exe_dir: &PdCStr) -> Vec<PathBuf> {
+    pub fn get_available_sdks(&self) -> Vec<PathBuf> {
+        let dotnet_path = PathBuf::from(self.dotnet_exe.to_os_string())
+            .parent()
+            .and_then(|p| PdCString::from_os_str(p).ok());
+        match dotnet_path {
+            Some(p) => self.get_available_sdks_with_dotnet_path(&p),
+            None => vec![],
+        }
+    }
+
+    /// Get the list of all available SDKs ordered by ascending version, based on the provided `dotnet` executable.
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
+    #[must_use]
+    pub fn get_available_sdks_with_dotnet_path(&self, dotnet_path: &PdCStr) -> Vec<PathBuf> {
         unsafe {
             self.lib
-                .hostfxr_get_available_sdks(exe_dir.as_ptr(), get_available_sdks_callback)
+                .hostfxr_get_available_sdks(dotnet_path.as_ptr(), get_available_sdks_callback)
         };
         GET_AVAILABLE_SDKS_DATA
             .with(|sdks| sdks.borrow_mut().take())
@@ -126,7 +136,7 @@ impl Hostfxr {
         app_path: &PdCStr,
     ) -> Result<Vec<PathBuf>, HostingError> {
         let mut buffer = Vec::<PdUChar>::new();
-        let args = [self.dotnet_bin.as_ptr(), app_path.as_ptr()];
+        let args = [self.dotnet_exe.as_ptr(), app_path.as_ptr()];
 
         let mut required_buffer_size = MaybeUninit::uninit();
         unsafe {

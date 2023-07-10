@@ -46,7 +46,8 @@ fn list_sdks() {
         .parent()
         .unwrap();
 
-    let mut sdks = hostfxr.get_available_sdks(&PdCString::from_os_str(sdks_dir).unwrap());
+    let mut sdks =
+        hostfxr.get_available_sdks_with_dotnet_path(&PdCString::from_os_str(sdks_dir).unwrap());
     sdks.sort();
     actual_sdks.sort();
     assert_eq!(actual_sdks, sdks);
