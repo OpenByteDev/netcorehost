@@ -51,9 +51,9 @@ jobs:
     - name: Install .NET SDK ${{ matrix.dotnet }}
       run: |
         ${{ matrix.dotnet_install_download_script }}
-        ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel 5.0
         ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel 6.0
         ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel 7.0
+        ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel 8.0
 
         if ($Env:DOTNET_INSTALL_DIR) {
             $dotnetRoot = $Env:DOTNET_INSTALL_DIR
