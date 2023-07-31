@@ -49,7 +49,7 @@ impl Hostfxr {
     ) -> io::Result<AppOrHostingResult> {
         let args = [&self.dotnet_exe, app_path]
             .into_iter()
-            .chain(args.into_iter())
+            .chain(args)
             .map(|s| s.as_ptr())
             .collect::<Vec<_>>();
 
