@@ -1,3 +1,5 @@
+#![cfg(feature = "net8_0")]
+
 use netcorehost::{nethost, pdcstr};
 use rusty_fork::rusty_fork_test;
 use std::fs;
@@ -7,7 +9,6 @@ mod common;
 
 rusty_fork_test! {
     #[test]
-    #[cfg(feature = "net8_0")]
     fn load_from_path() {
         common::setup();
 
@@ -36,7 +37,6 @@ rusty_fork_test! {
     }
 
     #[test]
-    #[cfg(feature = "net8_0")]
     fn load_from_bytes() {
         common::setup();
 
