@@ -82,10 +82,10 @@ jobs:
           override: true
       
     - name: Build
-      run: cargo build --target ${{ matrix.target }}
+      run: cargo build --target ${{ matrix.target }} --no-default-features --features "nethost-download  net${{ matrix.dotnet }}" 
       
     - name: Test
-      run: cargo test --target ${{ matrix.target }} --all-targets --no-fail-fast
+      run: cargo test --target ${{ matrix.target }} --all-targets --no-fail-fast --no-default-features --features "nethost-download  net${{ matrix.dotnet }}" -- --nocapture
  
   cross:
     runs-on: ubuntu-latest
