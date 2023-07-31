@@ -1,5 +1,6 @@
 use netcorehost::{nethost, pdcstr};
 use rusty_fork::rusty_fork_test;
+use std::fs;
 
 #[path = "common.rs"]
 mod common;
@@ -13,21 +14,20 @@ rusty_fork_test! {
         let hostfxr = nethost::load_hostfxr().unwrap();
 
         let context = hostfxr
-            .initialize_for_dotnet_command_line(common::test_dll_path())
-            // .initialize_for_runtime_config(common::test_runtime_config_path())
+            .initialize_for_runtime_config(common::test_runtime_config_path())
             .unwrap();
 
         context
-            .load_assembly_from_path(common::test_dll_path())
+            .load_assembly_from_path(common::library_dll_path())
             .unwrap();
 
         let fn_loader = context
-            .get_delegate_loader_for_assembly(common::test_dll_path())
+            .get_delegate_loader_for_assembly(common::library_dll_path())
             .unwrap();
         let hello = fn_loader
             .get_function_with_unmanaged_callers_only::<fn() -> i32>(
-                pdcstr!("Test.Program, Test"),
-                pdcstr!("UnmanagedHello"),
+                pdcstr!("ClassLibrary.Library, ClassLibrary"),
+                pdcstr!("Hello"),
             )
             .unwrap();
 
@@ -41,8 +41,29 @@ rusty_fork_test! {
         common::setup();
 
         let hostfxr = nethost::load_hostfxr().unwrap();
-        let result = hostfxr.run_app(&common::test_dll_path());
-        result.as_hosting_exit_code().unwrap();
-        assert_eq!(result.value(), 42);
+
+        let context = hostfxr
+            .initialize_for_runtime_config(common::test_runtime_config_path())
+            .unwrap();
+
+        let assembly_bytes = fs::read(common::library_dll_path().to_os_string()).unwrap();
+        let symbol_bytes = fs::read(common::library_symbols_path().to_os_string()).unwrap();
+
+        context
+            .load_assembly_from_bytes(&assembly_bytes, &symbol_bytes)
+            .unwrap();
+
+        let fn_loader = context
+            .get_delegate_loader_for_assembly(common::library_dll_path())
+            .unwrap();
+        let hello = fn_loader
+            .get_function_with_unmanaged_callers_only::<fn() -> i32>(
+                pdcstr!("ClassLibrary.Library, ClassLibrary"),
+                pdcstr!("Hello"),
+            )
+            .unwrap();
+
+        let result = hello();
+        assert_eq!(result, 42);
     }
 }
