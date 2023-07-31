@@ -24,10 +24,10 @@ rusty_fork_test! {
         let property_value = context
             .get_runtime_property_value(test_property_name)
             .unwrap();
-        assert_eq!(test_property_value, property_value.as_ref());
+        assert_eq!(test_property_value, property_value);
 
         let properties = context.runtime_properties().unwrap();
-        let property_value = properties.get(test_property_name).unwrap();
-        assert_eq!(test_property_value, property_value.as_ref());
+        let property_value = properties.get(test_property_name).copied().unwrap();
+        assert_eq!(test_property_value, property_value);
     }
 }

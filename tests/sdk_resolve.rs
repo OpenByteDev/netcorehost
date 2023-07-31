@@ -54,7 +54,7 @@ fn list_sdks() {
 }
 
 #[test]
-#[cfg(all(feature = "netcore2_1"))]
+#[cfg(feature = "netcore2_1")]
 fn get_native_search_directories() {
     common::setup();
 

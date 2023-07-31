@@ -50,7 +50,7 @@ rusty_fork_test! {
         let symbol_bytes = fs::read(common::library_symbols_path().to_os_string()).unwrap();
 
         context
-            .load_assembly_from_bytes(&assembly_bytes, &symbol_bytes)
+            .load_assembly_from_bytes(assembly_bytes, symbol_bytes)
             .unwrap();
 
         let fn_loader = context
