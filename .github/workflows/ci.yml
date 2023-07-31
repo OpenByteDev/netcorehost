@@ -83,10 +83,12 @@ jobs:
       
     - name: Build
       run: cargo build --target ${{ matrix.target }} --no-default-features --features "nethost-download $("net" + "8.0".replace(".", "_"))"
+      shell: pwsh  
       
     - name: Test
       run: cargo test --target ${{ matrix.target }} --all-targets --no-fail-fast --no-default-features --features "nethost-download $("net" + "8.0".replace(".", "_"))" -- --nocapture
- 
+      shell: pwsh  
+      
   cross:
     runs-on: ubuntu-latest
     strategy:
