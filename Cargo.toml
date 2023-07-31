@@ -38,7 +38,7 @@ rusty-fork = "0.3"
 path-absolutize = "3.1"
 
 [features]
-default = ["nethost-download", "net8_0"]
+default = ["nethost-download", "net7_0"]
 nethost-download = ["nethost", "nethost-sys/download-nuget"]
 nethost = ["nethost-sys"]
 nightly = []
