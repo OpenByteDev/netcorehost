@@ -273,18 +273,18 @@ impl<I> HostfxrContext<I> {
     #[cfg(feature = "net8_0")]
     pub fn load_assembly_from_bytes(
         &self,
-        symbols_bytes: impl AsRef<[u8]>,
         assembly_bytes: impl AsRef<[u8]>,
+        symbols_bytes: impl AsRef<[u8]>,
     ) -> Result<(), HostingError> {
         let symbols_bytes = symbols_bytes.as_ref();
         let assembly_bytes = assembly_bytes.as_ref();
         let load_assembly_bytes = self.get_load_assembly_bytes_delegate()?;
         let result = unsafe {
             load_assembly_bytes(
-                symbols_bytes.as_ptr(),
-                symbols_bytes.len(),
                 assembly_bytes.as_ptr(),
                 assembly_bytes.len(),
+                symbols_bytes.as_ptr(),
+                symbols_bytes.len(),
                 ptr::null_mut(),
                 ptr::null_mut(),
             )
