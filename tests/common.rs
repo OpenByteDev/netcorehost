@@ -70,8 +70,6 @@ pub fn library_symbols_path() -> PdCString {
 }
 
 pub fn setup() {
-    
-
     build_test_project();
     build_library_project();
 }
