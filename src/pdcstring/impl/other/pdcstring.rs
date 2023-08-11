@@ -7,7 +7,7 @@ use crate::pdcstring::{ContainsNul, PdCStringInner, PdChar, PdUChar};
 
 impl PdCStringInner for CString {
     fn from_str(s: impl AsRef<str>) -> Result<Self, ContainsNul> {
-        Self::from_vec(s.as_bytes().to_vec())
+        Self::from_vec(s.as_ref().as_bytes().to_vec())
     }
 
     fn from_os_str(s: impl AsRef<std::ffi::OsStr>) -> Result<Self, ContainsNul> {
