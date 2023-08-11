@@ -216,10 +216,11 @@ impl Hostfxr {
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         let mut hostfxr_handle = MaybeUninit::<hostfxr_handle>::uninit();
 
+        let args = args.iter().map(|arg| arg.as_ptr()).collect::<Vec<_>>();
         let result = unsafe {
             self.lib.hostfxr_initialize_for_dotnet_command_line(
                 args.len().try_into().unwrap(),
-                args.as_ptr().cast(),
+                args.as_ptr(),
                 parameters,
                 hostfxr_handle.as_mut_ptr(),
             )
