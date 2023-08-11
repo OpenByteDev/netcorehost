@@ -7,7 +7,7 @@ use crate::{
     },
     pdcstring::PdCStr,
 };
-use std::{convert::TryInto, mem::MaybeUninit, ptr};
+use std::{mem::MaybeUninit, ptr};
 
 impl Hostfxr {
     /// Initializes the hosting components for a dotnet command line running an application
@@ -33,7 +33,7 @@ impl Hostfxr {
         &self,
         app_path: impl AsRef<PdCStr>,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
-        self.initialize_for_dotnet_command_line_with_args(&[app_path.as_ref()])
+        self.initialize_for_dotnet_command_line_with_args([app_path])
     }
 
     /// Initializes the hosting components for a dotnet command line running an application
@@ -66,10 +66,7 @@ impl Hostfxr {
         app_path: impl AsRef<PdCStr>,
         host_path: impl AsRef<PdCStr>,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
-        self.initialize_for_dotnet_command_line_with_args_and_host_path(
-            &[app_path.as_ref()],
-            host_path,
-        )
+        self.initialize_for_dotnet_command_line_with_args_and_host_path([app_path], host_path)
     }
 
     /// Initializes the hosting components for a dotnet command line running an application
@@ -101,10 +98,7 @@ impl Hostfxr {
         app_path: impl AsRef<PdCStr>,
         dotnet_root: impl AsRef<PdCStr>,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
-        self.initialize_for_dotnet_command_line_with_args_and_dotnet_root(
-            &[app_path.as_ref()],
-            dotnet_root,
-        )
+        self.initialize_for_dotnet_command_line_with_args_and_dotnet_root([app_path], dotnet_root)
     }
 
     /// Initializes the hosting components for a dotnet command line running an application
@@ -130,11 +124,9 @@ impl Hostfxr {
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
     pub fn initialize_for_dotnet_command_line_with_args(
         &self,
-        args: &[&PdCStr],
+        args: impl IntoIterator<Item = impl AsRef<PdCStr>>,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
-        unsafe {
-            self.initialize_for_dotnet_command_line_with_parameters(args.as_ref(), ptr::null())
-        }
+        unsafe { self.initialize_for_dotnet_command_line_with_parameters(args, ptr::null()) }
     }
 
     /// Initializes the hosting components for a dotnet command line running an application
@@ -166,7 +158,7 @@ impl Hostfxr {
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
     pub fn initialize_for_dotnet_command_line_with_args_and_host_path(
         &self,
-        args: &[&PdCStr],
+        args: impl IntoIterator<Item = impl AsRef<PdCStr>>,
         host_path: impl AsRef<PdCStr>,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         let parameters = hostfxr_initialize_parameters::with_host_path(host_path.as_ref().as_ptr());
@@ -201,7 +193,7 @@ impl Hostfxr {
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
     pub fn initialize_for_dotnet_command_line_with_args_and_dotnet_root(
         &self,
-        args: &[&PdCStr],
+        args: impl IntoIterator<Item = impl AsRef<PdCStr>>,
         dotnet_root: impl AsRef<PdCStr>,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         let parameters =
@@ -211,12 +203,12 @@ impl Hostfxr {
 
     unsafe fn initialize_for_dotnet_command_line_with_parameters(
         &self,
-        args: &[&PdCStr],
+        args: impl IntoIterator<Item = impl AsRef<PdCStr>>,
         parameters: *const hostfxr_initialize_parameters,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         let mut hostfxr_handle = MaybeUninit::<hostfxr_handle>::uninit();
 
-        let args = args.iter().map(|arg| arg.as_ptr()).collect::<Vec<_>>();
+        let args: Vec<_> = args.into_iter().map(|arg| arg.as_ref().as_ptr()).collect();
         let result = unsafe {
             self.lib.hostfxr_initialize_for_dotnet_command_line(
                 args.len().try_into().unwrap(),
