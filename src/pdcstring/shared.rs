@@ -203,6 +203,14 @@ impl<'a> TryFrom<&'a str> for PdCString {
     }
 }
 
+impl<'a> TryFrom<&'a OsStr> for PdCString {
+    type Error = ContainsNul;
+
+    fn try_from(s: &'a OsStr) -> Result<Self, Self::Error> {
+        Self::from_os_str(s)
+    }
+}
+
 impl TryFrom<Vec<PdUChar>> for PdCString {
     type Error = ContainsNul;
 
