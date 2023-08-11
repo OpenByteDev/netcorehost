@@ -118,7 +118,7 @@ jobs:
     strategy:
       matrix:
         toolchain: ["beta"]
-        example: ["run-app", "run-app-with-args", "call-managed-function", "passing-parameters"]
+        example: ["run-app", "run-app-with-args", "call-managed-function", "passing-parameters", "return-string-from-managed"]
     steps:
     - uses: actions/checkout@v3
     - name: Install latest ${{ matrix.toolchain }}
