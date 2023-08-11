@@ -32,11 +32,6 @@ impl PdCString {
     pub fn from_os_str(s: impl AsRef<OsStr>) -> Result<Self, ContainsNul> {
         PdCStringInner::from_os_str(s).map(Self::from_inner)
     }
-    /// Construct a [`PdCString`] copy from an [`str`], reencoding it in a platform-dependent manner.
-    #[inline]
-    pub fn from_str(s: impl AsRef<str>) -> Result<Self, ContainsNul> {
-        PdCStringInner::from_str(s).map(Self::from_inner)
-    }
     /// Constructs a new [`PdCString`] copied from a nul-terminated string pointer.
     #[inline]
     #[must_use]
