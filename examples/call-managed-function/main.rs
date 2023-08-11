@@ -1,11 +1,6 @@
 use netcorehost::{nethost, pdcstr};
 
-#[path = "../helpers/dotnet-build.rs"]
-mod dotnet_build;
-
 fn main() {
-    dotnet_build::build_example_project("call-managed-function");
-
     let hostfxr = nethost::load_hostfxr().unwrap();
     let context = hostfxr.initialize_for_runtime_config(pdcstr!("examples/call-managed-function/ExampleProject/bin/Debug/net6.0/ExampleProject.runtimeconfig.json")).unwrap();
     let delegate_loader = context
