@@ -115,19 +115,22 @@ jobs:
         
   examples:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain: ["beta"]
+        example: ["run-app", "run-app-with-args", "call-managed-function", "passing-parameters"]
     steps:
     - uses: actions/checkout@v3
-    - name: Install latest beta
+    - name: Install latest ${{ matrix.toolchain }}
       uses: dtolnay/rust-toolchain@master
       with:
-          toolchain: nightly
+          toolchain: ${{ matrix.toolchain }}
           override: true
-    - name: Run example 'run-app'
-      run: cargo run --example run-app
-    - name: Run example 'call-managed-function'
-      run: cargo run --example call-managed-function
-    - name: Run example 'passing-parameters'
-      run: cargo run --example passing-parameters
+    - name: Build .NET project for '${{ matrix.example }}'
+      working-directory: ./examples/${{ matrix.example }}/ExampleProject
+      run: dotnet build 
+    - name: Run example '${{ matrix.example }}'
+      run: cargo run --example ${{ matrix.example }}
 
   documentation:
     runs-on: ${{ matrix.os }}
