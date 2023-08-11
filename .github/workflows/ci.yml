@@ -82,11 +82,11 @@ jobs:
           override: true
       
     - name: Build
-      run: cargo build --target ${{ matrix.target }} --no-default-features --features "nethost-download $("net" + "8.0".replace(".", "_"))"
+      run: cargo build --target ${{ matrix.target }} --no-default-features --features "nethost-download $("net" + "${{ matrix.dotnet }}".replace(".", "_"))"
       shell: pwsh  
       
     - name: Test
-      run: cargo test --target ${{ matrix.target }} --all-targets --no-fail-fast --no-default-features --features "nethost-download $("net" + "8.0".replace(".", "_"))" -- --nocapture
+      run: cargo test --target ${{ matrix.target }} --all-targets --no-fail-fast --no-default-features --features "nethost-download $("net" + "${{ matrix.dotnet }}".replace(".", "_"))" -- --nocapture
       shell: pwsh  
       
   cross:
