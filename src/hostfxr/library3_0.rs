@@ -7,7 +7,7 @@ use crate::{
     },
     pdcstring::PdCStr,
 };
-use std::{mem::MaybeUninit, ptr};
+use std::{iter, mem::MaybeUninit, ptr};
 
 impl Hostfxr {
     /// Initializes the hosting components for a dotnet command line running an application
@@ -33,7 +33,7 @@ impl Hostfxr {
         &self,
         app_path: impl AsRef<PdCStr>,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
-        self.initialize_for_dotnet_command_line_with_args([app_path])
+        self.initialize_for_dotnet_command_line_with_args(app_path, iter::empty::<&PdCStr>())
     }
 
     /// Initializes the hosting components for a dotnet command line running an application
@@ -66,7 +66,11 @@ impl Hostfxr {
         app_path: impl AsRef<PdCStr>,
         host_path: impl AsRef<PdCStr>,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
-        self.initialize_for_dotnet_command_line_with_args_and_host_path([app_path], host_path)
+        self.initialize_for_dotnet_command_line_with_args_and_host_path(
+            app_path,
+            iter::empty::<&PdCStr>(),
+            host_path,
+        )
     }
 
     /// Initializes the hosting components for a dotnet command line running an application
@@ -98,7 +102,11 @@ impl Hostfxr {
         app_path: impl AsRef<PdCStr>,
         dotnet_root: impl AsRef<PdCStr>,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
-        self.initialize_for_dotnet_command_line_with_args_and_dotnet_root([app_path], dotnet_root)
+        self.initialize_for_dotnet_command_line_with_args_and_dotnet_root(
+            app_path,
+            iter::empty::<&PdCStr>(),
+            dotnet_root,
+        )
     }
 
     /// Initializes the hosting components for a dotnet command line running an application
@@ -112,10 +120,10 @@ impl Hostfxr {
     /// The functions will **NOT** load the `CoreCLR` runtime. They just prepare everything to the point where it can be loaded.
     ///
     /// # Arguments
+    ///  * `app_path`:
+    ///     The path to the target application.
     ///  * `args`:
-    ///     The command line for running a managed application.
-    ///     These represent the arguments which would have been passed to the muxer if the app was being run from the command line.
-    ///     Note that the first argument has to be the path of the target app.
+    ///     The command line arguments for the managed application.
     ///
     /// # Remarks
     /// This function parses the specified command-line arguments to determine the application to run. It will
@@ -124,9 +132,12 @@ impl Hostfxr {
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
     pub fn initialize_for_dotnet_command_line_with_args(
         &self,
-        args: impl IntoIterator<Item = impl AsRef<PdCStr>>,
+        app_path: impl AsRef<PdCStr>,
+        args: impl Iterator<Item = impl AsRef<PdCStr>>,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
-        unsafe { self.initialize_for_dotnet_command_line_with_parameters(args, ptr::null()) }
+        unsafe {
+            self.initialize_for_dotnet_command_line_with_parameters(app_path, args, ptr::null())
+        }
     }
 
     /// Initializes the hosting components for a dotnet command line running an application
@@ -140,10 +151,10 @@ impl Hostfxr {
     /// The functions will **NOT** load the `CoreCLR` runtime. They just prepare everything to the point where it can be loaded.
     ///
     /// # Arguments
+    ///  * `app_path`:
+    ///     The path to the target application.
     ///  * `args`:
-    ///     The command line for running a managed application.
-    ///     These represent the arguments which would have been passed to the muxer if the app was being run from the command line.
-    ///     Note that the first argument has to be the path of the target app.
+    ///     The command line arguments for the managed application.
     ///  * `host_path`:
     ///     Path to the native host (typically the `.exe`).
     ///     This value is not used for anything by the hosting components.
@@ -158,11 +169,14 @@ impl Hostfxr {
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
     pub fn initialize_for_dotnet_command_line_with_args_and_host_path(
         &self,
-        args: impl IntoIterator<Item = impl AsRef<PdCStr>>,
+        app_path: impl AsRef<PdCStr>,
+        args: impl Iterator<Item = impl AsRef<PdCStr>>,
         host_path: impl AsRef<PdCStr>,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         let parameters = hostfxr_initialize_parameters::with_host_path(host_path.as_ref().as_ptr());
-        unsafe { self.initialize_for_dotnet_command_line_with_parameters(args, &parameters) }
+        unsafe {
+            self.initialize_for_dotnet_command_line_with_parameters(app_path, args, &parameters)
+        }
     }
 
     /// Initializes the hosting components for a dotnet command line running an application
@@ -176,10 +190,10 @@ impl Hostfxr {
     /// The functions will **NOT** load the `CoreCLR` runtime. They just prepare everything to the point where it can be loaded.
     ///
     /// # Arguments
+    ///  * `app_path`:
+    ///     The path to the target application.
     ///  * `args`:
-    ///     The command line for running a managed application.
-    ///     These represent the arguments which would have been passed to the muxer if the app was being run from the command line.
-    ///     Note that the first argument has to be the path of the target app.
+    ///     The command line arguments for the managed application.
     ///  * `dotnet_root`:
     ///     Path to the root of the .NET Core installation in use.
     ///     This typically points to the install location from which the hostfxr has been loaded.
@@ -193,26 +207,32 @@ impl Hostfxr {
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
     pub fn initialize_for_dotnet_command_line_with_args_and_dotnet_root(
         &self,
-        args: impl IntoIterator<Item = impl AsRef<PdCStr>>,
+        app_path: impl AsRef<PdCStr>,
+        args: impl Iterator<Item = impl AsRef<PdCStr>>,
         dotnet_root: impl AsRef<PdCStr>,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         let parameters =
             hostfxr_initialize_parameters::with_dotnet_root(dotnet_root.as_ref().as_ptr());
-        unsafe { self.initialize_for_dotnet_command_line_with_parameters(args, &parameters) }
+        unsafe {
+            self.initialize_for_dotnet_command_line_with_parameters(app_path, args, &parameters)
+        }
     }
 
     unsafe fn initialize_for_dotnet_command_line_with_parameters(
         &self,
-        args: impl IntoIterator<Item = impl AsRef<PdCStr>>,
+        app_path: impl AsRef<PdCStr>,
+        args: impl Iterator<Item = impl AsRef<PdCStr>>,
         parameters: *const hostfxr_initialize_parameters,
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         let mut hostfxr_handle = MaybeUninit::<hostfxr_handle>::uninit();
 
-        let args: Vec<_> = args.into_iter().map(|arg| arg.as_ref().as_ptr()).collect();
+        let app_path = app_path.as_ref().as_ptr();
+        let args = args.map(|arg| arg.as_ref().as_ptr());
+        let app_path_and_args = iter::once(app_path).chain(args).collect::<Vec<_>>();
         let result = unsafe {
             self.lib.hostfxr_initialize_for_dotnet_command_line(
-                args.len().try_into().unwrap(),
-                args.as_ptr(),
+                app_path_and_args.len().try_into().unwrap(),
+                app_path_and_args.as_ptr(),
                 parameters,
                 hostfxr_handle.as_mut_ptr(),
             )
