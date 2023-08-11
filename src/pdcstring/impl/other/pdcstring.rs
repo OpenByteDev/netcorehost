@@ -6,7 +6,7 @@ use std::{
 use crate::pdcstring::{ContainsNul, PdCStringInner, PdChar, PdUChar};
 
 impl PdCStringInner for CString {
-    fn from_str(s: &str) -> Result<Self, ContainsNul> {
+    fn from_str(s: impl AsRef<str>) -> Result<Self, ContainsNul> {
         Self::from_vec(s.as_bytes().to_vec())
     }
 

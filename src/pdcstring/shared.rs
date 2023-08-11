@@ -32,6 +32,11 @@ impl PdCString {
     pub fn from_os_str(s: impl AsRef<OsStr>) -> Result<Self, ContainsNul> {
         PdCStringInner::from_os_str(s).map(Self::from_inner)
     }
+    /// Construct a [`PdCString`] copy from an [`str`], reencoding it in a platform-dependent manner.
+    #[inline]
+    pub fn from_str(s: impl AsRef<str>) -> Result<Self, ContainsNul> {
+        PdCStringInner::from_str(s).map(Self::from_inner)
+    }
     /// Constructs a new [`PdCString`] copied from a nul-terminated string pointer.
     #[inline]
     #[must_use]
@@ -181,32 +186,6 @@ impl<'a> From<&'a PdCStr> for PdCString {
         s.to_owned()
     }
 }
-
-/*
-impl From<PdCStringInnerImpl> for PdCString {
-    fn from(s: PdCStringInnerImpl) -> Self {
-        Self::from_inner(s)
-    }
-}
-
-impl From<PdCString> for PdCStringInnerImpl {
-    fn from(s: PdCString) -> Self {
-        s.into_inner()
-    }
-}
-
-impl<'a> From<&'a PdCStrInnerImpl> for &'a PdCStr {
-    fn from(s: &'a PdCStrInnerImpl) -> Self {
-        PdCStr::from_inner(s)
-    }
-}
-
-impl<'a> From<&'a PdCStr> for &'a PdCStrInnerImpl {
-    fn from(s: &'a PdCStr) -> Self {
-        s.as_inner()
-    }
-}
-*/
 
 impl FromStr for PdCString {
     type Err = ContainsNul;

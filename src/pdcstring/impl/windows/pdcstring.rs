@@ -3,7 +3,7 @@ use widestring::U16CString;
 use crate::pdcstring::{ContainsNul, PdCStringInner, PdChar};
 
 impl PdCStringInner for U16CString {
-    fn from_str(s: &str) -> Result<Self, ContainsNul> {
+    fn from_str(s: impl AsRef<str>) -> Result<Self, ContainsNul> {
         Ok(U16CString::from_str(s)?)
     }
 

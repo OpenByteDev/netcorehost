@@ -10,7 +10,7 @@ pub(crate) trait PdCStringInner
 where
     Self: Sized,
 {
-    fn from_str(s: &str) -> Result<Self, ContainsNul>;
+    fn from_str(s: impl AsRef<str>) -> Result<Self, ContainsNul>;
     fn from_os_str(s: impl AsRef<OsStr>) -> Result<Self, ContainsNul>;
     unsafe fn from_str_ptr(ptr: *const PdChar) -> Self;
     fn from_vec(vec: impl Into<Vec<PdUChar>>) -> Result<Self, ContainsNul>;
