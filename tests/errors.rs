@@ -89,7 +89,7 @@ rusty_fork_test! {
             GetManagedFunctionError::TypeNotFound
         );
 
-        unsafe { context.close() }.unwrap();
+        context.close().unwrap();
     }
 
     #[test]
@@ -124,6 +124,6 @@ rusty_fork_test! {
             GetManagedFunctionError::AssemblyNotFound
         );
 
-        unsafe { context.close() }.unwrap();
+        context.close().unwrap();
     }
 }

@@ -9,7 +9,7 @@ use rusty_fork::rusty_fork_test;
 mod common;
 
 rusty_fork_test! {
-#[test]
+    #[test]
     fn manual_close_frees_lib() {
         common::setup();
 
@@ -20,7 +20,7 @@ rusty_fork_test! {
 
         let weak = Rc::downgrade(&hostfxr.lib);
         drop(hostfxr);
-        unsafe { context.close() }.unwrap();
+        context.close().unwrap();
 
         assert_eq!(weak.strong_count(), 0);
     }

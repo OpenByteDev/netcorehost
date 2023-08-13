@@ -16,7 +16,7 @@ rusty_fork_test! {
             .initialize_for_runtime_config(common::test_runtime_config_path())
             .unwrap();
         assert!(context.is_primary());
-        unsafe { context.close() }.unwrap();
+        context.close().unwrap();
     }
 
     #[test]
@@ -35,6 +35,6 @@ rusty_fork_test! {
             .unwrap();
         assert!(!context2.is_primary());
 
-        unsafe { context2.close() }.unwrap();
+        context2.close().unwrap();
     }
 }
