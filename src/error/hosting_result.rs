@@ -16,7 +16,7 @@ pub struct HostingResult(pub Result<HostingSuccess, HostingError>);
 impl HostingResult {
     /// Creates a new [`HostingResult`] from the raw status code.
     #[allow(clippy::cast_possible_wrap)]
-    pub fn from_status_code(code: u32) -> Self {
+    pub const fn from_status_code(code: u32) -> Self {
         if code as i32 >= 0 {
             Self::from_success(HostingSuccess::from_status_code(code))
         } else {
@@ -25,18 +25,18 @@ impl HostingResult {
     }
 
     /// Creates a new successful [`HostingResult`] from the give [`HostingSuccess`].
-    pub fn from_success(success: HostingSuccess) -> Self {
+    pub const fn from_success(success: HostingSuccess) -> Self {
         Self(Ok(success))
     }
 
     /// Creates a new erroneous [`HostingResult`] from the give [`HostingError`].
-    pub fn from_error(error: HostingError) -> Self {
+    pub const fn from_error(error: HostingError) -> Self {
         Self(Err(error))
     }
 
     /// Tries to create a new [`HostingResult`] from the raw status code if it is known.
     /// Otherwise returns the given value as an [`Err`].
-    pub fn known_from_status_code(code: u32) -> Result<Self, u32> {
+    pub const fn known_from_status_code(code: u32) -> Result<Self, u32> {
         if let Ok(success) = HostingSuccess::known_from_status_code(code) {
             Ok(Self::from_success(success))
         } else if let Ok(error) = HostingError::known_from_status_code(code) {
@@ -172,7 +172,7 @@ pub enum HostingSuccess {
 impl HostingSuccess {
     /// Creates a new [`HostingSuccess`] from the raw status code.
     #[must_use]
-    pub fn from_status_code(code: u32) -> Self {
+    pub const fn from_status_code(code: u32) -> Self {
         match Self::known_from_status_code(code) {
             Ok(s) => s,
             Err(code) => Self::Unknown(code),
@@ -181,7 +181,7 @@ impl HostingSuccess {
 
     /// Tries to create a new [`HostingSuccess`] from the raw status code if it is known.
     /// Otherwise returns the given value as an [`Err`].
-    pub fn known_from_status_code(code: u32) -> Result<Self, u32> {
+    pub const fn known_from_status_code(code: u32) -> Result<Self, u32> {
         match code {
             c if c == bindings::StatusCode::Success as u32 => Ok(Self::Success),
             c if c == bindings::StatusCode::Success_DifferentRuntimeProperties as u32 => {
@@ -196,7 +196,7 @@ impl HostingSuccess {
 
     /// Returns the underlying status code value.
     #[must_use]
-    pub fn value(&self) -> u32 {
+    pub const fn value(&self) -> u32 {
         match self {
             Self::Success => bindings::StatusCode::Success as u32,
             Self::DifferentRuntimeProperties => {
@@ -211,13 +211,13 @@ impl HostingSuccess {
 
     /// Returns whether the status code of this success has a known meaning.
     #[must_use]
-    pub fn is_known(&self) -> bool {
+    pub const fn is_known(&self) -> bool {
         !self.is_unknown()
     }
 
     /// Returns whether the status code of this success has a unknown meaning.
     #[must_use]
-    pub fn is_unknown(&self) -> bool {
+    pub const fn is_unknown(&self) -> bool {
         matches!(self, Self::Unknown(_))
     }
 }
@@ -500,7 +500,7 @@ impl std::error::Error for HostingError {}
 
 impl HostingError {
     /// Creates a new [`HostingError`] from the raw status code.
-    pub fn from_status_code(code: u32) -> Self {
+    pub const fn from_status_code(code: u32) -> Self {
         match Self::known_from_status_code(code) {
             Ok(s) => s,
             Err(code) => Self::Unknown(code),
@@ -509,7 +509,7 @@ impl HostingError {
 
     /// Tries to create a new [`HostingError`] from the raw status code if it is known.
     /// Otherwise returns the given value as an [`Err`].
-    pub fn known_from_status_code(code: u32) -> Result<Self, u32> {
+    pub const fn known_from_status_code(code: u32) -> Result<Self, u32> {
         match code {
             c if c == bindings::StatusCode::InvalidArgFailure as u32 => Ok(Self::InvalidArgFailure),
             c if c == bindings::StatusCode::CoreHostLibLoadFailure as u32 => {
@@ -613,7 +613,7 @@ impl HostingError {
 
     /// Returns the underlying status code value.
     #[must_use]
-    pub fn value(&self) -> u32 {
+    pub const fn value(&self) -> u32 {
         match self {
             Self::InvalidArgFailure => bindings::StatusCode::InvalidArgFailure as u32,
             Self::CoreHostLibLoadFailure => bindings::StatusCode::CoreHostLibLoadFailure as u32,
@@ -676,13 +676,13 @@ impl HostingError {
 
     /// Returns whether the status code of this error has a known meaning.
     #[must_use]
-    pub fn is_known(&self) -> bool {
+    pub const fn is_known(&self) -> bool {
         !self.is_unknown()
     }
 
     /// Returns whether the status code of this error has a unknown meaning.
     #[must_use]
-    pub fn is_unknown(&self) -> bool {
+    pub const fn is_unknown(&self) -> bool {
         matches!(self, Self::Unknown(_))
     }
 }

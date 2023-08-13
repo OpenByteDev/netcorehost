@@ -67,7 +67,7 @@ pub struct AppOrHostingResult(i32);
 impl AppOrHostingResult {
     /// Gets the raw value of the result.
     #[must_use]
-    pub fn value(&self) -> i32 {
+    pub const fn value(&self) -> i32 {
         self.0
     }
 
