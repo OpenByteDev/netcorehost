@@ -9,6 +9,8 @@ use crate::{
 };
 use std::{iter, mem::MaybeUninit, ptr};
 
+use super::UNSUPPORTED_HOST_VERSION_ERROR_CODE;
+
 impl Hostfxr {
     /// Initializes the hosting components for a dotnet command line running an application
     ///
@@ -236,7 +238,7 @@ impl Hostfxr {
                 parameters,
                 hostfxr_handle.as_mut_ptr(),
             )
-        };
+        }.unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
 
         let success_code = HostingResult::from(result).into_result()?;
 
@@ -363,7 +365,7 @@ impl Hostfxr {
                 parameters,
                 hostfxr_handle.as_mut_ptr(),
             )
-        };
+        }.unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
 
         let success_code = HostingResult::from(result).into_result()?;
 

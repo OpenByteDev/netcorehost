@@ -17,6 +17,8 @@ use std::{
     ptr, slice,
 };
 
+use super::UNSUPPORTED_HOST_VERSION_ERROR_CODE;
+
 impl Hostfxr {
     /// Run an application.
     ///
@@ -61,7 +63,7 @@ impl Hostfxr {
                 dotnet_root.as_ptr(),
                 app_path.as_ptr(),
             )
-        };
+        }.unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
 
         Ok(AppOrHostingResult::from(result))
     }
@@ -91,7 +93,7 @@ impl Hostfxr {
                 flags,
                 resolve_sdk2_callback,
             )
-        };
+        }.unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
         HostingResult::from(result).into_result()?;
 
         let sdk_path = RESOLVE_SDK2_DATA
@@ -159,7 +161,7 @@ impl Hostfxr {
                 buffer.spare_capacity_mut().len().try_into().unwrap(),
                 &mut required_buffer_size,
             )
-        };
+        }.unwrap_or_else(|| HostingError::HostApiUnsupportedVersion.value() as i32);
         HostingResult::from(result).into_result()?;
         unsafe { buffer.set_len(required_buffer_size.try_into().unwrap()) };
 

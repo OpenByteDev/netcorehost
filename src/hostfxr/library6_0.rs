@@ -7,6 +7,8 @@ use crate::{
 };
 use std::{ffi::c_void, mem::MaybeUninit, path::PathBuf, ptr, slice};
 
+use super::UNSUPPORTED_HOST_VERSION_ERROR_CODE;
+
 /// Information about the current dotnet environment loaded using [Hostfxr::get_dotnet_environment_info].
 #[derive(Debug, Clone)]
 pub struct EnvironmentInfo {
@@ -110,7 +112,7 @@ impl Hostfxr {
                 get_dotnet_environment_info_callback,
                 info.as_mut_ptr().cast(),
             )
-        };
+        }.unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
         HostingResult::from(result).into_result()?;
         let info = unsafe { MaybeUninit::assume_init(info) };
         Ok(info)

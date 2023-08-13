@@ -21,7 +21,7 @@ impl<I> HostfxrContext<I> {
                 name.as_ref().as_ptr(),
                 value.as_mut_ptr(),
             )
-        };
+        }.unwrap();
         HostingResult::from(result).into_result()?;
 
         Ok(unsafe { PdCStr::from_str_ptr(value.assume_init()) })
@@ -39,7 +39,7 @@ impl<I> HostfxrContext<I> {
                 name.as_ref().as_ptr(),
                 value.as_ref().as_ptr(),
             )
-        };
+        }.unwrap();
         HostingResult::from(result).into_result().map(|_| ())
     }
 
@@ -54,7 +54,7 @@ impl<I> HostfxrContext<I> {
                 name.as_ref().as_ptr(),
                 ptr::null(),
             )
-        };
+        }.unwrap();
         HostingResult::from(result).into_result().map(|_| ())
     }
 
@@ -69,7 +69,7 @@ impl<I> HostfxrContext<I> {
                 ptr::null_mut(),
                 ptr::null_mut(),
             )
-        };
+        }.unwrap();
 
         // ignore buffer too small error as the first call is only to get the required buffer size.
         match HostingResult::from(result).into_result() {
@@ -88,7 +88,7 @@ impl<I> HostfxrContext<I> {
                 keys.as_mut_ptr(),
                 values.as_mut_ptr(),
             )
-        };
+        }.unwrap();
         HostingResult::from(result).into_result()?;
 
         unsafe { keys.set_len(count) };

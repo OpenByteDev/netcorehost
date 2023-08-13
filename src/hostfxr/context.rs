@@ -185,7 +185,7 @@ impl<I> HostfxrContext<I> {
                 r#type,
                 delegate.as_mut_ptr(),
             )
-        };
+        }.unwrap();
 
         HostingResult::from(result).into_result()?;
 
@@ -303,7 +303,7 @@ impl<I> HostfxrContext<I> {
 
     /// Internal non-consuming version of [`close`](HostfxrContext::close)
     unsafe fn _close(&self) -> Result<HostingSuccess, HostingError> {
-        let result = unsafe { self.hostfxr.hostfxr_close(self.handle.as_raw()) };
+        let result = unsafe { self.hostfxr.hostfxr_close(self.handle.as_raw()) }.unwrap();
         HostingResult::from(result).into_result()
     }
 }
@@ -315,7 +315,7 @@ impl HostfxrContext<InitializedForCommandLine> {
     /// If the app was successfully run, the exit code of the application. Otherwise, the error code result.
     #[must_use]
     pub fn run_app(self) -> AppOrHostingResult {
-        let result = unsafe { self.hostfxr.hostfxr_run_app(self.handle.as_raw()) };
+        let result = unsafe { self.hostfxr.hostfxr_run_app(self.handle.as_raw()) }.unwrap();
         AppOrHostingResult::from(result)
     }
 }
