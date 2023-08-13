@@ -12,7 +12,9 @@ use std::{
 
 pub(crate) type HostfxrLibrary = Container<crate::bindings::hostfxr::wrapper_option::Hostfxr>;
 pub(crate) type SharedHostfxrLibrary = Rc<HostfxrLibrary>;
-pub(crate) const UNSUPPORTED_HOST_VERSION_ERROR_CODE: i32 = HostingError::HostApiUnsupportedVersion.value() as i32;
+#[allow(clippy::cast_possible_wrap)]
+pub(crate) const UNSUPPORTED_HOST_VERSION_ERROR_CODE: i32 =
+    HostingError::HostApiUnsupportedVersion.value() as i32;
 
 /// A struct representing a loaded hostfxr library.
 #[derive(Clone, From)]

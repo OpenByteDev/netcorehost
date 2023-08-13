@@ -161,7 +161,8 @@ impl Hostfxr {
                 buffer.spare_capacity_mut().len().try_into().unwrap(),
                 &mut required_buffer_size,
             )
-        }.unwrap_or_else(|| HostingError::HostApiUnsupportedVersion.value() as i32);
+        }
+        .unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
         HostingResult::from(result).into_result()?;
         unsafe { buffer.set_len(required_buffer_size.try_into().unwrap()) };
 
