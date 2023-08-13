@@ -25,6 +25,12 @@ mod library3_0;
 #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
 pub use library3_0::*;
 
+#[cfg(feature = "net6_0")]
+mod library6_0;
+#[cfg(feature = "net6_0")]
+#[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net6_0")))]
+pub use library6_0::*;
+
 #[cfg(feature = "netcore3_0")]
 mod context;
 #[cfg(feature = "netcore3_0")]
