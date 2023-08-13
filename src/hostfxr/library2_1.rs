@@ -4,7 +4,7 @@ use crate::{
     },
     error::{HostingError, HostingResult},
     hostfxr::{AppOrHostingResult, Hostfxr},
-    pdcstring::{PdCStr, PdCString, PdUChar},
+    pdcstring::{PdCStr, PdUChar},
 };
 
 use coreclr_hosting_shared::char_t;
@@ -14,7 +14,7 @@ use std::{
     io,
     mem::MaybeUninit,
     path::{Path, PathBuf},
-    slice,
+    ptr, slice,
 };
 
 impl Hostfxr {
@@ -104,22 +104,22 @@ impl Hostfxr {
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
     #[must_use]
     pub fn get_available_sdks(&self) -> Vec<PathBuf> {
-        let dotnet_path = PathBuf::from(self.dotnet_exe.to_os_string())
-            .parent()
-            .and_then(|p| PdCString::from_os_str(p).ok());
-        match dotnet_path {
-            Some(p) => self.get_available_sdks_with_dotnet_path(&p),
-            None => vec![],
-        }
+        self._get_available_sdks(None)
     }
 
     /// Get the list of all available SDKs ordered by ascending version, based on the provided `dotnet` executable.
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
     #[must_use]
     pub fn get_available_sdks_with_dotnet_path(&self, dotnet_path: &PdCStr) -> Vec<PathBuf> {
+        self._get_available_sdks(Some(dotnet_path))
+    }
+
+    #[must_use]
+    fn _get_available_sdks(&self, dotnet_path: Option<&PdCStr>) -> Vec<PathBuf> {
+        let dotnet_path = dotnet_path.map_or_else(ptr::null, |s| s.as_ptr());
         unsafe {
             self.lib
-                .hostfxr_get_available_sdks(dotnet_path.as_ptr(), get_available_sdks_callback)
+                .hostfxr_get_available_sdks(dotnet_path, get_available_sdks_callback)
         };
         GET_AVAILABLE_SDKS_DATA
             .with(|sdks| sdks.borrow_mut().take())

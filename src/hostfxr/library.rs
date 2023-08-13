@@ -45,6 +45,8 @@ impl Hostfxr {
     pub fn load_from_path(path: impl AsRef<Path>) -> Result<Self, crate::dlopen2::Error> {
         let path = path.as_ref();
         let lib = SharedHostfxrLibrary::new(unsafe { Container::load(path) }?);
+
+        // Some APIs of hostfxr.dll require a path to the dotnet executable, so we try to locate it here based on the hostfxr path.
         let dotnet_exe = PdCString::from_os_str(find_dotnet_bin(path)).unwrap();
 
         Ok(Self { lib, dotnet_exe })
