@@ -7,12 +7,6 @@ mod library1_0;
 #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore1_0")))]
 pub use library1_0::*;
 
-#[cfg(feature = "netcore2_0")]
-mod library2_0;
-#[cfg(feature = "netcore2_0")]
-#[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_0")))]
-pub use library2_0::*;
-
 #[cfg(feature = "netcore2_1")]
 mod library2_1;
 #[cfg(feature = "netcore2_1")]
