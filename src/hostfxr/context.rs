@@ -185,7 +185,8 @@ impl<I> HostfxrContext<I> {
                 r#type,
                 delegate.as_mut_ptr(),
             )
-        }.unwrap();
+        }
+        .unwrap();
 
         HostingResult::from(result).into_result()?;
 

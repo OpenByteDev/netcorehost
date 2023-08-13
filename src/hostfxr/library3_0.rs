@@ -238,7 +238,8 @@ impl Hostfxr {
                 parameters,
                 hostfxr_handle.as_mut_ptr(),
             )
-        }.unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
+        }
+        .unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
 
         let success_code = HostingResult::from(result).into_result()?;
 
@@ -365,7 +366,8 @@ impl Hostfxr {
                 parameters,
                 hostfxr_handle.as_mut_ptr(),
             )
-        }.unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
+        }
+        .unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
 
         let success_code = HostingResult::from(result).into_result()?;
 

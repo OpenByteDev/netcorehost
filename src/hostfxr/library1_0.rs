@@ -50,7 +50,8 @@ impl Hostfxr {
         let result = unsafe {
             self.lib
                 .hostfxr_main(args.len().try_into().unwrap(), args.as_ptr())
-        }.unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
+        }
+        .unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
 
         AppOrHostingResult::from(result)
     }
