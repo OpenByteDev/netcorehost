@@ -184,8 +184,8 @@ impl Hostfxr {
 }
 
 thread_local! {
-    static GET_AVAILABLE_SDKS_DATA: RefCell<Option<Vec<PathBuf>>> = RefCell::new(None);
-    static RESOLVE_SDK2_DATA: RefCell<Option<ResolveSdkResult>> = RefCell::new(None);
+    static GET_AVAILABLE_SDKS_DATA: RefCell<Option<Vec<PathBuf>>> = const { RefCell::new(None) };
+    static RESOLVE_SDK2_DATA: RefCell<Option<ResolveSdkResult>> = const { RefCell::new(None) };
 }
 
 extern "C" fn get_available_sdks_callback(sdk_count: i32, sdks_ptr: *const *const char_t) {
