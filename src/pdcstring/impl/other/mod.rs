@@ -7,9 +7,11 @@ mod pdcstr;
 pub use pdcstr::*;
 
 mod pdcstring;
+#[allow(unused)]
 pub use pdcstring::*;
 
 mod error;
+#[allow(unused)]
 pub use error::*;
 
 mod ext;

@@ -5,6 +5,7 @@ pub use library::*;
 mod library1_0;
 #[cfg(feature = "netcore1_0")]
 #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore1_0")))]
+#[allow(unused)]
 pub use library1_0::*;
 
 #[cfg(feature = "netcore2_1")]
@@ -17,6 +18,7 @@ pub use library2_1::*;
 mod library3_0;
 #[cfg(feature = "netcore3_0")]
 #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
+#[allow(unused)]
 pub use library3_0::*;
 
 #[cfg(feature = "net6_0")]
@@ -41,6 +43,7 @@ pub use delegate_loader::*;
 mod runtime_property;
 #[cfg(feature = "netcore3_0")]
 #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
+#[allow(unused)]
 pub use runtime_property::*;
 
 #[cfg(feature = "netcore3_0")]
