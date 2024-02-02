@@ -2,7 +2,7 @@ use netcorehost::{
     hostfxr::{EnvironmentInfo, FrameworkInfo, SdkInfo},
     nethost,
 };
-use std::{collections::HashMap, path::PathBuf, process::Command};
+use std::{collections::HashMap, path::{Path, PathBuf}, process::Command, str::FromStr};
 
 #[path = "common.rs"]
 mod common;
@@ -21,7 +21,11 @@ fn get_dotnet_environment_info() {
 }
 
 fn get_expected_environment_info() -> EnvironmentInfo {
-    let output = Command::new("dotnet").arg("--info").output().unwrap();
+    let dotnet_path = option_env!("DOTNET_ROOT")
+        .map(|root| Path::new(root).join("dotnet"))
+        .unwrap_or_else(|| PathBuf::from_str("dotnet").unwrap());
+    dbg!(&dotnet_path);
+    let output = Command::new(dotnet_path).arg("--info").output().unwrap();
     assert!(output.status.success());
     let output = String::from_utf8_lossy(&output.stdout);
 
