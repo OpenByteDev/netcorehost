@@ -24,7 +24,7 @@ use std::{
     marker::PhantomData,
     mem::{self, ManuallyDrop, MaybeUninit},
     ptr::NonNull,
-    rc::Rc,
+    cell::Cell
 };
 
 #[cfg(feature = "net8_0")]
@@ -85,8 +85,10 @@ pub struct HostfxrContext<I> {
     is_primary: bool,
     runtime_delegates: EnumMap<hostfxr_delegate_type, OnceCell<RawFunctionPtr>>,
     context_type: PhantomData<I>,
-    not_thread_safe: PhantomData<Rc<HostfxrLibrary>>,
+    not_sync: PhantomData<Cell<HostfxrLibrary>>
 }
+
+unsafe impl<I> Send for HostfxrContext<I> {}
 
 impl<I> Debug for HostfxrContext<I> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -117,7 +119,7 @@ impl<I> HostfxrContext<I> {
             is_primary,
             runtime_delegates: EnumMap::default(),
             context_type: PhantomData,
-            not_thread_safe: PhantomData,
+            not_sync: PhantomData,
         }
     }
 
