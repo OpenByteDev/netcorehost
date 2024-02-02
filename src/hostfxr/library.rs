@@ -62,6 +62,16 @@ impl Hostfxr {
     pub fn load_with_nethost() -> Result<Self, LoadHostfxrError> {
         crate::nethost::load_hostfxr()
     }
+
+    /// Returns the path to the dotnet root.
+    pub fn get_dotnet_root(&self) -> PathBuf {
+        self.get_dotnet_exe().parent().unwrap().to_owned()
+    }
+
+    /// Returns the path to the dotnet executable of the same installation as hostfxr.
+    pub fn get_dotnet_exe(&self) -> PathBuf {
+        self.dotnet_exe.to_os_string().into()
+    }
 }
 
 /// Either the exit code of the app if it ran successful, otherwise the error from the hosting components.

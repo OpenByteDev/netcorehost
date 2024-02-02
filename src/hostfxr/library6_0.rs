@@ -3,7 +3,7 @@ use hostfxr_sys::hostfxr_dotnet_environment_info;
 use crate::{
     error::{HostingError, HostingResult},
     hostfxr::Hostfxr,
-    pdcstring::PdCStr,
+    pdcstring::{PdCStr, PdCString},
 };
 use std::{ffi::c_void, mem::MaybeUninit, path::PathBuf, ptr, slice};
 
@@ -104,10 +104,12 @@ impl Hostfxr {
     /// then it will also enumerate SDKs and frameworks from the global install location.
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net6_0")))]
     pub fn get_dotnet_environment_info(&self) -> Result<EnvironmentInfo, HostingError> {
+        let dotnet_root = PdCString::from_os_str(self.get_dotnet_root()).ok();
+        let dotnet_root_ptr = dotnet_root.as_ref().map_or_else(ptr::null, |p| p.as_ptr());
         let mut info = MaybeUninit::<EnvironmentInfo>::uninit();
         let result = unsafe {
             self.lib.hostfxr_get_dotnet_environment_info(
-                ptr::null(),
+                dotnet_root_ptr,
                 ptr::null_mut(),
                 get_dotnet_environment_info_callback,
                 info.as_mut_ptr().cast(),
