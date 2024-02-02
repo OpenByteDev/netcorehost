@@ -2,7 +2,12 @@ use netcorehost::{
     hostfxr::{EnvironmentInfo, FrameworkInfo, SdkInfo},
     nethost,
 };
-use std::{collections::HashMap, path::{Path, PathBuf}, process::Command, str::FromStr};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+    process::Command,
+    str::FromStr,
+};
 
 #[path = "common.rs"]
 mod common;
@@ -16,7 +21,8 @@ fn get_dotnet_environment_info() {
         nethost::load_hostfxr_with_dotnet_root(PdCString::from_str(dotnet_root).unwrap())
     } else {
         nethost::load_hostfxr()
-    }.unwrap();
+    }
+    .unwrap();
 
     let actual_env = hostfxr.get_dotnet_environment_info().unwrap();
     let expected_env = get_expected_environment_info();
