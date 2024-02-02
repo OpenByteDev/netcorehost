@@ -2,7 +2,7 @@ use netcorehost::{
     hostfxr::{EnvironmentInfo, FrameworkInfo, SdkInfo},
     nethost,
 };
-use std::{collections::HashMap, path::PathBuf, process::Command};
+use std::{collections::HashMap, path::{Path, PathBuf}, process::Command, str::FromStr};
 
 #[path = "common.rs"]
 mod common;
@@ -10,7 +10,13 @@ mod common;
 #[test]
 #[cfg(feature = "net6_0")]
 fn get_dotnet_environment_info() {
-    let hostfxr = nethost::load_hostfxr().unwrap();
+    use netcorehost::pdcstring::PdCString;
+
+    let hostfxr = if let Some(dotnet_root) = option_env!("DOTNET_ROOT") {
+        nethost::load_hostfxr_with_dotnet_root(PdCString::from_str(dotnet_root).unwrap())
+    } else {
+        nethost::load_hostfxr()
+    }.unwrap();
 
     let actual_env = hostfxr.get_dotnet_environment_info().unwrap();
     let expected_env = get_expected_environment_info();
@@ -21,7 +27,10 @@ fn get_dotnet_environment_info() {
 }
 
 fn get_expected_environment_info() -> EnvironmentInfo {
-    let output = Command::new("dotnet").arg("--info").output().unwrap();
+    let dotnet_path = option_env!("DOTNET_ROOT")
+        .map(|root| Path::new(root).join("dotnet"))
+        .unwrap_or_else(|| PathBuf::from_str("dotnet").unwrap());
+    let output = Command::new(dotnet_path).arg("--info").output().unwrap();
     assert!(output.status.success());
     let output = String::from_utf8_lossy(&output.stdout);
 
