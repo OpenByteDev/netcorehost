@@ -6,22 +6,6 @@ error[E0080]: evaluation of constant value failed
   |
   = note: this error originates in the macro `$crate::panic::panic_2021` which comes from the expansion of the macro `netcorehost::pdcstr` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-note: erroneous constant encountered
- --> tests/macro-build-tests/pdcstr-compile-fail.rs:3:13
-  |
-3 |     let _ = netcorehost::pdcstr!("\0");
-  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  |
-  = note: this note originates in the macro `$crate::pdcstring::windows::widestring::u16cstr` which comes from the expansion of the macro `netcorehost::pdcstr` (in Nightly builds, run with -Z macro-backtrace for more info)
-
-note: erroneous constant encountered
- --> tests/macro-build-tests/pdcstr-compile-fail.rs:3:13
-  |
-3 |     let _ = netcorehost::pdcstr!("\0");
-  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  |
-  = note: this note originates in the macro `$crate::pdcstring::windows::widestring::u16cstr` which comes from the expansion of the macro `netcorehost::pdcstr` (in Nightly builds, run with -Z macro-backtrace for more info)
-
 error[E0080]: evaluation of constant value failed
  --> tests/macro-build-tests/pdcstr-compile-fail.rs:4:13
   |
@@ -29,22 +13,6 @@ error[E0080]: evaluation of constant value failed
   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the evaluated program panicked at 'invalid NUL value found in string literal', $DIR/tests/macro-build-tests/pdcstr-compile-fail.rs:4:13
   |
   = note: this error originates in the macro `$crate::panic::panic_2021` which comes from the expansion of the macro `netcorehost::pdcstr` (in Nightly builds, run with -Z macro-backtrace for more info)
-
-note: erroneous constant encountered
- --> tests/macro-build-tests/pdcstr-compile-fail.rs:4:13
-  |
-4 |     let _ = netcorehost::pdcstr!("somerandomteststring\0");
-  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  |
-  = note: this note originates in the macro `$crate::pdcstring::windows::widestring::u16cstr` which comes from the expansion of the macro `netcorehost::pdcstr` (in Nightly builds, run with -Z macro-backtrace for more info)
-
-note: erroneous constant encountered
- --> tests/macro-build-tests/pdcstr-compile-fail.rs:4:13
-  |
-4 |     let _ = netcorehost::pdcstr!("somerandomteststring\0");
-  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  |
-  = note: this note originates in the macro `$crate::pdcstring::windows::widestring::u16cstr` which comes from the expansion of the macro `netcorehost::pdcstr` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0080]: evaluation of constant value failed
  --> tests/macro-build-tests/pdcstr-compile-fail.rs:5:13
@@ -59,6 +27,38 @@ note: erroneous constant encountered
   |
 5 |     let _ = netcorehost::pdcstr!("somerandomteststring\0somerandomteststring");
   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this note originates in the macro `$crate::pdcstring::windows::widestring::u16cstr` which comes from the expansion of the macro `netcorehost::pdcstr` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+note: erroneous constant encountered
+ --> tests/macro-build-tests/pdcstr-compile-fail.rs:4:13
+  |
+4 |     let _ = netcorehost::pdcstr!("somerandomteststring\0");
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this note originates in the macro `$crate::pdcstring::windows::widestring::u16cstr` which comes from the expansion of the macro `netcorehost::pdcstr` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+note: erroneous constant encountered
+ --> tests/macro-build-tests/pdcstr-compile-fail.rs:3:13
+  |
+3 |     let _ = netcorehost::pdcstr!("\0");
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this note originates in the macro `$crate::pdcstring::windows::widestring::u16cstr` which comes from the expansion of the macro `netcorehost::pdcstr` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+note: erroneous constant encountered
+ --> tests/macro-build-tests/pdcstr-compile-fail.rs:3:13
+  |
+3 |     let _ = netcorehost::pdcstr!("\0");
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this note originates in the macro `$crate::pdcstring::windows::widestring::u16cstr` which comes from the expansion of the macro `netcorehost::pdcstr` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+note: erroneous constant encountered
+ --> tests/macro-build-tests/pdcstr-compile-fail.rs:4:13
+  |
+4 |     let _ = netcorehost::pdcstr!("somerandomteststring\0");
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   |
   = note: this note originates in the macro `$crate::pdcstring::windows::widestring::u16cstr` which comes from the expansion of the macro `netcorehost::pdcstr` (in Nightly builds, run with -Z macro-backtrace for more info)
 
