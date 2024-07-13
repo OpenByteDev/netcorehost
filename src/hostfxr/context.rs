@@ -19,12 +19,12 @@ use crate::{
 };
 
 use std::{
+    cell::Cell,
     ffi::c_void,
     fmt::{self, Debug},
     marker::PhantomData,
     mem::{self, ManuallyDrop, MaybeUninit},
     ptr::NonNull,
-    cell::Cell
 };
 
 #[cfg(feature = "net8_0")]
@@ -85,7 +85,7 @@ pub struct HostfxrContext<I> {
     is_primary: bool,
     runtime_delegates: EnumMap<hostfxr_delegate_type, OnceCell<RawFunctionPtr>>,
     context_type: PhantomData<I>,
-    not_sync: PhantomData<Cell<HostfxrLibrary>>
+    not_sync: PhantomData<Cell<HostfxrLibrary>>,
 }
 
 unsafe impl<I> Send for HostfxrContext<I> {}
