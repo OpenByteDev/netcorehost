@@ -64,12 +64,12 @@ impl Hostfxr {
     }
 
     /// Returns the path to the dotnet root.
-    pub fn get_dotnet_root(&self) -> PathBuf {
+    #[must_use] pub fn get_dotnet_root(&self) -> PathBuf {
         self.get_dotnet_exe().parent().unwrap().to_owned()
     }
 
     /// Returns the path to the dotnet executable of the same installation as hostfxr.
-    pub fn get_dotnet_exe(&self) -> PathBuf {
+    #[must_use] pub fn get_dotnet_exe(&self) -> PathBuf {
         self.dotnet_exe.to_os_string().into()
     }
 }
