@@ -38,7 +38,7 @@ rusty-fork = "0.3"
 path-absolutize = "3.1"
 
 [features]
-default = ["nethost-download", "net7_0"]
+default = ["nethost-download", "net8_0"]
 nethost-download = ["nethost", "nethost-sys/download-nuget"]
 nethost = ["nethost-sys"]
 nightly = []
@@ -51,7 +51,8 @@ net5_0 = ["hostfxr-sys/net5_0", "netcore3_0"]
 net6_0 = ["hostfxr-sys/net6_0", "net5_0"]
 net7_0 = ["hostfxr-sys/net7_0", "net6_0"]
 net8_0 = ["hostfxr-sys/net8_0", "net7_0"]
-latest = ["hostfxr-sys/latest", "net8_0"]
+net9_0 = ["hostfxr-sys/net8_0", "net8_0"]
+latest = ["hostfxr-sys/latest", "net9_0"]
 
 # Prevent downloading nethost library when building on docs.rs.
 [package.metadata.docs.rs]
