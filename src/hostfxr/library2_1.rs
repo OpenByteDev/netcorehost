@@ -63,7 +63,8 @@ impl Hostfxr {
                 dotnet_root.as_ptr(),
                 app_path.as_ptr(),
             )
-        }.unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
+        }
+        .unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
 
         Ok(AppOrHostingResult::from(result))
     }
@@ -93,7 +94,8 @@ impl Hostfxr {
                 flags,
                 resolve_sdk2_callback,
             )
-        }.unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
+        }
+        .unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
         HostingResult::from(result).into_result()?;
 
         let sdk_path = RESOLVE_SDK2_DATA
