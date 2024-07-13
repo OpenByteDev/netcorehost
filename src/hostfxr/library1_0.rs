@@ -3,6 +3,8 @@ use crate::{
     pdcstring::PdCStr,
 };
 
+use super::UNSUPPORTED_HOST_VERSION_ERROR_CODE;
+
 impl Hostfxr {
     /// Run an application.
     ///
@@ -48,7 +50,7 @@ impl Hostfxr {
         let result = unsafe {
             self.lib
                 .hostfxr_main(args.len().try_into().unwrap(), args.as_ptr())
-        };
+        }.unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
 
         AppOrHostingResult::from(result)
     }

@@ -1,5 +1,5 @@
 use crate::{
-    dlopen2::wrapper::Container, error::HostingResult, nethost::LoadHostfxrError,
+    dlopen2::wrapper::Container, error::{HostingResult, HostingError}, nethost::LoadHostfxrError,
     pdcstring::PdCString,
 };
 use derive_more::From;
@@ -10,8 +10,9 @@ use std::{
     rc::Rc,
 };
 
-pub(crate) type HostfxrLibrary = Container<crate::bindings::hostfxr::wrapper::Hostfxr>;
+pub(crate) type HostfxrLibrary = Container<crate::bindings::hostfxr::wrapper_option::Hostfxr>;
 pub(crate) type SharedHostfxrLibrary = Rc<HostfxrLibrary>;
+pub(crate) const UNSUPPORTED_HOST_VERSION_ERROR_CODE: i32 = HostingError::HostApiUnsupportedVersion.value() as i32;
 
 /// A struct representing a loaded hostfxr library.
 #[derive(Clone, From)]
