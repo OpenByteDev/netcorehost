@@ -9,11 +9,11 @@ use std::{
     env::consts::EXE_SUFFIX,
     ffi::OsString,
     path::{Path, PathBuf},
-    rc::Rc,
+    sync::Arc,
 };
 
 pub(crate) type HostfxrLibrary = Container<crate::bindings::hostfxr::wrapper_option::Hostfxr>;
-pub(crate) type SharedHostfxrLibrary = Rc<HostfxrLibrary>;
+pub(crate) type SharedHostfxrLibrary = Arc<HostfxrLibrary>;
 #[allow(clippy::cast_possible_wrap)]
 pub(crate) const UNSUPPORTED_HOST_VERSION_ERROR_CODE: i32 =
     HostingError::HostApiUnsupportedVersion.value() as i32;
