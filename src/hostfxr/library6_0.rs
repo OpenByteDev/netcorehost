@@ -112,7 +112,8 @@ impl Hostfxr {
                 get_dotnet_environment_info_callback,
                 info.as_mut_ptr().cast(),
             )
-        }.unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
+        }
+        .unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
         HostingResult::from(result).into_result()?;
         let info = unsafe { MaybeUninit::assume_init(info) };
         Ok(info)
