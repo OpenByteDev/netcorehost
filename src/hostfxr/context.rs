@@ -59,13 +59,13 @@ impl HostfxrHandle {
     /// - The given raw handle has to be non-null.
     /// - The given handle has to be valid and has to represent a hostfxr context.
     #[must_use]
-    pub unsafe fn new_unchecked(ptr: hostfxr_handle) -> Self {
+    pub const unsafe fn new_unchecked(ptr: hostfxr_handle) -> Self {
         Self(unsafe { NonNull::new_unchecked(ptr.cast_mut()) })
     }
 
     /// Returns the raw underlying handle.
     #[must_use]
-    pub fn as_raw(&self) -> hostfxr_handle {
+    pub const fn as_raw(&self) -> hostfxr_handle {
         self.0.as_ptr()
     }
 }
@@ -123,7 +123,7 @@ impl<I> HostfxrContext<I> {
 
     /// Gets the underlying handle to the hostfxr context.
     #[must_use]
-    pub fn handle(&self) -> HostfxrHandle {
+    pub const fn handle(&self) -> HostfxrHandle {
         self.handle
     }
 
@@ -140,12 +140,12 @@ impl<I> HostfxrContext<I> {
     /// # Note
     /// <https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/native-hosting.md#synchronization>
     #[must_use]
-    pub fn is_primary(&self) -> bool {
+    pub const fn is_primary(&self) -> bool {
         self.is_primary
     }
 
     #[must_use]
-    pub(crate) fn library(&self) -> &SharedHostfxrLibrary {
+    pub(crate) const fn library(&self) -> &SharedHostfxrLibrary {
         &self.hostfxr
     }
 
