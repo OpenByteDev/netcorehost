@@ -36,4 +36,5 @@ pub(crate) trait ToStringErrorInner: Debug + Display + Error + Clone {
     fn index(&self) -> Option<usize>;
 }
 
+#[allow(dead_code)]
 pub(crate) trait MissingNulTerminatorInner: Debug + Display + Error + Clone {}

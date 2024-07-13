@@ -67,13 +67,13 @@ impl PdCStr {
     pub(crate) fn from_inner(inner: &PdCStrInnerImpl) -> &Self {
         // Safety:
         // Safe because PdCStr has the same layout as PdCStrInnerImpl
-        unsafe { &*(inner as *const PdCStrInnerImpl as *const PdCStr) }
+        unsafe { &*(std::ptr::from_ref::<PdCStrInnerImpl>(inner) as *const PdCStr) }
     }
     #[inline]
     pub(crate) fn as_inner(&self) -> &PdCStrInnerImpl {
         // Safety:
         // Safe because PdCStr has the same layout as PdCStrInnerImpl
-        unsafe { &*(self as *const PdCStr as *const PdCStrInnerImpl) }
+        unsafe { &*(std::ptr::from_ref::<PdCStr>(self) as *const PdCStrInnerImpl) }
     }
 
     /// Returns a raw pointer to the string.
