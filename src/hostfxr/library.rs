@@ -1,7 +1,6 @@
 use crate::{
     dlopen2::wrapper::Container,
-    error::{HostingError, HostingResult},
-    nethost::LoadHostfxrError,
+    error::{HostingError, HostingResult, LoadHostfxrError},
     pdcstring::PdCString,
 };
 use derive_more::From;

@@ -13,11 +13,11 @@ pub enum Error {
     GetFunctionPointer(#[from] crate::hostfxr::GetManagedFunctionError),
     /// An error while loading the hostfxr library.
     #[error(transparent)]
-    LoadHostfxr(#[from] crate::nethost::LoadHostfxrError),
+    LoadHostfxr(#[from] crate::error::LoadHostfxrError),
 }
 
 impl From<crate::dlopen2::Error> for Error {
     fn from(err: crate::dlopen2::Error) -> Self {
-        Self::LoadHostfxr(crate::nethost::LoadHostfxrError::DlOpen(err))
+        Self::LoadHostfxr(crate::error::LoadHostfxrError::DlOpen(err))
     }
 }

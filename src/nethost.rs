@@ -5,7 +5,9 @@ use crate::{
     pdcstring::{self, PdCStr, PdUChar},
 };
 use std::{ffi::OsString, mem::MaybeUninit, ptr};
-use thiserror::Error;
+
+#[doc(no_inline)]
+pub use crate::error::LoadHostfxrError;
 
 /// Gets the path to the hostfxr library.
 pub fn get_hostfxr_path() -> Result<OsString, HostingError> {
@@ -98,17 +100,6 @@ pub fn load_hostfxr_with_dotnet_root<P: AsRef<PdCStr>>(
     let hostfxr_path = get_hostfxr_path_with_dotnet_root(dotnet_root)?;
     let hostfxr = Hostfxr::load_from_path(hostfxr_path)?;
     Ok(hostfxr)
-}
-
-/// Enum for errors that can occur while locating and loading the hostfxr library.
-#[derive(Debug, Error)]
-pub enum LoadHostfxrError {
-    /// An error occured inside the hosting components.
-    #[error(transparent)]
-    Hosting(#[from] HostingError),
-    /// An error occured while loading the hostfxr library.
-    #[error(transparent)]
-    DlOpen(#[from] crate::dlopen2::Error),
 }
 
 const unsafe fn maybe_uninit_slice_assume_init_ref<T>(slice: &[MaybeUninit<T>]) -> &[T] {
