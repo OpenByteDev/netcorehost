@@ -177,6 +177,7 @@ pub mod hostfxr;
 
 /// Module for abstractions of the nethost library.
 #[cfg(feature = "nethost")]
+#[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "nethost")))]
 pub mod nethost;
 
 /// Module for a platform dependent c-like string type.

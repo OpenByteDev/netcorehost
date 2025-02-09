@@ -1,3 +1,5 @@
+#![cfg(feature = "net6_0")]
+
 use netcorehost::{
     hostfxr::{EnvironmentInfo, FrameworkInfo, SdkInfo},
     nethost,
@@ -13,7 +15,6 @@ use std::{
 mod common;
 
 #[test]
-#[cfg(feature = "net6_0")]
 fn get_dotnet_environment_info() {
     use netcorehost::pdcstring::PdCString;
 

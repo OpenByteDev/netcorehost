@@ -1,7 +1,6 @@
 use crate::{
     dlopen2::wrapper::Container,
     error::{HostingError, HostingResult},
-    nethost::LoadHostfxrError,
     pdcstring::PdCString,
 };
 use derive_more::From;
@@ -14,7 +13,7 @@ use std::{
 
 pub(crate) type HostfxrLibrary = Container<crate::bindings::hostfxr::wrapper_option::Hostfxr>;
 pub(crate) type SharedHostfxrLibrary = Arc<HostfxrLibrary>;
-#[allow(clippy::cast_possible_wrap)]
+#[allow(unused, clippy::cast_possible_wrap)]
 pub(crate) const UNSUPPORTED_HOST_VERSION_ERROR_CODE: i32 =
     HostingError::HostApiUnsupportedVersion.value() as i32;
 
@@ -59,7 +58,7 @@ impl Hostfxr {
 
     /// Locates the hostfxr library using [`nethost`](crate::nethost) and loads it.
     #[cfg(feature = "nethost")]
-    pub fn load_with_nethost() -> Result<Self, LoadHostfxrError> {
+    pub fn load_with_nethost() -> Result<Self, crate::nethost::LoadHostfxrError> {
         crate::nethost::load_hostfxr()
     }
 
