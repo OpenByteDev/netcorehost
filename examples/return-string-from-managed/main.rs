@@ -2,7 +2,11 @@
 
 use core::slice;
 use std::{
-    ffi::{CStr, CString}, mem::{self, MaybeUninit}, os::raw::c_char, str::Utf8Error, string::FromUtf16Error,
+    ffi::{CStr, CString},
+    mem::{self, MaybeUninit},
+    os::raw::c_char,
+    str::Utf8Error,
+    string::FromUtf16Error,
 };
 
 use netcorehost::{
@@ -66,7 +70,10 @@ fn print_string_from_csharp_using_unmanaged_alloc(delegate_loader: &AssemblyDele
             pdcstr!("FreeUnmanagedMemory"),
         )
         .unwrap();
-    FREE_H_GLOBAL.set(free_h_global).ok().expect("string interop already init");
+    FREE_H_GLOBAL
+        .set(free_h_global)
+        .ok()
+        .expect("string interop already init");
 
     // actual usage
     let get_name = delegate_loader
@@ -109,7 +116,7 @@ impl HGlobalString {
 
 impl Drop for HGlobalString {
     fn drop(&mut self) {
-       FREE_H_GLOBAL.get().expect("string interop not init")(self.ptr);
+        FREE_H_GLOBAL.get().expect("string interop not init")(self.ptr);
     }
 }
 
@@ -122,7 +129,10 @@ fn print_string_from_csharp_using_gc_handle(delegate_loader: &AssemblyDelegateLo
             pdcstr!("FreeGCHandleString"),
         )
         .unwrap();
-    FREE_GC_HANDLE_STRING.set(free_gc_handle_string).ok().expect("string interop already init");
+    FREE_GC_HANDLE_STRING
+        .set(free_gc_handle_string)
+        .ok()
+        .expect("string interop already init");
 
     let get_string_data_offset = delegate_loader
         .get_function_with_unmanaged_callers_only::<fn() -> usize>(
@@ -131,7 +141,9 @@ fn print_string_from_csharp_using_gc_handle(delegate_loader: &AssemblyDelegateLo
         )
         .unwrap();
     let string_data_offset = get_string_data_offset();
-    STRING_DATA_OFFSET.set(string_data_offset).expect("string interop already init");
+    STRING_DATA_OFFSET
+        .set(string_data_offset)
+        .expect("string interop already init");
 
     // actual usage
     let get_name = delegate_loader
@@ -181,7 +193,9 @@ impl GcHandleString {
 
 impl Drop for GcHandleString {
     fn drop(&mut self) {
-        FREE_GC_HANDLE_STRING.get().expect("string interop not init")(self.0);
+        FREE_GC_HANDLE_STRING
+            .get()
+            .expect("string interop not init")(self.0);
     }
 }
 

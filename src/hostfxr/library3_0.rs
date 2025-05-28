@@ -177,7 +177,11 @@ impl Hostfxr {
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         let parameters = hostfxr_initialize_parameters::with_host_path(host_path.as_ref().as_ptr());
         unsafe {
-            self.initialize_for_dotnet_command_line_with_parameters(app_path, args, &raw const parameters)
+            self.initialize_for_dotnet_command_line_with_parameters(
+                app_path,
+                args,
+                &raw const parameters,
+            )
         }
     }
 
@@ -216,7 +220,11 @@ impl Hostfxr {
         let parameters =
             hostfxr_initialize_parameters::with_dotnet_root(dotnet_root.as_ref().as_ptr());
         unsafe {
-            self.initialize_for_dotnet_command_line_with_parameters(app_path, args, &raw const parameters)
+            self.initialize_for_dotnet_command_line_with_parameters(
+                app_path,
+                args,
+                &raw const parameters,
+            )
         }
     }
 
@@ -314,7 +322,10 @@ impl Hostfxr {
     ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, HostingError> {
         let parameters = hostfxr_initialize_parameters::with_host_path(host_path.as_ref().as_ptr());
         unsafe {
-            self.initialize_for_runtime_config_with_parameters(runtime_config_path, &raw const parameters)
+            self.initialize_for_runtime_config_with_parameters(
+                runtime_config_path,
+                &raw const parameters,
+            )
         }
     }
     /// This function loads the specified `.runtimeconfig.json`, resolve all frameworks, resolve all the assets from those frameworks and
@@ -349,7 +360,10 @@ impl Hostfxr {
         let parameters =
             hostfxr_initialize_parameters::with_dotnet_root(dotnet_root.as_ref().as_ptr());
         unsafe {
-            self.initialize_for_runtime_config_with_parameters(runtime_config_path, &raw const parameters)
+            self.initialize_for_runtime_config_with_parameters(
+                runtime_config_path,
+                &raw const parameters,
+            )
         }
     }
 
