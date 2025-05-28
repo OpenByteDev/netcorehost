@@ -400,9 +400,7 @@ pub enum HostingError {
     /// Returned by `hostpolicy` if the `corehost_main_with_output_buffer` is called with unsupported host command.
     /// This error code means there is incompatibility between the `hostfxr` and `hostpolicy`.
     /// In reality this should pretty much never happen.
-    #[display(
-        "corehost_main_with_output_buffer was called with an unsupported host command."
-    )]
+    #[display("corehost_main_with_output_buffer was called with an unsupported host command.")]
     LibHostUnknownCommand,
 
     /// Returned by `apphost` if the imprinted application path doesn't exist.
@@ -444,9 +442,7 @@ pub enum HostingError {
     BundleExtractionFailure,
 
     /// Error reading or writing files during single-file `apphost` bundle extraction.
-    #[display(
-        "Error reading or writing files during single-file apphost bundle extraction."
-    )]
+    #[display("Error reading or writing files during single-file apphost bundle extraction.")]
     BundleExtractionIOError,
 
     /// The `.runtimeconfig.json` specified by the app contains a runtime property which is also produced by the hosting layer.
