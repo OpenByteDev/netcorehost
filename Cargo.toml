@@ -15,6 +15,7 @@ keywords = ["nethost", "hostfxr", "dotnet", "bindings", "coreclr"]
 num_enum = { version = "0.7", default-features = false }
 thiserror = { version = "2.0", default-features = false }
 derive_more = { version = "2.0", features = ["deref", "from", "display"], default-features = false }
+hostfxr-sys = { version = "0.11.1", features = ["enum-map", "undocumented", "wrapper", "optional-apis"], default-features = false }
 coreclr-hosting-shared = { version = "0.1", default-features = false }
 destruct-drop = { version = "0.2", default-features = false }
 ffi-opaque = { version = "2.0", default-features = false }
