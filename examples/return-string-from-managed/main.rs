@@ -9,7 +9,7 @@ use netcorehost::{
     hostfxr::{AssemblyDelegateLoader, ManagedFunction},
     nethost, pdcstr,
 };
-use once_cell::sync::OnceCell;
+use std::sync::OnceLock;
 
 fn main() {
     let hostfxr = nethost::load_hostfxr().unwrap();
@@ -80,7 +80,7 @@ fn print_string_from_csharp_using_unmanaged_alloc(delegate_loader: &AssemblyDele
     println!("{}", name.as_str().unwrap());
 }
 
-static FREE_H_GLOBAL: OnceCell<ManagedFunction<extern "system" fn(*const u8)>> = OnceCell::new();
+static FREE_H_GLOBAL: OnceLock<ManagedFunction<extern "system" fn(*const u8)>> = OnceLock::new();
 
 struct HGlobalString {
     ptr: *const u8,
@@ -145,9 +145,9 @@ fn print_string_from_csharp_using_gc_handle(delegate_loader: &AssemblyDelegateLo
     println!("{}", name.to_string_lossy());
 }
 
-static FREE_GC_HANDLE_STRING: OnceCell<ManagedFunction<extern "system" fn(*const *const u16)>> =
-    OnceCell::new();
-static STRING_DATA_OFFSET: OnceCell<usize> = OnceCell::new();
+static FREE_GC_HANDLE_STRING: OnceLock<ManagedFunction<extern "system" fn(*const *const u16)>> =
+    OnceLock::new();
+static STRING_DATA_OFFSET: OnceLock<usize> = OnceLock::new();
 
 struct GcHandleString(*const *const u16);
 
