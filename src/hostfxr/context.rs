@@ -299,13 +299,13 @@ impl<I> HostfxrContext<I> {
     /// Closes an initialized host context.
     /// This method is automatically called on drop, but can be explicitely called to handle errors during closing.
     pub fn close(self) -> Result<HostingSuccess, HostingError> {
-        let result = unsafe { self._close() };
+        let result = unsafe { self.close_raw() };
         self.destruct_drop();
         result
     }
 
     /// Internal non-consuming version of [`close`](HostfxrContext::close)
-    unsafe fn _close(&self) -> Result<HostingSuccess, HostingError> {
+    unsafe fn close_raw(&self) -> Result<HostingSuccess, HostingError> {
         let result = unsafe { self.hostfxr.hostfxr_close(self.handle.as_raw()) }.unwrap();
         HostingResult::from(result).into_result()
     }
@@ -325,6 +325,6 @@ impl HostfxrContext<InitializedForCommandLine> {
 
 impl<I> Drop for HostfxrContext<I> {
     fn drop(&mut self) {
-        let _ = unsafe { self._close() };
+        let _ = unsafe { self.close_raw() };
     }
 }

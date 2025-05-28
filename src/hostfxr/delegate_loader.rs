@@ -46,7 +46,7 @@ impl Clone for DelegateLoader {
 }
 
 impl DelegateLoader {
-    unsafe fn _load_assembly_and_get_function_pointer(
+    unsafe fn load_assembly_and_get_function_pointer_raw(
         &self,
         assembly_path: *const char_t,
         type_name: *const char_t,
@@ -70,7 +70,7 @@ impl DelegateLoader {
         Ok(unsafe { delegate.assume_init() }.cast())
     }
 
-    fn _validate_assembly_path(
+    fn validate_assembly_path(
         assembly_path: impl AsRef<PdCStr>,
     ) -> Result<(), GetManagedFunctionError> {
         #[cfg(windows)]
@@ -89,7 +89,7 @@ impl DelegateLoader {
     }
 
     #[cfg(feature = "net5_0")]
-    unsafe fn _get_function_pointer(
+    unsafe fn get_function_pointer_raw(
         &self,
         type_name: *const char_t,
         method_name: *const char_t,
@@ -119,15 +119,15 @@ impl DelegateLoader {
     ///
     /// # Arguments
     ///  * `assembly_path`:
-    ///     Path to the assembly to load.
-    ///     In case of complex component, this should be the main assembly of the component (the one with the .deps.json next to it).
-    ///     Note that this does not have to be the assembly from which the `type_name` and `method_name` are.
+    ///    Path to the assembly to load.
+    ///    In case of complex component, this should be the main assembly of the component (the one with the .deps.json next to it).
+    ///    Note that this does not have to be the assembly from which the `type_name` and `method_name` are.
     ///  * `type_name`:
-    ///     Assembly qualified type name to find
+    ///    Assembly qualified type name to find
     ///  * `method_name`:
-    ///     Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
+    ///    Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
     ///  * `delegate_type_name`:
-    ///     Assembly qualified delegate type name for the method signature.
+    ///    Assembly qualified delegate type name for the method signature.
     pub fn load_assembly_and_get_function<F: FunctionPtr>(
         &self,
         assembly_path: &PdCStr,
@@ -135,9 +135,9 @@ impl DelegateLoader {
         method_name: &PdCStr,
         delegate_type_name: &PdCStr,
     ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
-        Self::_validate_assembly_path(assembly_path)?;
+        Self::validate_assembly_path(assembly_path)?;
         let function = unsafe {
-            self._load_assembly_and_get_function_pointer(
+            self.load_assembly_and_get_function_pointer_raw(
                 assembly_path.as_ptr(),
                 type_name.as_ptr(),
                 method_name.as_ptr(),
@@ -154,23 +154,23 @@ impl DelegateLoader {
     ///
     /// # Arguments
     ///  * `assembly_path`:
-    ///     Path to the assembly to load.
-    ///     In case of complex component, this should be the main assembly of the component (the one with the .deps.json next to it).
-    ///     Note that this does not have to be the assembly from which the `type_name` and `method_name` are.
+    ///    Path to the assembly to load.
+    ///    In case of complex component, this should be the main assembly of the component (the one with the .deps.json next to it).
+    ///    Note that this does not have to be the assembly from which the `type_name` and `method_name` are.
     ///  * `type_name`:
-    ///     Assembly qualified type name to find
+    ///    Assembly qualified type name to find
     ///  * `method_name`:
-    ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
-    ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
+    ///    Name of the method on the `type_name` to find. The method must be static and must match the following signature:
+    ///    `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
     pub fn load_assembly_and_get_function_with_default_signature(
         &self,
         assembly_path: &PdCStr,
         type_name: &PdCStr,
         method_name: &PdCStr,
     ) -> Result<ManagedFunctionWithDefaultSignature, GetManagedFunctionError> {
-        Self::_validate_assembly_path(assembly_path)?;
+        Self::validate_assembly_path(assembly_path)?;
         let function = unsafe {
-            self._load_assembly_and_get_function_pointer(
+            self.load_assembly_and_get_function_pointer_raw(
                 assembly_path.as_ptr(),
                 type_name.as_ptr(),
                 method_name.as_ptr(),
@@ -187,13 +187,13 @@ impl DelegateLoader {
     ///
     /// # Arguments
     ///  * `assembly_path`:
-    ///     Path to the assembly to load.
-    ///     In case of complex component, this should be the main assembly of the component (the one with the .deps.json next to it).
-    ///     Note that this does not have to be the assembly from which the `type_name` and `method_name` are.
+    ///    Path to the assembly to load.
+    ///    In case of complex component, this should be the main assembly of the component (the one with the .deps.json next to it).
+    ///    Note that this does not have to be the assembly from which the `type_name` and `method_name` are.
     ///  * `type_name`:
-    ///     Assembly qualified type name to find
+    ///    Assembly qualified type name to find
     ///  * `method_name`:
-    ///     Name of the method on the `type_name` to find. The method must be static and must match be annotated with [`\[UnmanagedCallersOnly\]`].
+    ///    Name of the method on the `type_name` to find. The method must be static and must match be annotated with [`\[UnmanagedCallersOnly\]`].
     ///
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
@@ -205,9 +205,9 @@ impl DelegateLoader {
         type_name: &PdCStr,
         method_name: &PdCStr,
     ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
-        Self::_validate_assembly_path(assembly_path)?;
+        Self::validate_assembly_path(assembly_path)?;
         let function = unsafe {
-            self._load_assembly_and_get_function_pointer(
+            self.load_assembly_and_get_function_pointer_raw(
                 assembly_path.as_ptr(),
                 type_name.as_ptr(),
                 method_name.as_ptr(),
@@ -222,11 +222,11 @@ impl DelegateLoader {
     ///
     /// # Arguments
     ///  * `type_name`:
-    ///     Assembly qualified type name to find
+    ///    Assembly qualified type name to find
     ///  * `method_name`:
-    ///     Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
+    ///    Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
     ///  * `delegate_type_name`:
-    ///     Assembly qualified delegate type name for the method signature.
+    ///    Assembly qualified delegate type name for the method signature.
     #[cfg(feature = "net5_0")]
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net5_0")))]
     pub fn get_function<F: FunctionPtr>(
@@ -236,7 +236,7 @@ impl DelegateLoader {
         delegate_type_name: &PdCStr,
     ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
         let function = unsafe {
-            self._get_function_pointer(
+            self.get_function_pointer_raw(
                 type_name.as_ptr(),
                 method_name.as_ptr(),
                 delegate_type_name.as_ptr(),
@@ -250,10 +250,10 @@ impl DelegateLoader {
     ///
     /// # Arguments
     ///  * `type_name`:
-    ///     Assembly qualified type name to find
+    ///    Assembly qualified type name to find
     ///  * `method_name`:
-    ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
-    ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
+    ///    Name of the method on the `type_name` to find. The method must be static and must match the following signature:
+    ///    `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
     #[cfg(feature = "net5_0")]
     pub fn get_function_with_default_signature(
         &self,
@@ -261,7 +261,7 @@ impl DelegateLoader {
         method_name: &PdCStr,
     ) -> Result<ManagedFunctionWithDefaultSignature, GetManagedFunctionError> {
         let function = unsafe {
-            self._get_function_pointer(type_name.as_ptr(), method_name.as_ptr(), ptr::null())
+            self.get_function_pointer_raw(type_name.as_ptr(), method_name.as_ptr(), ptr::null())
         }?;
         Ok(ManagedFunction(unsafe { FunctionPtr::from_ptr(function) }))
     }
@@ -271,9 +271,9 @@ impl DelegateLoader {
     ///
     /// # Arguments
     ///  * `type_name`:
-    ///     Assembly qualified type name to find
+    ///    Assembly qualified type name to find
     ///  * `method_name`:
-    ///     Name of the method on the `type_name` to find. The method must be static and must match be annotated with [`UnmanagedCallersOnly`].
+    ///    Name of the method on the `type_name` to find. The method must be static and must match be annotated with [`UnmanagedCallersOnly`].
     ///
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
@@ -285,7 +285,7 @@ impl DelegateLoader {
         method_name: &PdCStr,
     ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
         let function = unsafe {
-            self._get_function_pointer(
+            self.get_function_pointer_raw(
                 type_name.as_ptr(),
                 method_name.as_ptr(),
                 UNMANAGED_CALLERS_ONLY_METHOD,
@@ -325,11 +325,11 @@ impl AssemblyDelegateLoader {
     ///
     /// # Arguments
     ///  * `type_name`:
-    ///     Assembly qualified type name to find
+    ///    Assembly qualified type name to find
     ///  * `method_name`:
-    ///     Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
+    ///    Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
     ///  * `delegate_type_name`:
-    ///     Assembly qualified delegate type name for the method signature.
+    ///    Assembly qualified delegate type name for the method signature.
     pub fn get_function<F: FunctionPtr>(
         &self,
         type_name: &PdCStr,
@@ -352,10 +352,10 @@ impl AssemblyDelegateLoader {
     ///
     /// # Arguments
     ///  * `type_name`:
-    ///     Assembly qualified type name to find
+    ///    Assembly qualified type name to find
     ///  * `method_name`:
-    ///     Name of the method on the `type_name` to find. The method must be static and must match the following signature:
-    ///     `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
+    ///    Name of the method on the `type_name` to find. The method must be static and must match the following signature:
+    ///    `public delegate int ComponentEntryPoint(IntPtr args, int sizeBytes);`
     pub fn get_function_with_default_signature(
         &self,
         type_name: &PdCStr,
@@ -377,9 +377,9 @@ impl AssemblyDelegateLoader {
     ///
     /// # Arguments
     ///  * `type_name`:
-    ///     Assembly qualified type name to find
+    ///    Assembly qualified type name to find
     ///  * `method_name`:
-    ///     Name of the method on the `type_name` to find. The method must be static and must match be annotated with [`UnmanagedCallersOnly`].
+    ///    Name of the method on the `type_name` to find. The method must be static and must match be annotated with [`UnmanagedCallersOnly`].
     ///
     /// [`UnmanagedCallersOnlyAttribute`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute

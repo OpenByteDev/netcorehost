@@ -24,7 +24,7 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `app_path`:
-    ///     The path to the target application.
+    ///    The path to the target application.
     ///
     /// # Remarks
     /// This function parses the specified command-line arguments to determine the application to run. It will
@@ -50,13 +50,13 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `app_path`:
-    ///     The path to the target application.
+    ///    The path to the target application.
     ///  * `host_path`:
-    ///     Path to the native host (typically the `.exe`).
-    ///     This value is not used for anything by the hosting components.
-    ///     It's just passed to the `CoreCLR` as the path to the executable.
-    ///     It can point to a file which is not executable itself, if such file doesn't exist (for example in COM activation scenarios this points to the `comhost.dll`).
-    ///     This is used by PAL to initialize internal command line structures, process name and so on.
+    ///    Path to the native host (typically the `.exe`).
+    ///    This value is not used for anything by the hosting components.
+    ///    It's just passed to the `CoreCLR` as the path to the executable.
+    ///    It can point to a file which is not executable itself, if such file doesn't exist (for example in COM activation scenarios this points to the `comhost.dll`).
+    ///    This is used by PAL to initialize internal command line structures, process name and so on.
     ///
     /// # Remarks
     /// This function parses the specified command-line arguments to determine the application to run. It will
@@ -87,12 +87,12 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `app_path`:
-    ///     The path to the target application.
+    ///    The path to the target application.
     ///  * `dotnet_root`:
-    ///     Path to the root of the .NET Core installation in use.
-    ///     This typically points to the install location from which the hostfxr has been loaded.
-    ///     For example on Windows this would typically point to `C:\Program Files\dotnet`.
-    ///     The path is used to search for shared frameworks and potentially SDKs.
+    ///    Path to the root of the .NET Core installation in use.
+    ///    This typically points to the install location from which the hostfxr has been loaded.
+    ///    For example on Windows this would typically point to `C:\Program Files\dotnet`.
+    ///    The path is used to search for shared frameworks and potentially SDKs.
     ///
     /// # Remarks
     /// This function parses the specified command-line arguments to determine the application to run. It will
@@ -123,9 +123,9 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `app_path`:
-    ///     The path to the target application.
+    ///    The path to the target application.
     ///  * `args`:
-    ///     The command line arguments for the managed application.
+    ///    The command line arguments for the managed application.
     ///
     /// # Remarks
     /// This function parses the specified command-line arguments to determine the application to run. It will
@@ -154,15 +154,15 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `app_path`:
-    ///     The path to the target application.
+    ///    The path to the target application.
     ///  * `args`:
-    ///     The command line arguments for the managed application.
+    ///    The command line arguments for the managed application.
     ///  * `host_path`:
-    ///     Path to the native host (typically the `.exe`).
-    ///     This value is not used for anything by the hosting components.
-    ///     It's just passed to the `CoreCLR` as the path to the executable.
-    ///     It can point to a file which is not executable itself, if such file doesn't exist (for example in COM activation scenarios this points to the `comhost.dll`).
-    ///     This is used by PAL to initialize internal command line structures, process name and so on.
+    ///    Path to the native host (typically the `.exe`).
+    ///    This value is not used for anything by the hosting components.
+    ///    It's just passed to the `CoreCLR` as the path to the executable.
+    ///    It can point to a file which is not executable itself, if such file doesn't exist (for example in COM activation scenarios this points to the `comhost.dll`).
+    ///    This is used by PAL to initialize internal command line structures, process name and so on.
     ///
     /// # Remarks
     /// This function parses the specified command-line arguments to determine the application to run. It will
@@ -177,7 +177,7 @@ impl Hostfxr {
     ) -> Result<HostfxrContext<InitializedForCommandLine>, HostingError> {
         let parameters = hostfxr_initialize_parameters::with_host_path(host_path.as_ref().as_ptr());
         unsafe {
-            self.initialize_for_dotnet_command_line_with_parameters(app_path, args, &parameters)
+            self.initialize_for_dotnet_command_line_with_parameters(app_path, args, &raw const parameters)
         }
     }
 
@@ -193,14 +193,14 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `app_path`:
-    ///     The path to the target application.
+    ///    The path to the target application.
     ///  * `args`:
-    ///     The command line arguments for the managed application.
+    ///    The command line arguments for the managed application.
     ///  * `dotnet_root`:
-    ///     Path to the root of the .NET Core installation in use.
-    ///     This typically points to the install location from which the hostfxr has been loaded.
-    ///     For example on Windows this would typically point to `C:\Program Files\dotnet`.
-    ///     The path is used to search for shared frameworks and potentially SDKs.
+    ///    Path to the root of the .NET Core installation in use.
+    ///    This typically points to the install location from which the hostfxr has been loaded.
+    ///    For example on Windows this would typically point to `C:\Program Files\dotnet`.
+    ///    The path is used to search for shared frameworks and potentially SDKs.
     ///
     /// # Remarks
     /// This function parses the specified command-line arguments to determine the application to run. It will
@@ -216,7 +216,7 @@ impl Hostfxr {
         let parameters =
             hostfxr_initialize_parameters::with_dotnet_root(dotnet_root.as_ref().as_ptr());
         unsafe {
-            self.initialize_for_dotnet_command_line_with_parameters(app_path, args, &parameters)
+            self.initialize_for_dotnet_command_line_with_parameters(app_path, args, &raw const parameters)
         }
     }
 
@@ -268,8 +268,8 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `runtime_config_path`:
-    ///     Path to the `.runtimeconfig.json` file to process.
-    ///     Unlike with [`initialize_for_dotnet_command_line`], any `.deps.json` from the app/component will not be processed by the hosting layers.
+    ///    Path to the `.runtimeconfig.json` file to process.
+    ///    Unlike with [`initialize_for_dotnet_command_line`], any `.deps.json` from the app/component will not be processed by the hosting layers.
     ///
     /// [`initialize_for_dotnet_command_line`]: Hostfxr::initialize_for_dotnet_command_line
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
@@ -296,14 +296,14 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `runtime_config_path`:
-    ///     Path to the `.runtimeconfig.json` file to process.
-    ///     Unlike with [`initialize_for_dotnet_command_line`], any `.deps.json` from the app/component will not be processed by the hosting layers.
+    ///    Path to the `.runtimeconfig.json` file to process.
+    ///    Unlike with [`initialize_for_dotnet_command_line`], any `.deps.json` from the app/component will not be processed by the hosting layers.
     ///  * `host_path`:
-    ///     Path to the native host (typically the `.exe`).
-    ///     This value is not used for anything by the hosting components.
-    ///     It's just passed to the `CoreCLR` as the path to the executable.
-    ///     It can point to a file which is not executable itself, if such file doesn't exist (for example in COM activation scenarios this points to the `comhost.dll`).
-    ///     This is used by PAL to initialize internal command line structures, process name and so on.
+    ///    Path to the native host (typically the `.exe`).
+    ///    This value is not used for anything by the hosting components.
+    ///    It's just passed to the `CoreCLR` as the path to the executable.
+    ///    It can point to a file which is not executable itself, if such file doesn't exist (for example in COM activation scenarios this points to the `comhost.dll`).
+    ///    This is used by PAL to initialize internal command line structures, process name and so on.
     ///
     /// [`initialize_for_dotnet_command_line`]: Hostfxr::initialize_for_dotnet_command_line
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
@@ -314,7 +314,7 @@ impl Hostfxr {
     ) -> Result<HostfxrContext<InitializedForRuntimeConfig>, HostingError> {
         let parameters = hostfxr_initialize_parameters::with_host_path(host_path.as_ref().as_ptr());
         unsafe {
-            self.initialize_for_runtime_config_with_parameters(runtime_config_path, &parameters)
+            self.initialize_for_runtime_config_with_parameters(runtime_config_path, &raw const parameters)
         }
     }
     /// This function loads the specified `.runtimeconfig.json`, resolve all frameworks, resolve all the assets from those frameworks and
@@ -331,13 +331,13 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `runtime_config_path`:
-    ///     Path to the `.runtimeconfig.json` file to process.
-    ///     Unlike with [`initialize_for_dotnet_command_line`], any `.deps.json` from the app/component will not be processed by the hosting layers.
+    ///    Path to the `.runtimeconfig.json` file to process.
+    ///    Unlike with [`initialize_for_dotnet_command_line`], any `.deps.json` from the app/component will not be processed by the hosting layers.
     ///  * `dotnet_root`:
-    ///     Path to the root of the .NET Core installation in use.
-    ///     This typically points to the install location from which the hostfxr has been loaded.
-    ///     For example on Windows this would typically point to `C:\Program Files\dotnet`.
-    ///     The path is used to search for shared frameworks and potentially SDKs.
+    ///    Path to the root of the .NET Core installation in use.
+    ///    This typically points to the install location from which the hostfxr has been loaded.
+    ///    For example on Windows this would typically point to `C:\Program Files\dotnet`.
+    ///    The path is used to search for shared frameworks and potentially SDKs.
     ///
     /// [`initialize_for_dotnet_command_line`]: Hostfxr::initialize_for_dotnet_command_line
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
@@ -349,7 +349,7 @@ impl Hostfxr {
         let parameters =
             hostfxr_initialize_parameters::with_dotnet_root(dotnet_root.as_ref().as_ptr());
         unsafe {
-            self.initialize_for_runtime_config_with_parameters(runtime_config_path, &parameters)
+            self.initialize_for_runtime_config_with_parameters(runtime_config_path, &raw const parameters)
         }
     }
 

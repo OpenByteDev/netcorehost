@@ -18,7 +18,7 @@ pub fn get_hostfxr_path_with_assembly_path<P: AsRef<PdCStr>>(
     assembly_path: P,
 ) -> Result<OsString, HostingError> {
     let parameters = get_hostfxr_parameters::with_assembly_path(assembly_path.as_ref().as_ptr());
-    unsafe { get_hostfxr_path_with_parameters(&parameters) }
+    unsafe { get_hostfxr_path_with_parameters(&raw const parameters) }
 }
 
 /// Gets the path to the hostfxr library.
@@ -28,7 +28,7 @@ pub fn get_hostfxr_path_with_dotnet_root<P: AsRef<PdCStr>>(
     dotnet_root: P,
 ) -> Result<OsString, HostingError> {
     let parameters = get_hostfxr_parameters::with_dotnet_root(dotnet_root.as_ref().as_ptr());
-    unsafe { get_hostfxr_path_with_parameters(&parameters) }
+    unsafe { get_hostfxr_path_with_parameters(&raw const parameters) }
 }
 
 unsafe fn get_hostfxr_path_with_parameters(
@@ -40,7 +40,7 @@ unsafe fn get_hostfxr_path_with_parameters(
     let result = unsafe {
         crate::bindings::nethost::get_hostfxr_path(
             path_buffer.as_mut_ptr().cast(),
-            &mut path_length,
+            &raw mut path_length,
             parameters,
         )
     };
@@ -58,7 +58,7 @@ unsafe fn get_hostfxr_path_with_parameters(
             let result = unsafe {
                 crate::bindings::nethost::get_hostfxr_path(
                     path_vec[0].as_mut_ptr().cast(),
-                    &mut path_length,
+                    &raw mut path_length,
                     parameters,
                 )
             };

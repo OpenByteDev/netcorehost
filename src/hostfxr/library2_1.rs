@@ -24,13 +24,13 @@ impl Hostfxr {
     ///
     /// # Arguments
     ///  * `app_path`
-    ///     path to the application to run
+    ///    path to the application to run
     ///  * `args`
-    ///     command-line arguments
+    ///    command-line arguments
     ///  * `host_path`
-    ///     path to the host application
+    ///    path to the host application
     ///  * `dotnet_root`
-    ///     path to the .NET Core installation root
+    ///    path to the .NET Core installation root
     ///
     /// This function does not return until the application completes execution.
     /// It will shutdown CoreCLR after the application executes.
@@ -108,18 +108,18 @@ impl Hostfxr {
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
     #[must_use]
     pub fn get_available_sdks(&self) -> Vec<PathBuf> {
-        self._get_available_sdks(None)
+        self.get_available_sdks_raw(None)
     }
 
     /// Get the list of all available SDKs ordered by ascending version, based on the provided `dotnet` executable.
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
     #[must_use]
     pub fn get_available_sdks_with_dotnet_path(&self, dotnet_path: &PdCStr) -> Vec<PathBuf> {
-        self._get_available_sdks(Some(dotnet_path))
+        self.get_available_sdks_raw(Some(dotnet_path))
     }
 
     #[must_use]
-    fn _get_available_sdks(&self, dotnet_path: Option<&PdCStr>) -> Vec<PathBuf> {
+    fn get_available_sdks_raw(&self, dotnet_path: Option<&PdCStr>) -> Vec<PathBuf> {
         let dotnet_path = dotnet_path.map_or_else(ptr::null, |s| s.as_ptr());
         unsafe {
             self.lib
@@ -161,7 +161,7 @@ impl Hostfxr {
                 args.as_ptr(),
                 buffer.spare_capacity_mut().as_mut_ptr().cast(),
                 buffer.spare_capacity_mut().len().try_into().unwrap(),
-                &mut required_buffer_size,
+                &raw mut required_buffer_size,
             )
         }
         .unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);

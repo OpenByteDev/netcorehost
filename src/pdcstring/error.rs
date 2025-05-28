@@ -45,7 +45,7 @@ impl From<widestring::error::ContainsNul<PdUChar>> for ContainsNul {
 }
 
 impl Error for ContainsNul {
-    fn description(&self) -> &str {
+    fn description(&self) -> &'static str {
         "nul value found in data"
     }
 }

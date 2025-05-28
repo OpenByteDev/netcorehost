@@ -79,7 +79,7 @@ impl<I> HostfxrContext<I> {
         match HostingResult::from(result).into_result() {
             Ok(_) | Err(HostingError::HostApiBufferTooSmall) => {}
             Err(e) => return Err(e),
-        };
+        }
 
         // get values / fill buffer
         let mut count = unsafe { count.assume_init() };
@@ -88,7 +88,7 @@ impl<I> HostfxrContext<I> {
         result = unsafe {
             self.library().hostfxr_get_runtime_properties(
                 self.handle().as_raw(),
-                &mut count,
+                &raw mut count,
                 keys.as_mut_ptr(),
                 values.as_mut_ptr(),
             )
