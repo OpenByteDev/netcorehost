@@ -144,7 +144,7 @@ impl FromResidual for HostingResult {
 #[derive(Debug, PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Hash, Display)]
 pub enum HostingSuccess {
     /// Operation was successful.
-    #[display(fmt = "Operation was successful.")]
+    #[display("Operation was successful.")]
     Success,
 
     /// Initialization was successful, but another host context is already initialized, so the returned context is "secondary".
@@ -152,7 +152,7 @@ pub enum HostingSuccess {
     /// This is returned by `hostfxr_initialize_for_runtime_config` if it's called when the host is already initialized in the process.
     /// Comes from `corehost_initialize` in `hostpolicy`.
     #[display(
-        fmt = "Initialization was successful, but another host context is already initialized, so the returned context is 'secondary'"
+        "Initialization was successful, but another host context is already initialized, so the returned context is 'secondary'"
     )]
     HostAlreadyInitialized,
 
@@ -160,12 +160,12 @@ pub enum HostingSuccess {
     /// This is returned by `hostfxr_initialize_for_runtime_config` if it's called when the host is already initialized in the process.
     /// Comes from `corehost_initialize` in `hostpolicy`.
     #[display(
-        fmt = "Initialization was successful, but another host context is already initialized and the requested context specified some runtime properties which are not the same (either in value or in presence) to the already initialized context."
+        "Initialization was successful, but another host context is already initialized and the requested context specified some runtime properties which are not the same (either in value or in presence) to the already initialized context."
     )]
     DifferentRuntimeProperties,
 
     /// Unknown success status code.
-    #[display(fmt = "Unknown success status code: {_0:#08X}")]
+    #[display("Unknown success status code: {_0:#08X}")]
     Unknown(u32),
 }
 
@@ -243,7 +243,7 @@ impl From<HostingSuccess> for u32 {
 #[must_use]
 pub enum HostingError {
     /// One of the specified arguments for the operation is invalid.
-    #[display(fmt = "One of the specified arguments for the operation is invalid.")]
+    #[display("One of the specified arguments for the operation is invalid.")]
     InvalidArgFailure,
 
     /// There was a failure loading a dependent library.
@@ -251,17 +251,17 @@ pub enum HostingError {
     /// The most common case for this failure is if the dependent library is missing some of its dependencies (for example the necessary CRT is missing on the machine), likely corrupt or incomplete install.
     /// This error code is also returned from `corehost_resolve_component_dependencies` if it's called on a `hostpolicy` which has not been initialized via the hosting layer.
     /// This would typically happen if `coreclr` is loaded directly without the hosting layer and then `AssemblyDependencyResolver` is used (which is an unsupported scenario).
-    #[display(fmt = "There was a failure loading a dependent library.")]
+    #[display("There was a failure loading a dependent library.")]
     CoreHostLibLoadFailure,
 
     /// One of the dependent libraries is missing.
     /// Typically when the `hostfxr`, `hostpolicy` or `coreclr` dynamic libraries are not present in the expected locations.
     /// Probably means corrupted or incomplete installation.
-    #[display(fmt = "One of the dependent libraries is missing.")]
+    #[display("One of the dependent libraries is missing.")]
     CoreHostLibMissingFailure,
 
     /// One of the dependent libraries is missing a required entry point.
-    #[display(fmt = "One of the dependent libraries is missing a required entry point.")]
+    #[display("One of the dependent libraries is missing a required entry point.")]
     CoreHostEntryPointFailure,
 
     /// If the hosting component is trying to use the path to the current module (the hosting component itself) and from it deduce the location of the installation.
@@ -269,7 +269,7 @@ pub enum HostingError {
     /// For example the `hostfxr` may look at its location and try to deduce the location of the `shared` folder with the framework from it.
     /// It assumes the typical install layout on disk. If this doesn't work, this error will be returned.
     #[display(
-        fmt = "Either the location of the current module could not be determined (some weird OS call failure) or the location is not in the right place relative to other expected components."
+        "Either the location of the current module could not be determined (some weird OS call failure) or the location is not in the right place relative to other expected components."
     )]
     CoreHostCurHostFindFailure,
 
@@ -277,39 +277,39 @@ pub enum HostingError {
     /// The hosting layer (`hostpolicy`) looks for `coreclr` library either next to the app itself (for self-contained) or in the root framework (for framework-dependent).
     /// This search can be done purely by looking at disk or more commonly by looking into the respective `.deps.json`.
     /// If the `coreclr` library is missing in `.deps.json` or it's there but doesn't exist on disk, this error is returned.
-    #[display(fmt = "The coreclr library could not be found.")]
+    #[display("The coreclr library could not be found.")]
     CoreClrResolveFailure,
 
     /// The loaded `coreclr` library doesn't have one of the required entry points.
-    #[display(fmt = "The loaded coreclr library doesn't have one of the required entry points.")]
+    #[display("The loaded coreclr library doesn't have one of the required entry points.")]
     CoreClrBindFailure,
 
     /// The call to `coreclr_initialize` failed.
     /// The actual error returned by `coreclr` is reported in the error message.
-    #[display(fmt = "The call to coreclr_initialize failed.")]
+    #[display("The call to coreclr_initialize failed.")]
     CoreClrInitFailure,
 
     /// The call to `coreclr_execute_assembly` failed.
     /// Note that this does not mean anything about the app's exit code, this failure occurs if `coreclr` failed to run the app itself.
-    #[display(fmt = "The call to coreclr_execute_assembly failed.")]
+    #[display("The call to coreclr_execute_assembly failed.")]
     CoreClrExeFailure,
 
     /// Initialization of the `hostpolicy` dependency resolver failed.
     /// This can be:
     ///  - One of the frameworks or the app is missing a required `.deps.json` file.
     ///  - One of the `.deps.json` files is invalid (invalid JSON, or missing required properties and so on).
-    #[display(fmt = "Initialization of the hostpolicy dependency resolver failed.")]
+    #[display("Initialization of the hostpolicy dependency resolver failed.")]
     ResolverInitFailure,
 
     /// Resolution of dependencies in `hostpolicy` failed.
     /// This can mean many different things, but in general one of the processed `.deps.json` contains entry for a file which could not found, or its resolution failed for some other reason (conflict for example).
-    #[display(fmt = "Resolution of dependencies in `hostpolicy` failed.")]
+    #[display("Resolution of dependencies in `hostpolicy` failed.")]
     ResolverResolveFailure,
 
     /// Failure to determine the location of the current executable.
     /// The hosting layer uses the current executable path to deduce the install location in some cases.
     /// If this path can't be obtained (OS call fails, or the returned path doesn't exist), this error is returned.
-    #[display(fmt = "Failure to determine the location of the current executable.")]
+    #[display("Failure to determine the location of the current executable.")]
     LibHostCurExeFindFailure,
 
     /// Initialization of the `hostpolicy` library failed.
@@ -317,12 +317,12 @@ pub enum HostingError {
     /// If the version of this structure doesn't match the expected value, this error code is returned.
     /// This would in general mean incompatibility between the `hostfxr` and `hostpolicy`, which should really only happen if somehow a newer `hostpolicy` is used by older `hostfxr`.
     /// This typically means corrupted installation.
-    #[display(fmt = "Initialization of the `hostpolicy` library failed.")]
+    #[display("Initialization of the `hostpolicy` library failed.")]
     LibHostInitFailure,
 
     // Error only present in `error_codes.h` not in `host-error-codes.md`
     #[doc(hidden)]
-    #[display(fmt = "LibHostExecModeFailure")]
+    #[display("LibHostExecModeFailure")]
     LibHostExecModeFailure,
 
     /// Failure to find the requested SDK.
@@ -330,7 +330,7 @@ pub enum HostingError {
     /// In this case the hosting layer tries to find an installed .NET SDK to run the command on.
     /// The search is based on deduced install location and on the requested version from potential `global.json` file.
     /// If either no matching SDK version can be found, or that version exists, but it's missing the `dotnet.dll` file, this error code is returned.
-    #[display(fmt = "Failure to find the requested SDK.")]
+    #[display("Failure to find the requested SDK.")]
     LibHostSdkFindFailure,
 
     /// Arguments to `hostpolicy` are invalid.
@@ -342,7 +342,7 @@ pub enum HostingError {
     ///    Again this would mean `hostfxr` passed the wrong value.
     ///  - `corehost_resolve_component_dependencies` - if something went wrong initializing `hostpolicy` internal structures.
     ///    Would happen for example when the `component_main_assembly_path` argument is wrong.
-    #[display(fmt = "Arguments to hostpolicy are invalid.")]
+    #[display("Arguments to hostpolicy are invalid.")]
     LibHostInvalidArgs,
 
     /// The `.runtimeconfig.json` file is invalid.
@@ -356,7 +356,7 @@ pub enum HostingError {
     ///  - Self-contained `.runtimeconfig.json` used in `hostfxr_initialize_for_runtime_config`.
     ///    Note that missing `.runtimconfig.json` is not an error (means self-contained app).
     ///    This error code is also used when there is a problem reading the CLSID map file in `comhost`.
-    #[display(fmt = "Arguments to hostpolicy are invalid.")]
+    #[display("Arguments to hostpolicy are invalid.")]
     InvalidConfigFile,
 
     /// Used internally when the command line for `dotnet.exe` doesn't contain path to the application to run.
@@ -364,7 +364,7 @@ pub enum HostingError {
     /// This error code should never be returned to external caller.
     #[doc(hidden)]
     #[display(
-        fmt = "[Internal error] The command line for dotnet.exe doesn't contain the path to the application to run."
+        "[Internal error] The command line for dotnet.exe doesn't contain the path to the application to run."
     )]
     AppArgNotRunnable,
 
@@ -372,7 +372,7 @@ pub enum HostingError {
     /// This can mean:
     ///  - The `apphost` binary has not been imprinted with the path to the app to run (so freshly built `apphost.exe` from the branch will fail to run like this)
     ///  - The `apphost` is a bundle (single-file exe) and it failed to extract correctly.
-    #[display(fmt = "apphost failed to determine which application to run.")]
+    #[display("apphost failed to determine which application to run.")]
     AppHostExeNotBoundFailure,
 
     /// It was not possible to find a compatible framework version.
@@ -380,11 +380,11 @@ pub enum HostingError {
     /// The failure to resolve can mean that no such framework is available on the disk, or that the available frameworks don't match the minimum version specified or that the roll forward options specified excluded all available frameworks.
     /// Typically this would be used if a 3.0 app is trying to run on a machine which has no 3.0 installed.
     /// It would also be used for example if a 32bit 3.0 app is running on a machine which has 3.0 installed but only for 64bit.
-    #[display(fmt = "It was not possible to find a compatible framework version.")]
+    #[display("It was not possible to find a compatible framework version.")]
     FrameworkMissingFailure,
 
     /// Returned by `hostfxr_get_native_search_directories` if the `hostpolicy` could not calculate the `NATIVE_DLL_SEARCH_DIRECTORIES`.
-    #[display(fmt = "hostpolicy could not calculate the NATIVE_DLL_SEARCH_DIRECTORIES.")]
+    #[display("hostpolicy could not calculate the NATIVE_DLL_SEARCH_DIRECTORIES.")]
     HostApiFailed,
 
     /// Returned when the buffer specified to an API is not big enough to fit the requested value.
@@ -393,7 +393,7 @@ pub enum HostingError {
     ///  - `hostfxr_get_native_search_directories`
     ///  - `get_hostfxr_path`
     #[display(
-        fmt = "Returned when the buffer specified to an API is not big enough to fit the requested value."
+        "Returned when the buffer specified to an API is not big enough to fit the requested value."
     )]
     HostApiBufferTooSmall,
 
@@ -401,18 +401,18 @@ pub enum HostingError {
     /// This error code means there is incompatibility between the `hostfxr` and `hostpolicy`.
     /// In reality this should pretty much never happen.
     #[display(
-        fmt = "corehost_main_with_output_buffer was called with an unsupported host command."
+        "corehost_main_with_output_buffer was called with an unsupported host command."
     )]
     LibHostUnknownCommand,
 
     /// Returned by `apphost` if the imprinted application path doesn't exist.
     /// This would happen if the app is built with an executable (the `apphost`) and the main `app.dll` is missing.
-    #[display(fmt = "The imprinted application path doesn't exist.")]
+    #[display("The imprinted application path doesn't exist.")]
     LibHostAppRootFindFailure,
 
     /// Returned from `hostfxr_resolve_sdk2` when it fails to find matching SDK.
     /// Similar to `LibHostSdkFindFailure` but only used in the `hostfxr_resolve_sdk2`.
-    #[display(fmt = "hostfxr_resolve_sdk2 failed to find a matching SDK.")]
+    #[display("hostfxr_resolve_sdk2 failed to find a matching SDK.")]
     SdkResolverResolveFailure,
 
     /// During processing of `.runtimeconfig.json` there were two framework references to the same framework which were not compatible.
@@ -420,7 +420,7 @@ pub enum HostingError {
     /// For example, this would happen if the app referenced `Microsoft.AspNet.App` version 2.0 and `Microsoft.NETCore.App` version 3.0. In such case the `Microsoft.AspNet.App` has `.runtimeconfig.json` which also references `Microsoft.NETCore.App` but it only allows versions 2.0 up to 2.9 (via roll forward options).
     /// So the version 3.0 requested by the app is incompatible.
     #[display(
-        fmt = "During processing of `.runtimeconfig.json` there were two framework references to the same framework which were not compatible."
+        "During processing of `.runtimeconfig.json` there were two framework references to the same framework which were not compatible."
     )]
     FrameworkCompatFailure,
 
@@ -428,24 +428,24 @@ pub enum HostingError {
     /// If this error is returned to the external caller, it would mean there's a bug in the framework resolution algorithm.
     #[doc(hidden)]
     #[display(
-        fmt = "[Internal error] The processing of framework references from .runtimeconfig.json reached a point where it needs to reprocess another already processed framework reference."
+        "[Internal error] The processing of framework references from .runtimeconfig.json reached a point where it needs to reprocess another already processed framework reference."
     )]
     FrameworkCompatRetry,
 
     /// Error reading the bundle footer metadata from a single-file `apphost`.
     /// This would mean a corrupted `apphost`.
-    #[display(fmt = "Error reading the bundle footer metadata from a single-file apphost.")]
+    #[display("Error reading the bundle footer metadata from a single-file apphost.")]
     AppHostExeNotBundle,
 
     /// Error extracting single-file `apphost` bundle.
     /// This is used in case of any error related to the bundle itself.
     /// Typically would mean a corrupted bundle.
-    #[display(fmt = "Error extracting single-file apphost bundle.")]
+    #[display("Error extracting single-file apphost bundle.")]
     BundleExtractionFailure,
 
     /// Error reading or writing files during single-file `apphost` bundle extraction.
     #[display(
-        fmt = "Error reading or writing files during single-file apphost bundle extraction."
+        "Error reading or writing files during single-file apphost bundle extraction."
     )]
     BundleExtractionIOError,
 
@@ -453,46 +453,46 @@ pub enum HostingError {
     /// For example if the `.runtimeconfig.json` would specify a property `TRUSTED_PLATFORM_ROOTS`, this error code would be returned.
     /// It is not allowed to specify properties which are otherwise populated by the hosting layer (`hostpolicy`) as there is not good way to resolve such conflicts.
     #[display(
-        fmt = "The .runtimeconfig.json specified by the app contains a runtime property which is also produced by the hosting layer."
+        "The .runtimeconfig.json specified by the app contains a runtime property which is also produced by the hosting layer."
     )]
     LibHostDuplicateProperty,
 
     /// Feature which requires certain version of the hosting layer binaries was used on a version which doesn't support it.
     /// For example if COM component specified to run on 2.0 `Microsoft.NETCore.App` - as that contains older version of `hostpolicy` which doesn't support the necessary features to provide COM services.
     #[display(
-        fmt = "Feature which requires certain version of the hosting layer binaries was used on a version which doesn't support it."
+        "Feature which requires certain version of the hosting layer binaries was used on a version which doesn't support it."
     )]
     HostApiUnsupportedVersion,
 
     /// Error code returned by the hosting APIs in `hostfxr` if the current state is incompatible with the requested operation.
     /// There are many such cases, please refer to the documentation of the hosting APIs for details.
     /// For example if `hostfxr_get_runtime_property_value` is called with the `host_context_handle` `nullptr` (meaning get property from the active runtime) but there's no active runtime in the process.
-    #[display(fmt = "The current state is incompatible with the requested operation.")]
+    #[display("The current state is incompatible with the requested operation.")]
     HostInvalidState,
 
     /// Property requested by `hostfxr_get_runtime_property_value` doesn't exist.
-    #[display(fmt = "Property requested by hostfxr_get_runtime_property_value doesn't exist.")]
+    #[display("Property requested by hostfxr_get_runtime_property_value doesn't exist.")]
     HostPropertyNotFound,
 
     /// Error returned by `hostfxr_initialize_for_runtime_config` if the component being initialized requires framework which is not available or incompatible with the frameworks loaded by the runtime already in the process.
     /// For example trying to load a component which requires 3.0 into a process which is already running a 2.0 runtime.
     #[display(
-        fmt = "Error returned by hostfxr_initialize_for_runtime_config if the component being initialized requires framework which is not available or incompatible with the frameworks loaded by the runtime already in the process."
+        "Error returned by hostfxr_initialize_for_runtime_config if the component being initialized requires framework which is not available or incompatible with the frameworks loaded by the runtime already in the process."
     )]
     CoreHostIncompatibleConfig,
 
     /// Error returned by `hostfxr_get_runtime_delegate` when `hostfxr` doesn't currently support requesting the given delegate type using the given context.
     #[display(
-        fmt = "Requesting the given delegate type using the given context is currently not supported."
+        "Requesting the given delegate type using the given context is currently not supported."
     )]
     HostApiUnsupportedScenario,
 
     /// Error returned by `hostfxr_get_runtime_delegate` when managed feature support for native host is disabled.
-    #[display(fmt = "Managed feature support for native hosting is disabled")]
+    #[display("Managed feature support for native hosting is disabled")]
     HostFeatureDisabled,
 
     /// Unknown error status code.
-    #[display(fmt = "Unknown error status code: {_0:#08X}")]
+    #[display("Unknown error status code: {_0:#08X}")]
     Unknown(u32),
 }
 

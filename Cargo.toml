@@ -13,18 +13,17 @@ keywords = ["nethost", "hostfxr", "dotnet", "bindings", "coreclr"]
 
 [dependencies]
 num_enum = { version = "0.7", default-features = false }
-thiserror = { version = "1.0", default-features = false }
-derive_more = { version = "0.99", features = ["deref", "from", "display"], default-features = false }
-hostfxr-sys = { version = "0.11", features = ["enum-map", "undocumented", "wrapper", "optional-apis"], default-features = false }
+thiserror = { version = "2.0", default-features = false }
+derive_more = { version = "2.0", features = ["deref", "from", "display"], default-features = false }
 coreclr-hosting-shared = { version = "0.1", default-features = false }
 destruct-drop = { version = "0.2", default-features = false }
 ffi-opaque = { version = "2.0", default-features = false }
 enum-map = { version = "2.7", default-features = false }
-once_cell = { version = "1.19", default-features = false }
+once_cell = { version = "1.21", default-features = false }
 nethost-sys = { version = "0.7", optional = true, default-features = false }
 
 [target.'cfg(windows)'.dependencies]
-widestring = { version = "1.1", features = ["std"], default-features = false }
+widestring = { version = "1.2", features = ["std"], default-features = false }
 
 [target.'cfg(not(windows))'.dependencies]
 cstr = { version = "0.2", default-features = false }
@@ -33,7 +32,7 @@ cstr = { version = "0.2", default-features = false }
 trybuild = "1.0"
 current_platform = "0.2"
 glob = "0.3"
-widestring = "1.1"
+widestring = "1.2"
 rusty-fork = "0.3"
 path-absolutize = "3.1"
 
