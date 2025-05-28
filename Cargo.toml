@@ -50,8 +50,9 @@ net5_0 = ["hostfxr-sys/net5_0", "netcore3_0"]
 net6_0 = ["hostfxr-sys/net6_0", "net5_0"]
 net7_0 = ["hostfxr-sys/net7_0", "net6_0"]
 net8_0 = ["hostfxr-sys/net8_0", "net7_0"]
-net9_0 = ["hostfxr-sys/net8_0", "net8_0"]
-latest = ["hostfxr-sys/latest", "net9_0"]
+net9_0 = ["hostfxr-sys/net9_0", "net8_0"]
+net10_0 = ["hostfxr-sys/net10_0", "net9_0"]
+latest = ["hostfxr-sys/latest", "net10_0"]
 
 # Prevent downloading nethost library when building on docs.rs.
 [package.metadata.docs.rs]
