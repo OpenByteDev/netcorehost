@@ -34,7 +34,7 @@ pub fn get_hostfxr_path_with_dotnet_root<P: AsRef<PdCStr>>(
 unsafe fn get_hostfxr_path_with_parameters(
     parameters: *const get_hostfxr_parameters,
 ) -> Result<OsString, HostingError> {
-    let mut path_buffer = maybe_uninit_uninit_array::<PdUChar, MAX_PATH>();
+    let mut path_buffer = [const { MaybeUninit::<PdUChar>::uninit() }; MAX_PATH];
     let mut path_length = path_buffer.len();
 
     let result = unsafe {
@@ -114,19 +114,10 @@ pub enum LoadHostfxrError {
 const unsafe fn maybe_uninit_slice_assume_init_ref<T>(slice: &[MaybeUninit<T>]) -> &[T] {
     #[cfg(feature = "nightly")]
     unsafe {
-        MaybeUninit::slice_assume_init_ref(slice)
+        slice.assume_init_ref()
     }
     #[cfg(not(feature = "nightly"))]
     unsafe {
         &*(std::ptr::from_ref::<[MaybeUninit<T>]>(slice) as *const [T])
-    }
-}
-
-fn maybe_uninit_uninit_array<T, const LEN: usize>() -> [MaybeUninit<T>; LEN] {
-    #[cfg(feature = "nightly")]
-    return MaybeUninit::<T>::uninit_array::<LEN>();
-    #[cfg(not(feature = "nightly"))]
-    unsafe {
-        MaybeUninit::<[MaybeUninit<T>; LEN]>::uninit().assume_init()
     }
 }

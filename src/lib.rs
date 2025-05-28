@@ -1,6 +1,6 @@
 #![cfg_attr(
     feature = "nightly",
-    feature(try_trait_v2, maybe_uninit_uninit_array, maybe_uninit_slice)
+    feature(try_trait_v2, maybe_uninit_slice)
 )]
 #![cfg_attr(feature = "doc-cfg", feature(doc_cfg))]
 #![warn(clippy::pedantic, clippy::cargo, unsafe_op_in_unsafe_fn, missing_docs)]
