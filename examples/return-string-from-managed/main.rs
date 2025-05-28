@@ -2,17 +2,14 @@
 
 use core::slice;
 use std::{
-    ffi::{CStr, CString},
-    mem::{self, MaybeUninit},
-    os::raw::c_char,
-    str::Utf8Error,
-    string::FromUtf16Error,
+    ffi::{CStr, CString}, mem::{self, MaybeUninit}, os::raw::c_char, str::Utf8Error, string::FromUtf16Error,
 };
 
 use netcorehost::{
     hostfxr::{AssemblyDelegateLoader, ManagedFunction},
     nethost, pdcstr,
 };
+use once_cell::sync::OnceCell;
 
 fn main() {
     let hostfxr = nethost::load_hostfxr().unwrap();
@@ -69,7 +66,7 @@ fn print_string_from_csharp_using_unmanaged_alloc(delegate_loader: &AssemblyDele
             pdcstr!("FreeUnmanagedMemory"),
         )
         .unwrap();
-    unsafe { FREE_H_GLOBAL = Some(free_h_global) };
+    FREE_H_GLOBAL.set(free_h_global).ok().expect("string interop already init");
 
     // actual usage
     let get_name = delegate_loader
@@ -83,8 +80,7 @@ fn print_string_from_csharp_using_unmanaged_alloc(delegate_loader: &AssemblyDele
     println!("{}", name.as_str().unwrap());
 }
 
-// use OnceCell or similar instead if possible.
-static mut FREE_H_GLOBAL: Option<ManagedFunction<extern "system" fn(*const u8)>> = None;
+static FREE_H_GLOBAL: OnceCell<ManagedFunction<extern "system" fn(*const u8)>> = OnceCell::new();
 
 struct HGlobalString {
     ptr: *const u8,
@@ -113,7 +109,7 @@ impl HGlobalString {
 
 impl Drop for HGlobalString {
     fn drop(&mut self) {
-        unsafe { FREE_H_GLOBAL.as_ref() }.expect("string interop not init")(self.ptr);
+       FREE_H_GLOBAL.get().expect("string interop not init")(self.ptr);
     }
 }
 
@@ -126,7 +122,7 @@ fn print_string_from_csharp_using_gc_handle(delegate_loader: &AssemblyDelegateLo
             pdcstr!("FreeGCHandleString"),
         )
         .unwrap();
-    unsafe { FREE_GC_HANDLE_STRING = Some(free_gc_handle_string) };
+    FREE_GC_HANDLE_STRING.set(free_gc_handle_string).ok().expect("string interop already init");
 
     let get_string_data_offset = delegate_loader
         .get_function_with_unmanaged_callers_only::<fn() -> usize>(
@@ -135,7 +131,7 @@ fn print_string_from_csharp_using_gc_handle(delegate_loader: &AssemblyDelegateLo
         )
         .unwrap();
     let string_data_offset = get_string_data_offset();
-    unsafe { STRING_DATA_OFFSET = Some(string_data_offset) };
+    STRING_DATA_OFFSET.set(string_data_offset).expect("string interop already init");
 
     // actual usage
     let get_name = delegate_loader
@@ -149,10 +145,9 @@ fn print_string_from_csharp_using_gc_handle(delegate_loader: &AssemblyDelegateLo
     println!("{}", name.to_string_lossy());
 }
 
-// use OnceCell or similar instead if possible.
-static mut FREE_GC_HANDLE_STRING: Option<ManagedFunction<extern "system" fn(*const *const u16)>> =
-    None;
-static mut STRING_DATA_OFFSET: Option<usize> = None;
+static FREE_GC_HANDLE_STRING: OnceCell<ManagedFunction<extern "system" fn(*const *const u16)>> =
+    OnceCell::new();
+static STRING_DATA_OFFSET: OnceCell<usize> = OnceCell::new();
 
 struct GcHandleString(*const *const u16);
 
@@ -163,12 +158,13 @@ impl GcHandleString {
     pub fn data_ptr(&self) -> *const u16 {
         // convert the handle pointer to the actual string pointer by removing the mark.
         let unmarked_ptr = (self.0 as usize & !1usize) as *const *const u16;
-        (unsafe { *unmarked_ptr } as usize
-            + unsafe { STRING_DATA_OFFSET }.expect("string interop not init")) as *const u16
+        let string_ptr = unsafe { *unmarked_ptr };
+        let string_data_offset = *STRING_DATA_OFFSET.get().expect("string interop not init");
+        return unsafe { string_ptr.byte_add(string_data_offset) }.cast::<u16>();
     }
     pub fn len(&self) -> usize {
         // read the length of the string which is stored in front of the data.
-        let len_ptr = (self.data_ptr() as usize - mem::size_of::<i32>()) as *const i32;
+        let len_ptr = unsafe { self.data_ptr().byte_sub(mem::size_of::<i32>()) }.cast::<i32>();
         unsafe { *len_ptr as usize }
     }
     pub fn wide_chars(&self) -> &[u16] {
@@ -185,7 +181,7 @@ impl GcHandleString {
 
 impl Drop for GcHandleString {
     fn drop(&mut self) {
-        unsafe { FREE_GC_HANDLE_STRING.as_ref() }.expect("string interop not init")(self.0);
+        FREE_GC_HANDLE_STRING.get().expect("string interop not init")(self.0);
     }
 }
 
