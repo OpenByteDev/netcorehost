@@ -27,7 +27,7 @@ rusty_fork_test! {
         assert!(invalid_method_name.is_err());
         assert_eq!(
             invalid_method_name.unwrap_err(),
-            GetManagedFunctionError::MissingMethod
+            GetManagedFunctionError::TypeOrMethodNotFound
         );
 
         let invalid_method_signature = fn_loader
@@ -35,7 +35,7 @@ rusty_fork_test! {
         assert!(invalid_method_signature.is_err());
         assert_eq!(
             invalid_method_signature.unwrap_err(),
-            GetManagedFunctionError::MissingMethod
+            GetManagedFunctionError::TypeOrMethodNotFound
         );
 
         let invalid_type_name = fn_loader.get_function_with_default_signature(
@@ -45,7 +45,7 @@ rusty_fork_test! {
         assert!(invalid_type_name.is_err());
         assert_eq!(
             invalid_type_name.unwrap_err(),
-            GetManagedFunctionError::MissingMethod
+            GetManagedFunctionError::TypeOrMethodNotFound
         );
 
         let invalid_namespace_name = fn_loader.get_function_with_default_signature(
@@ -55,7 +55,7 @@ rusty_fork_test! {
         assert!(invalid_namespace_name.is_err());
         assert_eq!(
             invalid_namespace_name.unwrap_err(),
-            GetManagedFunctionError::MissingMethod
+            GetManagedFunctionError::TypeOrMethodNotFound
         );
 
         let invalid_assembly_name = fn_loader.get_function_with_default_signature(
@@ -86,7 +86,7 @@ rusty_fork_test! {
         assert!(invalid_delegate_type_name.is_err());
         assert_eq!(
             invalid_delegate_type_name.unwrap_err(),
-            GetManagedFunctionError::TypeNotFound
+            GetManagedFunctionError::TypeOrMethodNotFound
         );
 
         context.close().unwrap();

@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <AssemblyName>ClassLibrary</AssemblyName>
         <TargetFrameworks>net9.0</TargetFrameworks>
     </PropertyGroup>
 

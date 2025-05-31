@@ -27,8 +27,7 @@ pub fn test_project_file_path() -> PathBuf {
 pub fn test_runtime_config_path() -> PdCString {
     PdCString::from_os_str(
         PathBuf::from_str(&format!(
-            "tests/Test/bin/Debug/{}/Test-{}.runtimeconfig.json",
-            test_netcore_version(),
+            "tests/Test/bin/Debug/{}/Test.runtimeconfig.json",
             test_netcore_version()
         ))
         .unwrap()
@@ -42,8 +41,7 @@ pub fn test_runtime_config_path() -> PdCString {
 pub fn test_dll_path() -> PdCString {
     PdCString::from_os_str(
         PathBuf::from_str(&format!(
-            "tests/Test/bin/Debug/{}/Test-{}.dll",
-            test_netcore_version(),
+            "tests/Test/bin/Debug/{}/Test.dll",
             test_netcore_version()
         ))
         .unwrap()
@@ -56,7 +54,7 @@ pub fn test_dll_path() -> PdCString {
 
 pub fn library_project_file_path() -> PathBuf {
     PathBuf::from_str(&format!(
-            "tests/ClassLibrary/ClassLibrary-{}.csproj",
+        "tests/ClassLibrary/ClassLibrary-{}.csproj",
         test_netcore_version()
     ))
     .unwrap()
@@ -68,8 +66,7 @@ pub fn library_project_file_path() -> PathBuf {
 pub fn library_symbols_path() -> PdCString {
     PdCString::from_os_str(
         PathBuf::from_str(&format!(
-            "tests/ClassLibrary/bin/Debug/{}/ClassLibrary-{}.pdb",
-            test_netcore_version(),
+            "tests/ClassLibrary/bin/Debug/{}/ClassLibrary.pdb",
             test_netcore_version()
         ))
         .unwrap()
@@ -83,8 +80,7 @@ pub fn library_symbols_path() -> PdCString {
 pub fn library_dll_path() -> PdCString {
     PdCString::from_os_str(
         PathBuf::from_str(&format!(
-            "tests/ClassLibrary/bin/Debug/{}/ClassLibrary-{}.dll",
-            test_netcore_version(),
+            "tests/ClassLibrary/bin/Debug/{}/ClassLibrary.dll",
             test_netcore_version()
         ))
         .unwrap()

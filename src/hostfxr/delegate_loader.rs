@@ -408,12 +408,8 @@ pub enum GetManagedFunctionError {
     Hosting(#[from] HostingError),
 
     /// A type with the specified name could not be found or loaded.
-    #[error("Failed to load type containing method of delegate type.")]
-    TypeNotFound,
-
-    /// A method with the required signature and name could not be found.
-    #[error("Specified method does not exists or has an incompatible signature.")]
-    MissingMethod,
+    #[error("Failed to load the type or method or it has an incompatible signature.")]
+    TypeOrMethodNotFound,
 
     /// The specified assembly could not be found.
     #[error("The specified assembly could not be found.")]
@@ -438,10 +434,9 @@ impl GetManagedFunctionError {
             _ => {}
         }
         match HResult::try_from(code) {
-            Ok(HResult::COR_E_TYPELOAD) => return Err(Self::TypeNotFound),
-            Ok(HResult::COR_E_MISSINGMETHOD | HResult::COR_E_ARGUMENT) => {
-                return Err(Self::MissingMethod)
-            }
+            Ok(
+                HResult::COR_E_TYPELOAD | HResult::COR_E_MISSINGMETHOD | HResult::COR_E_ARGUMENT,
+            ) => return Err(Self::TypeOrMethodNotFound),
             Ok(HResult::FILE_NOT_FOUND) => return Err(Self::AssemblyNotFound),
             Ok(HResult::COR_E_INVALIDOPERATION) => return Err(Self::MethodNotUnmanagedCallersOnly),
             _ => {}
