@@ -108,7 +108,8 @@ jobs:
           override: true
           
     - name: Install cross
-      run: cargo install cross --git https://github.com/cross-rs/cross
+      # temporary fix, see cross-rs/cross#1561
+      run: RUSTFLAGS="" cargo install cross --git https://github.com/cross-rs/cross
           
     - name: Build
       run: cross build --target ${{ matrix.target }}
