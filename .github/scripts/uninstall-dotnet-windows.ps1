@@ -17,11 +17,12 @@ while (-not (Test-Path $uninstallToolPath) -and ($retry -lt $maxRetries)) {
 }
 if ($retry -eq $maxRetries) {
     Write-Error "Uninstall tool was not found after $maxRetries seconds."
+    Get-Content -Path "log.txt" | Write-Host
     exit 1
 }
 
 # Perform uninstall
-& $uninstallToolPath remove --yes --force --all --aspnet-runtime
-& $uninstallToolPath remove --yes --force --all --hosting-bundle
-& $uninstallToolPath remove --yes --force --all --runtime
-& $uninstallToolPath remove --yes --force --all --sdk
+& $uninstallToolPath remove --yes --force --all --aspnet-runtime --verbosity detailed
+& $uninstallToolPath remove --yes --force --all --hosting-bundle --verbosity detailed
+& $uninstallToolPath remove --yes --force --all --runtime --verbosity detailed
+& $uninstallToolPath remove --yes --force --all --sdk --verbosity detailed

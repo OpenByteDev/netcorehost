@@ -10,9 +10,21 @@ curl -L -o "$filename" "$download_url"
 tar -xzf "$filename"
 uninstall_tool_path=$(find . -name dotnet-core-uninstall)
 chmod +x "$tool_path"
+# wait for the tool to be ready
+max_retries=30
+retry=0
+while [[ ! -f "$uninstall_tool_path" && $retry -lt $max_retries ]]; do
+    sleep 1
+    ((retry++))
+done
+if [[ $retry -eq $max_retries ]]; then
+    echo "Uninstall tool was not found after $max_retries seconds." >&2
+    cat "log.txt"
+    exit 1
+fi
 
 # Perform uninstall
-"$uninstall_tool_path" remove --yes --force --all --aspnet-runtime
-"$uninstall_tool_path" remove --yes --force --all --hosting-bundle
-"$uninstall_tool_path" remove --yes --force --all --runtime
-"$uninstall_tool_path" remove --yes --force --all --sdk
+"$uninstall_tool_path" remove --yes --force --all --aspnet-runtime --verbosity detailed
+"$uninstall_tool_path" remove --yes --force --all --hosting-bundle --verbosity detailed
+"$uninstall_tool_path" remove --yes --force --all --runtime --verbosity detailed
+"$uninstall_tool_path" remove --yes --force --all --sdk --verbosity detailed
