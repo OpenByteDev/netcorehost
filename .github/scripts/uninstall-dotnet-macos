@@ -4,9 +4,6 @@
 latest_release_json=$(curl -s https://api.github.com/repos/dotnet/cli-lab/releases/latest)
 download_url=$(echo "$latest_release_json" | grep "browser_download_url" | grep "osx-x64.tar.gz" | cut -d '"' -f 4)
 filename=$(basename "$download_url")
-echo $download_url
-echo $filename
-echo $latest_release_json
 curl -L -o "$filename" "$download_url"
 
 # Prepare uninstall tool
@@ -15,7 +12,7 @@ uninstall_tool_path=$(find . -name dotnet-core-uninstall)
 chmod +x "$uninstall_tool_path"
 
 # Perform uninstall
-"$uninstall_tool_path" remove --yes --force --all --aspnet-runtime --verbosity detailed
-"$uninstall_tool_path" remove --yes --force --all --hosting-bundle --verbosity detailed
-"$uninstall_tool_path" remove --yes --force --all --runtime --verbosity detailed
-"$uninstall_tool_path" remove --yes --force --all --sdk --verbosity detailed
+sudo "$uninstall_tool_path" remove --yes --force --all --aspnet-runtime --verbosity detailed
+sudo "$uninstall_tool_path" remove --yes --force --all --hosting-bundle --verbosity detailed
+sudo "$uninstall_tool_path" remove --yes --force --all --runtime --verbosity detailed
+sudo "$uninstall_tool_path" remove --yes --force --all --sdk --verbosity detailed
