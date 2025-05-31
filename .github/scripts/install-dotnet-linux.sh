@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -e
+
+VERSION=$1
+ARCH=$2
+
+curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
+chmod +x dotnet-install.sh
+./dotnet-install.sh -Architecture "$ARCH" -Channel "$VERSION"
+
+DOTNET_ROOT="$HOME/.dotnet"
+echo "$DOTNET_ROOT" >> "$GITHUB_PATH"
+echo "DOTNET_ROOT=$DOTNET_ROOT" >> "$GITHUB_ENV"
