@@ -46,7 +46,7 @@ jobs:
 
     - name: Install .NET SDK ${{ matrix.dotnet }}
       run: |
-        .github/scripts/install-dotnet-${{ matrix.platform }} ${{ matrix.dotnet }} ${{ matrix.arch }}
+        ./.github/scripts/install-dotnet-${{ matrix.platform }} ${{ matrix.dotnet }} ${{ matrix.arch }}
 
     - name: Check .NET Installation
       run: dotnet --info
