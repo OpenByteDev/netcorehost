@@ -5,8 +5,13 @@ $url = $asset.browser_download_url
 Invoke-WebRequest -Uri $url -OutFile $(Split-Path $url -Leaf)
 
 # Prepare uninstall tool
-msiexec.exe /A dotnet-core-uninstall.msi TARGETDIR=$pwd /QN /L*V log.txt
-$uninstallToolPath = Join-Path $pwd "dotnet-core-uninstall\dotnet-core-uninstall.exe"
+$extractPath = Join-Path $pwd "dotnet-core-uninstall" # needs to be a new path
+msiexec.exe /A dotnet-core-uninstall.msi TARGETDIR=$extractPath /QN /L*V log.txt
+$uninstallToolPath = Join-Path $extractPath "dotnet-core-uninstall" "dotnet-core-uninstall.exe"
+# wait for the tool to be ready
+while (-not (Test-Path $uninstallToolPath)) {
+    Start-Sleep -Seconds 1
+}
 
 # Perform uninstall
 & $uninstallToolPath remove --all
