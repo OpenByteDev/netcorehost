@@ -12,7 +12,7 @@ fn main() {
     let context = hostfxr
         .initialize_for_dotnet_command_line_with_args(
             pdcstr!(
-                "examples/run-app-with-args/ExampleProject/bin/Debug/net6.0/ExampleProject.dll"
+                "examples/run-app-with-args/ExampleProject/bin/Debug/net8.0/ExampleProject.dll"
             ),
             args,
         )
