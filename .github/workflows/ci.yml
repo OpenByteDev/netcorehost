@@ -15,7 +15,7 @@ env:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
       matrix:
@@ -24,30 +24,27 @@ jobs:
         dotnet: ["8.0", "9.0", "10.0"]
         include:
           - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
-            platform: linux
+            os: ubuntu
             arch: x64
           - target: x86_64-pc-windows-msvc
-            os: windows-latest
-            platform: windows
+            os: windows
             arch: x64
           - target: i686-pc-windows-msvc
-            os: windows-latest
-            platform: windows
+            os: windows
             arch: x86
           - target: aarch64-apple-darwin
-            os: macos-latest
-            platform: linux
+            os: macos
             arch: arm64
     env:
       NETCOREHOST_TEST_NETCORE_VERSION: net${{ matrix.dotnet }}
     steps:
     - uses: actions/checkout@v4
 
+    - name: Uninstall .NET SDKs
+      run: ./.github/scripts/uninstall-dotnet-${{ matrix.os }}
+        
     - name: Install .NET SDK ${{ matrix.dotnet }}
-      run: |
-        chmod +x ./.github/scripts/install-dotnet-${{ matrix.platform }}
-        ./.github/scripts/install-dotnet-${{ matrix.platform }} ${{ matrix.dotnet }} ${{ matrix.arch }}
+      run: ./.github/scripts/install-dotnet-${{ matrix.os }} ${{ matrix.dotnet }} ${{ matrix.arch }}
 
     - name: Check .NET Installation
       run: dotnet --info
@@ -112,7 +109,7 @@ jobs:
       run: cargo run --example ${{ matrix.example }}
 
   documentation:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
         include:
@@ -134,7 +131,7 @@ jobs:
       run: cargo deadlinks
 
   clippy:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
         include:
@@ -153,7 +150,7 @@ jobs:
         run: cargo clippy --all-features
           
   fmt:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
         include:
