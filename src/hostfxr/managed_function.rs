@@ -1,9 +1,9 @@
-use std::{ops::Deref, fmt::Debug};
+use std::{fmt::Debug, ops::Deref};
 
 /// A wrapper around a managed function pointer.
 pub struct ManagedFunction<F: ManagedFunctionPtr>(pub(crate) F);
 
-impl <F: ManagedFunctionPtr> Debug for ManagedFunction<F> {
+impl<F: ManagedFunctionPtr> Debug for ManagedFunction<F> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ManagedFunction")
             .field("ptr", &self.0.as_ptr())
