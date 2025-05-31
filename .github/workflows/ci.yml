@@ -42,13 +42,11 @@ jobs:
     env:
       NETCOREHOST_TEST_NETCORE_VERSION: net${{ matrix.dotnet }}
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Ensure execute permission on install script
-      run: chmod +x ./.github/scripts/install-dotnet-${{ matrix.platform }}
+    - uses: actions/checkout@v4
 
     - name: Install .NET SDK ${{ matrix.dotnet }}
       run: |
+        chmod +x ./.github/scripts/install-dotnet-${{ matrix.platform }}
         ./.github/scripts/install-dotnet-${{ matrix.platform }} ${{ matrix.dotnet }} ${{ matrix.arch }}
 
     - name: Check .NET Installation
@@ -78,7 +76,7 @@ jobs:
         target: ["aarch64-unknown-linux-gnu", "armv7-unknown-linux-gnueabihf"]
           
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install latest ${{ matrix.toolchain }}
       uses: dtolnay/rust-toolchain@master
@@ -101,7 +99,7 @@ jobs:
         toolchain: ["beta"]
         example: ["run-app", "run-app-with-args", "call-managed-function", "passing-parameters", "return-string-from-managed"]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install latest ${{ matrix.toolchain }}
       uses: dtolnay/rust-toolchain@master
       with:
@@ -121,7 +119,7 @@ jobs:
           - os: ubuntu-latest
           - os: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install latest nightly
       uses: dtolnay/rust-toolchain@master
       with:
@@ -143,7 +141,7 @@ jobs:
           - os: ubuntu-latest
           - os: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install latest nightly
         uses: dtolnay/rust-toolchain@master
         with:
@@ -162,7 +160,7 @@ jobs:
           - os: ubuntu-latest
           - os: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install latest nightly
       uses: dtolnay/rust-toolchain@master
       with:
