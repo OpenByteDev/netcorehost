@@ -1,19 +1,13 @@
-Write-Output "Starting .NET uninstall on Windows..."
+# Download uninstall tool
+$releases = Invoke-RestMethod -Uri "https://api.github.com/repos/dotnet/cli-lab/releases/latest"
+$asset = $releases.assets | Where-Object { $_.name -eq "dotnet-core-uninstall.msi" } | Select-Object -First 1
+$url = $asset.browser_download_url
+Invoke-WebRequest -Uri $url -OutFile $(Split-Path $url -Leaf)
 
-$uninstallToolPath = "C:\Program Files\dotnet-core-uninstall\dotnet-core-uninstall.exe"
-$uninstallToolDownloadUrl = "https://aka.ms/dotnet-core-uninstall-tool-win"
-
-# Install uninstall tool
-Write-Output "Downloading .NET Uninstall Tool..."
-$zipPath = "$env:TEMP\dotnet-core-uninstall-tool.zip"
-Invoke-WebRequest -Uri $uninstallToolDownloadUrl -OutFile $zipPath
-
-Write-Output "Extracting..."
-Expand-Archive -Path $zipPath -DestinationPath "C:\Program Files\dotnet-core-uninstall" -Force
-Remove-Item $zipPath
+# Prepare uninstall tool
+$pwd = (Get-Location).Path
+msiexec.exe /A dotnet-core-uninstall.msi TARGETDIR=$pwd /QN /L*V log.txt
+$uninstallToolPath = Join-Path $pwd "dotnet-core-uninstall\dotnet-core-uninstall-tool.exe"
 
 # Perform uninstall
-Write-Output "Removing all SDKs and runtimes..."
-& "$uninstallToolPath" remove --all
-
-Write-Output ".NET uninstall process completed."
+$uninstallToolPath remove --all
