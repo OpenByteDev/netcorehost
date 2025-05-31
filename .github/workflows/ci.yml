@@ -21,28 +21,24 @@ jobs:
       matrix:
         toolchain: ["beta"]
         target: ["x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc", "i686-pc-windows-msvc", "aarch64-apple-darwin"]
-        dotnet: ["6.0", "7.0", "8.0"]
+        dotnet: ["8.0", "9.0", "10.0"]
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
-            dotnet_install_download_script: curl -sSL https://dot.net/v1/dotnet-install.sh > dotnet-install.sh; chmod +x dotnet-install.sh
-            dotnet_install_script: ./dotnet-install.sh
+            platform: linux
             arch: x64
           - target: x86_64-pc-windows-msvc
             os: windows-latest
-            dotnet_install_download_script: Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
-            dotnet_install_script: ./dotnet-install.ps1
+            platform: windows
             arch: x64
           - target: i686-pc-windows-msvc
             os: windows-latest
-            dotnet_install_download_script: Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
-            dotnet_install_script: ./dotnet-install.ps1
+            platform: windows
             arch: x86
-          - target: x86_64-apple-darwin
+          - target: aarch64-apple-darwin
             os: macos-latest
-            dotnet_install_download_script: curl -sSL https://dot.net/v1/dotnet-install.sh > dotnet-install.sh; chmod +x dotnet-install.sh
-            dotnet_install_script: ./dotnet-install.sh
-            arch: x64
+            platform: linux
+            arch: arm64
     env:
       NETCOREHOST_TEST_NETCORE_VERSION: net${{ matrix.dotnet }}
     steps:
@@ -50,26 +46,7 @@ jobs:
 
     - name: Install .NET SDK ${{ matrix.dotnet }}
       run: |
-        ${{ matrix.dotnet_install_download_script }}
-        ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel 6.0
-        ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel 7.0
-        ${{ matrix.dotnet_install_script }} -Architecture ${{ matrix.arch }} -Channel 8.0
-
-        if ($Env:DOTNET_INSTALL_DIR) {
-            $dotnetRoot = $Env:DOTNET_INSTALL_DIR
-        } else {
-            if ([System.Environment]::OSVersion.Platform -eq "Win32NT") {
-                $dotnetRoot = [IO.Path]::Combine($Env:LOCALAPPDATA, "Microsoft", "dotnet")
-            } else {
-                $dotnetRoot = [IO.Path]::Combine($Env:HOME, ".dotnet")
-            }
-        }
-
-        $dotnetRoot >> $env:GITHUB_PATH
-        "DOTNET_ROOT=$dotnetRoot" >> $env:GITHUB_ENV
-        
-        dotnet --info
-      shell: pwsh  
+        .github/scripts/install-dotnet-${{ matrix.platform }} ${{ matrix.dotnet }} ${{ matrix.arch }}
 
     - name: Check .NET Installation
       run: dotnet --info
