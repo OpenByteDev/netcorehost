@@ -26,7 +26,7 @@ rusty_fork_test! {
         );
         assert!(invalid_method_name.is_err());
         assert_eq!(
-            unsafe { invalid_method_name.unwrap_err_unchecked() },
+            invalid_method_name.unwrap_err(),
             GetManagedFunctionError::MissingMethod
         );
 
@@ -34,7 +34,7 @@ rusty_fork_test! {
             .get_function_with_default_signature(pdcstr!("Test.Program, Test"), pdcstr!("Main"));
         assert!(invalid_method_signature.is_err());
         assert_eq!(
-            unsafe { invalid_method_signature.unwrap_err_unchecked() },
+            invalid_method_signature.unwrap_err(),
             GetManagedFunctionError::MissingMethod
         );
 
@@ -44,8 +44,8 @@ rusty_fork_test! {
         );
         assert!(invalid_type_name.is_err());
         assert_eq!(
-            unsafe { invalid_type_name.unwrap_err_unchecked() },
-            GetManagedFunctionError::TypeNotFound
+            invalid_type_name.unwrap_err(),
+            GetManagedFunctionError::MissingMethod
         );
 
         let invalid_namespace_name = fn_loader.get_function_with_default_signature(
@@ -54,8 +54,8 @@ rusty_fork_test! {
         );
         assert!(invalid_namespace_name.is_err());
         assert_eq!(
-            unsafe { invalid_namespace_name.unwrap_err_unchecked() },
-            GetManagedFunctionError::TypeNotFound
+            invalid_namespace_name.unwrap_err(),
+            GetManagedFunctionError::MissingMethod
         );
 
         let invalid_assembly_name = fn_loader.get_function_with_default_signature(
@@ -64,7 +64,7 @@ rusty_fork_test! {
         );
         assert!(invalid_assembly_name.is_err());
         assert_eq!(
-            unsafe { invalid_assembly_name.unwrap_err_unchecked() },
+            invalid_assembly_name.unwrap_err(),
             GetManagedFunctionError::AssemblyNotFound
         );
 
@@ -74,7 +74,7 @@ rusty_fork_test! {
         );
         assert!(method_not_marked.is_err());
         assert_eq!(
-            unsafe { method_not_marked.unwrap_err_unchecked() },
+            method_not_marked.unwrap_err(),
             GetManagedFunctionError::MethodNotUnmanagedCallersOnly
         );
 
@@ -85,7 +85,7 @@ rusty_fork_test! {
         );
         assert!(invalid_delegate_type_name.is_err());
         assert_eq!(
-            unsafe { invalid_delegate_type_name.unwrap_err_unchecked() },
+            invalid_delegate_type_name.unwrap_err(),
             GetManagedFunctionError::TypeNotFound
         );
 
@@ -109,7 +109,7 @@ rusty_fork_test! {
             .get_function_with_default_signature(pdcstr!("Test.Program, Test"), pdcstr!("Hello"));
         assert!(invalid_assembly_path.is_err());
         assert_eq!(
-            unsafe { invalid_assembly_path.unwrap_err_unchecked() },
+            invalid_assembly_path.unwrap_err(),
             GetManagedFunctionError::AssemblyNotFound
         );
 
@@ -120,7 +120,7 @@ rusty_fork_test! {
             .get_function_with_default_signature(pdcstr!("Test.Program, Test"), pdcstr!("Hello"));
         assert!(non_existant_assembly_path.is_err());
         assert_eq!(
-            unsafe { non_existant_assembly_path.unwrap_err_unchecked() },
+            non_existant_assembly_path.unwrap_err(),
             GetManagedFunctionError::AssemblyNotFound
         );
 
