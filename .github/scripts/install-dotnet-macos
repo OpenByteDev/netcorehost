@@ -1,0 +1,4 @@
+#!/bin/bash
+
+chmod +x ./.github/scripts/uninstall-dotnet-linux
+./.github/scripts/uninstall-dotnet-linux

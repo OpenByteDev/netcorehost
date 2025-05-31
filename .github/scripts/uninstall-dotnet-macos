@@ -1,0 +1,30 @@
+#!/bin/bash
+
+echo "Starting .NET uninstall on macOS..."
+
+# Define paths and URLs
+UNINSTALL_TOOL_URL="https://aka.ms/dotnet-core-uninstall-tool-macos"
+UNINSTALL_TOOL_DIR="/usr/local/share/dotnet-core-uninstall"
+ZIP_PATH="/tmp/dotnet-core-uninstall-tool.zip"
+TOOL_EXEC="$UNINSTALL_TOOL_DIR/dotnet-core-uninstall"
+
+# Download the uninstall tool
+echo "Downloading .NET Uninstall Tool..."
+curl -L "$UNINSTALL_TOOL_URL" -o "$ZIP_PATH"
+
+# Create destination directory
+sudo mkdir -p "$UNINSTALL_TOOL_DIR"
+
+# Extract the tool
+echo "Extracting..."
+sudo unzip -o "$ZIP_PATH" -d "$UNINSTALL_TOOL_DIR"
+rm "$ZIP_PATH"
+
+# Make it executable
+sudo chmod +x "$TOOL_EXEC"
+
+# Perform uninstall
+echo "Removing all SDKs and runtimes..."
+"$TOOL_EXEC" remove --all
+
+echo ".NET uninstall process completed."
