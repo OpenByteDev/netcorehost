@@ -10,4 +10,4 @@ msiexec.exe /A dotnet-core-uninstall.msi TARGETDIR=$pwd /QN /L*V log.txt
 $uninstallToolPath = Join-Path $pwd "dotnet-core-uninstall\dotnet-core-uninstall-tool.exe"
 
 # Perform uninstall
-$uninstallToolPath remove --all
+& $uninstallToolPath remove --all
