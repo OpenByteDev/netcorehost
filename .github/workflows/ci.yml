@@ -43,6 +43,9 @@ jobs:
       NETCOREHOST_TEST_NETCORE_VERSION: net${{ matrix.dotnet }}
     steps:
     - uses: actions/checkout@v3
+    
+    - name: Ensure execute permission on install script
+      run: chmod +x ./.github/scripts/install-dotnet-${{ matrix.platform }}
 
     - name: Install .NET SDK ${{ matrix.dotnet }}
       run: |
