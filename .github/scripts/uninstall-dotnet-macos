@@ -8,8 +8,11 @@ curl -L -o "$filename" "$download_url"
 
 # Prepare uninstall tool
 tar -xzf "$filename"
-tool_path=$(find . -name dotnet-core-uninstall)
+uninstall_tool_path=$(find . -name dotnet-core-uninstall)
 chmod +x "$tool_path"
 
 # Perform uninstall
-"$tool_path" remove --all
+"$uninstall_tool_path" remove --yes --force --all --aspnet-runtime
+"$uninstall_tool_path" remove --yes --force --all --hosting-bundle
+"$uninstall_tool_path" remove --yes --force --all --runtime
+"$uninstall_tool_path" remove --yes --force --all --sdk

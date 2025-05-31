@@ -14,4 +14,7 @@ while (-not (Test-Path $uninstallToolPath)) {
 }
 
 # Perform uninstall
-& $uninstallToolPath remove --all
+& $uninstallToolPath remove --yes --force --all --aspnet-runtime
+& $uninstallToolPath remove --yes --force --all --hosting-bundle
+& $uninstallToolPath remove --yes --force --all --runtime
+& $uninstallToolPath remove --yes --force --all --sdk
