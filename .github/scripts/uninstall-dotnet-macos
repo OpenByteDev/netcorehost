@@ -4,24 +4,15 @@
 latest_release_json=$(curl -s https://api.github.com/repos/dotnet/cli-lab/releases/latest)
 download_url=$(echo "$latest_release_json" | grep "browser_download_url" | grep "osx-x64.tar.gz" | cut -d '"' -f 4)
 filename=$(basename "$download_url")
+echo $download_url
+echo $filename
+echo $latest_release_json
 curl -L -o "$filename" "$download_url"
 
 # Prepare uninstall tool
 tar -xzf "$filename"
 uninstall_tool_path=$(find . -name dotnet-core-uninstall)
-chmod +x "$tool_path"
-# wait for the tool to be ready
-max_retries=30
-retry=0
-while [[ ! -f "$uninstall_tool_path" && $retry -lt $max_retries ]]; do
-    sleep 1
-    ((retry++))
-done
-if [[ $retry -eq $max_retries ]]; then
-    echo "Uninstall tool was not found after $max_retries seconds." >&2
-    cat "log.txt"
-    exit 1
-fi
+chmod +x "$uninstall_tool_path"
 
 # Perform uninstall
 "$uninstall_tool_path" remove --yes --force --all --aspnet-runtime --verbosity detailed
