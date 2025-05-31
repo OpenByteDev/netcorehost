@@ -1,3 +1,5 @@
+use widestring::U16CStr;
+
 use crate::{
     bindings::hostfxr::{hostfxr_handle, hostfxr_initialize_parameters},
     error::{HostingError, HostingResult, HostingSuccess},
@@ -395,4 +397,50 @@ impl Hostfxr {
             )
         })
     }
+
+    /// Sets a callback which is to be used to write errors to.
+    ///
+    /// # Arguments
+    ///  * `error_writer`
+    ///    A callback function which will be invoked every time an error is to be reported.
+    ///    Or [`None`] to unregister previously registered callbacks and return to the default behavior.
+    ///
+    /// # Remarks
+    /// The error writer is registered per-thread, so the registration is thread-local. On each thread
+    /// only one callback can be registered. Subsequent registrations overwrite the previous ones.
+    ///
+    /// By default no callback is registered in which case the errors are written to stderr.
+    ///
+    /// Each call to the error writer is sort of like writing a single line (the EOL character is omitted).
+    /// Multiple calls to the error writer may occure for one failure.
+    ///
+    /// If the hostfxr invokes functions in hostpolicy as part of its operation, the error writer
+    /// will be propagated to hostpolicy for the duration of the call. This means that errors from
+    /// both hostfxr and hostpolicy will be reporter through the same error writer.
+    #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore3_0")))]
+    pub fn set_error_writer(&self, error_writer: Option<ErrorWriter>) {
+        let new_raw_error_writer = error_writer
+            .as_ref()
+            .map(|_| error_writer_trampoline as hostfxr_sys::hostfxr_error_writer_fn);
+        unsafe { self.lib.hostfxr_set_error_writer(new_raw_error_writer) };
+
+        CURRENT_ERROR_WRITER.with(|current_writer| {
+            *current_writer.borrow_mut() = error_writer;
+        });
+    }
+}
+
+type ErrorWriter = Box<dyn FnMut(&U16CStr)>;
+
+thread_local! {
+    static CURRENT_ERROR_WRITER: std::cell::RefCell<Option<ErrorWriter>> = std::cell::RefCell::new(None);
+}
+
+extern "C" fn error_writer_trampoline(raw_error: *const u16) {
+    CURRENT_ERROR_WRITER.with(|writer_holder| {
+        if let Some(writer) = writer_holder.borrow_mut().as_mut() {
+            let error_message = unsafe { U16CStr::from_ptr_str(raw_error) };
+            writer(error_message);
+        }
+    });
 }
