@@ -9,8 +9,15 @@ $extractPath = Join-Path $pwd "dotnet-core-uninstall" # needs to be a new path
 msiexec.exe /A dotnet-core-uninstall.msi TARGETDIR=$extractPath /QN /L*V log.txt
 $uninstallToolPath = Join-Path $extractPath "dotnet-core-uninstall" "dotnet-core-uninstall.exe"
 # wait for the tool to be ready
-while (-not (Test-Path $uninstallToolPath)) {
+$maxRetries = 30
+$retry = 0
+while (-not (Test-Path $uninstallToolPath) -and ($retry -lt $maxRetries)) {
     Start-Sleep -Seconds 1
+    $retry++
+}
+if ($retry -eq $maxRetries) {
+    Write-Error "Uninstall tool was not found after $maxRetries seconds."
+    exit 1
 }
 
 # Perform uninstall
