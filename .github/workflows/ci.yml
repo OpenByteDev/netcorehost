@@ -109,7 +109,7 @@ jobs:
       run: cargo run --example ${{ matrix.example }}
 
   documentation:
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
@@ -150,7 +150,7 @@ jobs:
         run: cargo clippy --all-features
           
   fmt:
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
