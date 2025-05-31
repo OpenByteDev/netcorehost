@@ -44,6 +44,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Uninstall .NET SDKs
+      run: |
+        chmod +x ./.github/scripts/uninstall-dotnet-${{ matrix.platform }}
+        ./.github/scripts/uninstall-dotnet-${{ matrix.platform }}
+
+    - name: Check .NET Installation
+      run: dotnet --info
+        
     - name: Install .NET SDK ${{ matrix.dotnet }}
       run: |
         chmod +x ./.github/scripts/install-dotnet-${{ matrix.platform }}
