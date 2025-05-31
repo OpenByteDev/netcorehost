@@ -12,5 +12,5 @@ if ($Env:DOTNET_INSTALL_DIR) {
     $dotnetRoot = Join-Path $Env:LOCALAPPDATA "Microsoft\dotnet"
 }
 
-$dotnetRoot >> $Env:GITHUB_PATH
-"DONET_ROOT=$dotnetRoot" >> $Env:GITHUB_ENV
+Add-Content -Path $Env:GITHUB_PATH -Value $dotnetRoot
+Add-Content -Path $Env:GITHUB_ENV -Value "DOTNET_ROOT=$dotnetRoot"
