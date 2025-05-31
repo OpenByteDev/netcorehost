@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+sudo apt remove 'dotnet*'
+sudo apt remove 'aspnetcore*'
