@@ -1,5 +1,3 @@
-use widestring::U16CStr;
-
 use crate::{
     bindings::hostfxr::{hostfxr_handle, hostfxr_initialize_parameters},
     error::{HostingError, HostingResult, HostingSuccess},
@@ -7,7 +5,7 @@ use crate::{
         Hostfxr, HostfxrContext, HostfxrHandle, InitializedForCommandLine,
         InitializedForRuntimeConfig,
     },
-    pdcstring::PdCStr,
+    pdcstring::{PdCStr, PdChar},
 };
 use std::{iter, mem::MaybeUninit, ptr};
 
@@ -430,16 +428,16 @@ impl Hostfxr {
     }
 }
 
-type ErrorWriter = Box<dyn FnMut(&U16CStr)>;
+type ErrorWriter = Box<dyn FnMut(&PdCStr)>;
 
 thread_local! {
     static CURRENT_ERROR_WRITER: std::cell::RefCell<Option<ErrorWriter>> = std::cell::RefCell::new(None);
 }
 
-extern "C" fn error_writer_trampoline(raw_error: *const u16) {
+extern "C" fn error_writer_trampoline(raw_error: *const PdChar) {
     CURRENT_ERROR_WRITER.with(|writer_holder| {
         if let Some(writer) = writer_holder.borrow_mut().as_mut() {
-            let error_message = unsafe { U16CStr::from_ptr_str(raw_error) };
+            let error_message = unsafe { PdCStr::from_str_ptr(raw_error) };
             writer(error_message);
         }
     });
