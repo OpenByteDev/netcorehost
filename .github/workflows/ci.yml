@@ -65,7 +65,7 @@ jobs:
       shell: pwsh  
       
   cross:
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -90,7 +90,7 @@ jobs:
       run: cross build --target ${{ matrix.target }}
         
   examples:
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         toolchain: ["beta"]
