@@ -1,4 +1,4 @@
 #!/bin/bash
 
 chmod +x ./.github/scripts/install-dotnet-ubuntu
-./.github/scripts/install-dotnet-ubuntu
+./.github/scripts/install-dotnet-ubuntu "$@"
