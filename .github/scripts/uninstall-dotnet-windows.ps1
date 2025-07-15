@@ -1,5 +1,8 @@
 # Download uninstall tool
-$releases = Invoke-RestMethod -Uri "https://api.github.com/repos/dotnet/cli-lab/releases/latest"
+$headers = @{
+    Authorization = "Bearer $($env:GITHUB_TOKEN)"
+}
+$releases = Invoke-RestMethod -Uri "https://api.github.com/repos/dotnet/cli-lab/releases/latest" -Headers $headers
 $asset = $releases.assets | Where-Object { $_.name -eq "dotnet-core-uninstall.msi" } | Select-Object -First 1
 $url = $asset.browser_download_url
 Invoke-WebRequest -Uri $url -OutFile $(Split-Path $url -Leaf)
@@ -22,7 +25,5 @@ if ($retry -eq $maxRetries) {
 }
 
 # Perform uninstall
-& $uninstallToolPath remove --yes --force --all --aspnet-runtime --verbosity detailed
-& $uninstallToolPath remove --yes --force --all --hosting-bundle --verbosity detailed
 & $uninstallToolPath remove --yes --force --all --runtime --verbosity detailed
 & $uninstallToolPath remove --yes --force --all --sdk --verbosity detailed
