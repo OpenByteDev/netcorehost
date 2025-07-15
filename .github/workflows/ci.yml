@@ -42,6 +42,8 @@ jobs:
 
     - name: Uninstall .NET SDKs
       run: ./.github/scripts/uninstall-dotnet-${{ matrix.os }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
         
     - name: Install .NET SDK ${{ matrix.dotnet }}
       run: ./.github/scripts/install-dotnet-${{ matrix.os }} ${{ matrix.dotnet }} ${{ matrix.arch }}
