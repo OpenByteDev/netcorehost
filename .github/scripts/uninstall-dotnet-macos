@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Download uninstall tool
-latest_release_json=$(curl -s https://api.github.com/repos/dotnet/cli-lab/releases/latest)
+latest_release_json=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/dotnet/cli-lab/releases/latest)
 download_url=$(echo "$latest_release_json" | grep "browser_download_url" | grep "osx-x64.tar.gz" | cut -d '"' -f 4)
 filename=$(basename "$download_url")
 curl -L -o "$filename" "$download_url"
