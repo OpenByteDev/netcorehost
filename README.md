@@ -6,7 +6,7 @@
 
 A Rust library for hosting the .NET Core runtime.
 
-It utilizes the .NET Core hosting API to load and execute managed code from withing the current process.
+It utilizes the .NET Core hosting API to load and execute managed code from within the current process.
 
 ## Usage
 ### Running an application
