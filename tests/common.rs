@@ -10,7 +10,7 @@ use std::{
 };
 
 pub fn test_netcore_version() -> String {
-    env::var("NETCOREHOST_TEST_NETCORE_VERSION").unwrap_or_else(|_| "net8.0".to_string())
+    env::var("NETCOREHOST_TEST_NETCORE_VERSION").unwrap_or_else(|_| "net10.0".to_string())
 }
 
 pub fn test_project_file_path() -> PathBuf {
