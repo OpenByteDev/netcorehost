@@ -91,8 +91,32 @@ pub fn library_dll_path() -> PdCString {
     .unwrap()
 }
 
+pub fn display_framework_id(id: &str) -> String {
+    let s = id.trim_start_matches('.');
+
+    if let Some(rest) = s.strip_prefix("netcoreapp") {
+        // .netcoreappX.Y  → .NET Core X.Y
+        let version = rest.trim_start_matches('.');
+        return format!(".NET Core {}", version);
+    }
+
+    if let Some(rest) = s.strip_prefix("net") {
+        // .netX.Y → .NET X.Y
+        let version = rest.trim_start_matches('.');
+        return format!(".NET {}", version);
+    }
+
+    // Fallback
+    id.to_string()
+}
+
 pub fn setup() {
+    println!("Running Test Setup");
+    println!("Using {}", display_framework_id(&test_netcore_version()));
+
+    println!("Building Test Project");
     build_test_project();
+    println!("Building Library Project");
     build_library_project();
 }
 
