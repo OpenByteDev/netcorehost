@@ -28,8 +28,8 @@ fn resolve_sdk() {
             true,
         )
         .unwrap();
-
-    assert!(actual_sdks.contains(&sdk.into_path()));
+    
+    assert!(actual_sdks.contains(&sdk.sdk_dir));
 }
 
 #[test]

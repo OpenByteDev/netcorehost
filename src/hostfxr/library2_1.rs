@@ -9,13 +9,7 @@ use crate::{
 
 use coreclr_hosting_shared::char_t;
 
-use std::{
-    cell::RefCell,
-    io,
-    mem::MaybeUninit,
-    path::{Path, PathBuf},
-    ptr, slice,
-};
+use std::{cell::RefCell, io, mem::MaybeUninit, path::PathBuf, ptr, slice};
 
 use super::UNSUPPORTED_HOST_VERSION_ERROR_CODE;
 
@@ -87,6 +81,11 @@ impl Hostfxr {
         } else {
             hostfxr_resolve_sdk2_flags_t::disallow_prerelease
         };
+
+        // Reset the output
+        let raw_result = RawResolveSdkResult::default();
+        RESOLVE_SDK2_DATA.with(|sdk| *sdk.borrow_mut() = Some(raw_result));
+
         let result = unsafe {
             self.lib.hostfxr_resolve_sdk2(
                 sdk_dir.as_ptr(),
@@ -98,10 +97,10 @@ impl Hostfxr {
         .unwrap_or(UNSUPPORTED_HOST_VERSION_ERROR_CODE);
         HostingResult::from(result).into_result()?;
 
-        let sdk_path = RESOLVE_SDK2_DATA
+        let raw_result = RESOLVE_SDK2_DATA
             .with(|sdk| sdk.borrow_mut().take())
             .unwrap();
-        Ok(sdk_path)
+        Ok(ResolveSdkResult::new(raw_result))
     }
 
     /// Get the list of all available SDKs ordered by ascending version.
@@ -185,7 +184,7 @@ impl Hostfxr {
 
 thread_local! {
     static GET_AVAILABLE_SDKS_DATA: RefCell<Option<Vec<PathBuf>>> = const { RefCell::new(None) };
-    static RESOLVE_SDK2_DATA: RefCell<Option<ResolveSdkResult>> = const { RefCell::new(None) };
+    static RESOLVE_SDK2_DATA: RefCell<Option<RawResolveSdkResult>> = const { RefCell::new(None) };
 }
 
 extern "C" fn get_available_sdks_callback(sdk_count: i32, sdks_ptr: *const *const char_t) {
@@ -204,45 +203,105 @@ extern "C" fn get_available_sdks_callback(sdk_count: i32, sdks_ptr: *const *cons
 
 extern "C" fn resolve_sdk2_callback(key: hostfxr_resolve_sdk2_result_key_t, value: *const char_t) {
     RESOLVE_SDK2_DATA.with(|sdks| {
-        let path = unsafe { PdCStr::from_str_ptr(value) }.to_os_string().into();
-        *sdks.borrow_mut() = Some(match key {
+        let path: PathBuf = unsafe { PdCStr::from_str_ptr(value) }.to_os_string().into();
+        let mut guard = sdks.borrow_mut();
+        let raw_result = guard.as_mut().unwrap();
+        match key {
             hostfxr_resolve_sdk2_result_key_t::resolved_sdk_dir => {
-                ResolveSdkResult::ResolvedSdkDirectory(path)
+                assert_eq!(raw_result.resolved_sdk_dir, None);
+                raw_result.resolved_sdk_dir = Some(path);
             }
             hostfxr_resolve_sdk2_result_key_t::global_json_path => {
-                ResolveSdkResult::GlobalJsonPath(path)
+                assert_eq!(raw_result.global_json_path, None);
+                raw_result.global_json_path = Some(path);
             }
-        });
+            hostfxr_resolve_sdk2_result_key_t::requested_version => {
+                assert_eq!(raw_result.requested_version, None);
+                raw_result.requested_version = Some(path);
+            }
+            hostfxr_resolve_sdk2_result_key_t::global_json_state => {
+                assert_eq!(raw_result.global_json_state, None);
+                raw_result.global_json_state = Some(path);
+            }
+            _ => {
+                // new key encountered
+            }
+        }
     });
+}
+
+#[derive(Debug, Default)]
+struct RawResolveSdkResult {
+    pub resolved_sdk_dir: Option<PathBuf>,
+    pub global_json_path: Option<PathBuf>,
+    pub requested_version: Option<PathBuf>,
+    pub global_json_state: Option<PathBuf>,
 }
 
 /// Result of [`Hostfxr::resolve_sdk`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "netcore2_1")))]
 #[must_use]
-pub enum ResolveSdkResult {
-    /// `global.json` was not present or did not impact the resolved SDK location.
-    ResolvedSdkDirectory(PathBuf),
-    /// `global.json` was used during resolution.
-    GlobalJsonPath(PathBuf),
+pub struct ResolveSdkResult {
+    /// Path to the directory of the resolved sdk.
+    pub sdk_dir: PathBuf,
+    /// State of the global.json encountered during sdk resolution.
+    pub global_json: GlobalJsonState,
+}
+
+/// State of global.json during sdk resolution with [`Hostfxr::resolve_sdk`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum GlobalJsonState {
+    /// The global.json contained invalid data, such as a malformed version number.
+    InvalidData,
+    /// The global.json does not contain valid json.
+    InvalidJson,
+    /// No global.json was found.
+    NotFound,
+    /// A global.json was found and was valid.
+    Found(GlobalJsonInfo),
 }
 
 impl ResolveSdkResult {
-    /// Returns the path to the resolved SDK directory.
-    #[must_use]
-    pub fn into_path(self) -> PathBuf {
-        match self {
-            ResolveSdkResult::GlobalJsonPath(path)
-            | ResolveSdkResult::ResolvedSdkDirectory(path) => path,
+    fn new(raw: RawResolveSdkResult) -> Self {
+        use hostfxr_sys::hostfxr_resolve_sdk2_global_json_state;
+        let global_json = match raw.global_json_state {
+            None => GlobalJsonState::NotFound, // assume not found, but could also be invalid
+            Some(s) => match s.to_string_lossy().as_ref() {
+                hostfxr_resolve_sdk2_global_json_state::INVALID_DATA => {
+                    GlobalJsonState::InvalidData
+                }
+                hostfxr_resolve_sdk2_global_json_state::INVALID_JSON => {
+                    GlobalJsonState::InvalidJson
+                }
+                hostfxr_resolve_sdk2_global_json_state::VALID => {
+                    GlobalJsonState::Found(GlobalJsonInfo {
+                        path: raw
+                            .global_json_path
+                            .expect("global.json found but no path provided"),
+                        requested_version: raw
+                            .requested_version
+                            .expect("global.json found but requested version not provided")
+                            .to_string_lossy()
+                            .to_string(),
+                    })
+                }
+                _ => GlobalJsonState::NotFound,
+            },
+        };
+        let sdk_dir = raw
+            .resolved_sdk_dir
+            .expect("resolve_sdk2 succeeded but no sdk_dir provided.");
+        Self {
+            sdk_dir,
+            global_json,
         }
     }
+}
 
-    /// Returns the path to the resolved SDK directory.
-    #[must_use]
-    pub fn path(&self) -> &Path {
-        match self {
-            ResolveSdkResult::GlobalJsonPath(path)
-            | ResolveSdkResult::ResolvedSdkDirectory(path) => path,
-        }
-    }
+/// Info about global.json if valid with [`Hostfxr::resolve_sdk`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GlobalJsonInfo {
+    path: PathBuf,
+    requested_version: String,
 }
