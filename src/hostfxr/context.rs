@@ -5,7 +5,7 @@ use crate::{
     error::{HostingError, HostingResult, HostingSuccess},
     hostfxr::{
         AppOrHostingResult, AssemblyDelegateLoader, DelegateLoader, Hostfxr, HostfxrLibrary,
-        RawFunctionPtr, SharedHostfxrLibrary,
+        RawFnPtr, SharedHostfxrLibrary,
     },
     pdcstring::PdCString,
 };
@@ -83,7 +83,7 @@ pub struct HostfxrContext<I> {
     handle: HostfxrHandle,
     hostfxr: SharedHostfxrLibrary,
     is_primary: bool,
-    runtime_delegates: EnumMap<hostfxr_delegate_type, OnceCell<RawFunctionPtr>>,
+    runtime_delegates: EnumMap<hostfxr_delegate_type, OnceCell<RawFnPtr>>,
     context_type: PhantomData<I>,
     not_sync: PhantomData<Cell<HostfxrLibrary>>,
 }
@@ -171,7 +171,7 @@ impl<I> HostfxrContext<I> {
     pub fn get_runtime_delegate(
         &self,
         r#type: hostfxr_delegate_type,
-    ) -> Result<RawFunctionPtr, HostingError> {
+    ) -> Result<RawFnPtr, HostingError> {
         self.runtime_delegates[r#type]
             .get_or_try_init(|| self.get_runtime_delegate_uncached(r#type))
             .copied()
@@ -179,7 +179,7 @@ impl<I> HostfxrContext<I> {
     fn get_runtime_delegate_uncached(
         &self,
         r#type: hostfxr_delegate_type,
-    ) -> Result<RawFunctionPtr, HostingError> {
+    ) -> Result<RawFnPtr, HostingError> {
         let mut delegate = MaybeUninit::uninit();
         let result = unsafe {
             self.hostfxr.hostfxr_get_runtime_delegate(

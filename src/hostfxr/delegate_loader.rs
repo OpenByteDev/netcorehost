@@ -10,7 +10,7 @@ use num_enum::TryFromPrimitive;
 use std::{convert::TryFrom, mem::MaybeUninit, path::Path, ptr};
 use thiserror::Error;
 
-use super::{FunctionPtr, ManagedFunction, RawFunctionPtr, SharedHostfxrLibrary};
+use super::{as_managed, FnPtr, ManagedFunction, RawFnPtr, SharedHostfxrLibrary};
 
 #[cfg(feature = "net5_0")]
 use crate::bindings::hostfxr::{get_function_pointer_fn, UNMANAGED_CALLERS_ONLY_METHOD};
@@ -18,7 +18,7 @@ use crate::bindings::hostfxr::{get_function_pointer_fn, UNMANAGED_CALLERS_ONLY_M
 /// A pointer to a function with the default signature.
 pub type ManagedFunctionWithDefaultSignature = ManagedFunction<component_entry_point_fn>;
 /// A pointer to a function with an unknown signature.
-pub type ManagedFunctionWithUnknownSignature = ManagedFunction<RawFunctionPtr>;
+pub type ManagedFunctionWithUnknownSignature = ManagedFunction<RawFnPtr>;
 
 /// A struct for loading pointers to managed functions for a given [`HostfxrContext`].
 ///
@@ -52,7 +52,7 @@ impl DelegateLoader {
         type_name: *const char_t,
         method_name: *const char_t,
         delegate_type_name: *const char_t,
-    ) -> Result<RawFunctionPtr, GetManagedFunctionError> {
+    ) -> Result<RawFnPtr, GetManagedFunctionError> {
         let mut delegate = MaybeUninit::uninit();
 
         let result = unsafe {
@@ -94,7 +94,7 @@ impl DelegateLoader {
         type_name: *const char_t,
         method_name: *const char_t,
         delegate_type_name: *const char_t,
-    ) -> Result<RawFunctionPtr, GetManagedFunctionError> {
+    ) -> Result<RawFnPtr, GetManagedFunctionError> {
         let mut delegate = MaybeUninit::uninit();
 
         let result = unsafe {
@@ -128,13 +128,13 @@ impl DelegateLoader {
     ///    Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
     ///  * `delegate_type_name`:
     ///    Assembly qualified delegate type name for the method signature.
-    pub fn load_assembly_and_get_function<F: FunctionPtr>(
+    pub fn load_assembly_and_get_function<F: FnPtr>(
         &self,
         assembly_path: &PdCStr,
         type_name: &PdCStr,
         method_name: &PdCStr,
         delegate_type_name: &PdCStr,
-    ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
+    ) -> Result<ManagedFunction<as_managed!(F)>, GetManagedFunctionError> {
         Self::validate_assembly_path(assembly_path)?;
         let function = unsafe {
             self.load_assembly_and_get_function_pointer_raw(
@@ -144,7 +144,9 @@ impl DelegateLoader {
                 delegate_type_name.as_ptr(),
             )
         }?;
-        Ok(ManagedFunction(unsafe { F::Managed::from_ptr(function) }))
+        Ok(ManagedFunction(unsafe {
+            <as_managed!(F)>::from_ptr(function)
+        }))
     }
 
     /// Calling this function will load the specified assembly in isolation (into its own `AssemblyLoadContext`)
@@ -177,7 +179,7 @@ impl DelegateLoader {
                 ptr::null(),
             )
         }?;
-        Ok(ManagedFunction(unsafe { FunctionPtr::from_ptr(function) }))
+        Ok(ManagedFunction(unsafe { FnPtr::from_ptr(function) }))
     }
 
     /// Calling this function will load the specified assembly in isolation (into its own `AssemblyLoadContext`)
@@ -199,12 +201,12 @@ impl DelegateLoader {
     /// [UnmanagedCallersOnly]: <https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute>
     #[cfg(feature = "net5_0")]
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net5_0")))]
-    pub fn load_assembly_and_get_function_with_unmanaged_callers_only<F: FunctionPtr>(
+    pub fn load_assembly_and_get_function_with_unmanaged_callers_only<F: FnPtr>(
         &self,
         assembly_path: &PdCStr,
         type_name: &PdCStr,
         method_name: &PdCStr,
-    ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
+    ) -> Result<ManagedFunction<as_managed!(F)>, GetManagedFunctionError> {
         Self::validate_assembly_path(assembly_path)?;
         let function = unsafe {
             self.load_assembly_and_get_function_pointer_raw(
@@ -214,7 +216,9 @@ impl DelegateLoader {
                 UNMANAGED_CALLERS_ONLY_METHOD,
             )
         }?;
-        Ok(ManagedFunction(unsafe { F::Managed::from_ptr(function) }))
+        Ok(ManagedFunction(unsafe {
+            <as_managed!(F)>::from_ptr(function)
+        }))
     }
 
     /// Calling this function will find the specified type and method and return a native function pointer to that method.
@@ -229,12 +233,12 @@ impl DelegateLoader {
     ///    Assembly qualified delegate type name for the method signature.
     #[cfg(feature = "net5_0")]
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net5_0")))]
-    pub fn get_function<F: FunctionPtr>(
+    pub fn get_function<F: FnPtr>(
         &self,
         type_name: &PdCStr,
         method_name: &PdCStr,
         delegate_type_name: &PdCStr,
-    ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
+    ) -> Result<ManagedFunction<as_managed!(F)>, GetManagedFunctionError> {
         let function = unsafe {
             self.get_function_pointer_raw(
                 type_name.as_ptr(),
@@ -242,7 +246,9 @@ impl DelegateLoader {
                 delegate_type_name.as_ptr(),
             )
         }?;
-        Ok(ManagedFunction(unsafe { F::Managed::from_ptr(function) }))
+        Ok(ManagedFunction(unsafe {
+            <as_managed!(F)>::from_ptr(function)
+        }))
     }
 
     /// Calling this function will find the specified type and method and return a native function pointer to that method.
@@ -263,7 +269,7 @@ impl DelegateLoader {
         let function = unsafe {
             self.get_function_pointer_raw(type_name.as_ptr(), method_name.as_ptr(), ptr::null())
         }?;
-        Ok(ManagedFunction(unsafe { FunctionPtr::from_ptr(function) }))
+        Ok(ManagedFunction(unsafe { FnPtr::from_ptr(function) }))
     }
 
     /// Calling this function will find the specified type and method and return a native function pointer to that method.
@@ -279,11 +285,11 @@ impl DelegateLoader {
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     #[cfg(feature = "net5_0")]
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net5_0")))]
-    pub fn get_function_with_unmanaged_callers_only<F: FunctionPtr>(
+    pub fn get_function_with_unmanaged_callers_only<F: FnPtr>(
         &self,
         type_name: &PdCStr,
         method_name: &PdCStr,
-    ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
+    ) -> Result<ManagedFunction<as_managed!(F)>, GetManagedFunctionError> {
         let function = unsafe {
             self.get_function_pointer_raw(
                 type_name.as_ptr(),
@@ -291,7 +297,9 @@ impl DelegateLoader {
                 UNMANAGED_CALLERS_ONLY_METHOD,
             )
         }?;
-        Ok(ManagedFunction(unsafe { F::Managed::from_ptr(function) }))
+        Ok(ManagedFunction(unsafe {
+            <as_managed!(F)>::from_ptr(function)
+        }))
     }
 }
 
@@ -330,12 +338,12 @@ impl AssemblyDelegateLoader {
     ///    Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
     ///  * `delegate_type_name`:
     ///    Assembly qualified delegate type name for the method signature.
-    pub fn get_function<F: FunctionPtr>(
+    pub fn get_function<F: FnPtr>(
         &self,
         type_name: &PdCStr,
         method_name: &PdCStr,
         delegate_type_name: &PdCStr,
-    ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
+    ) -> Result<ManagedFunction<as_managed!(F)>, GetManagedFunctionError> {
         self.loader.load_assembly_and_get_function::<F>(
             self.assembly_path.as_ref(),
             type_name,
@@ -385,11 +393,11 @@ impl AssemblyDelegateLoader {
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     #[cfg(feature = "net5_0")]
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net5_0")))]
-    pub fn get_function_with_unmanaged_callers_only<F: FunctionPtr>(
+    pub fn get_function_with_unmanaged_callers_only<F: FnPtr>(
         &self,
         type_name: &PdCStr,
         method_name: &PdCStr,
-    ) -> Result<ManagedFunction<F::Managed>, GetManagedFunctionError> {
+    ) -> Result<ManagedFunction<as_managed!(F)>, GetManagedFunctionError> {
         self.loader
             .load_assembly_and_get_function_with_unmanaged_callers_only::<F>(
                 self.assembly_path.as_ref(),
