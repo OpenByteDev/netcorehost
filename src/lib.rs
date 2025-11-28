@@ -184,8 +184,10 @@ pub mod pdcstring;
 /// Module containing error enums.
 pub mod error;
 
+/// Module containing additional utilities. (currently unix-only)
+#[cfg(feature = "utils")]
+#[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "utils")))]
+pub mod utils;
+
 #[doc(hidden)]
 pub use hostfxr_sys::dlopen2;
-
-/// Module containing additional utilities. (currently unix-only)
-pub mod utils;
