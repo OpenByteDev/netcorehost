@@ -7,7 +7,7 @@
 /// for the CLR exception-handling mechanisms. Increasing or disabling the alternate signal stack
 /// may be necessary to avoid a segfault in such cases.
 ///
-/// See https://github.com/OpenByteDev/netcorehost/issues/38 for more details.
+/// See <https://github.com/OpenByteDev/netcorehost/issues/38> for more details.
 pub mod altstack {
     use libc::{
         mmap, sigaltstack, stack_t, MAP_ANON, MAP_FAILED, MAP_PRIVATE, PROT_READ, PROT_WRITE,
