@@ -4,9 +4,12 @@
 #[path = "common.rs"]
 mod common;
 
-use netcorehost::{nethost, pdcstr, utils::altstack::{self, State}};
-use rusty_fork::{ChildWrapper, ExitStatusWrapper, fork, rusty_fork_id};
-use std::{process::Stdio, io::Read};
+use netcorehost::{
+    nethost, pdcstr,
+    utils::altstack::{self, State},
+};
+use rusty_fork::{fork, rusty_fork_id, ChildWrapper, ExitStatusWrapper};
+use std::{io::Read, process::Stdio};
 
 macro_rules! function_name {
     () => {{
@@ -60,7 +63,7 @@ fn segfault_with_small_altstack() {
         |status, _, stderr| {
             assert_eq!(status.unix_signal(), Some(libc::SIGSEGV));
             assert_not_contains!(stderr, MANAGED_HANDLER_OUTPUT);
-        }
+        },
     );
 }
 
@@ -75,7 +78,7 @@ fn no_segfault_with_large_altstack() {
         |status, _, stderr| {
             assert_ne!(status.unix_signal(), Some(libc::SIGSEGV));
             assert_contains!(stderr, MANAGED_HANDLER_OUTPUT);
-        }
+        },
     );
 }
 
@@ -90,14 +93,14 @@ fn no_segfault_with_altstack_disabled() {
         |status, _, stderr| {
             assert_ne!(status.unix_signal(), Some(libc::SIGSEGV));
             assert_contains!(stderr, MANAGED_HANDLER_OUTPUT);
-        }
+        },
     );
 }
 
 fn altstack_test(
     test_name: &str,
     configure_altstack: impl FnOnce(),
-    verify: impl FnOnce(ExitStatusWrapper, /* stdout */ String, /* stderr */String)
+    verify: impl FnOnce(ExitStatusWrapper, /* stdout */ String, /* stderr */ String),
 ) {
     common::setup();
 
@@ -137,7 +140,7 @@ fn altstack_test(
             .unwrap()
             .read_to_string(&mut stdout)
             .unwrap();
-        
+
         let mut stderr = String::new();
         child
             .inner_mut()
@@ -161,5 +164,6 @@ fn altstack_test(
         configure_child,
         supervise,
         body,
-    ).expect("fork failed");
+    )
+    .expect("fork failed");
 }

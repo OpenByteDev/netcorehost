@@ -16,6 +16,7 @@ pub mod altstack {
     use std::{io, mem::MaybeUninit, ptr};
 
     /// Represents the desired configuration of the alternate signal stack.
+    #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
     pub enum State {
         /// Disables Rust's alternate signal stack.
         Disabled,
@@ -25,6 +26,12 @@ pub mod altstack {
             /// Target altstack size
             size: usize,
         },
+    }
+
+    impl Default for State {
+        fn default() -> Self {
+            Self::Enabled { size: 8 * 1024 }
+        }
     }
 
     /// Configures the alternate signal stack according to the provided status.
@@ -37,7 +44,7 @@ pub mod altstack {
                     ss_size: 0,
                 };
 
-                let result = unsafe { sigaltstack(&ss, ptr::null_mut()) };
+                let result = unsafe { sigaltstack(&raw const ss, ptr::null_mut()) };
                 if result != 0 {
                     return Err(io::Error::last_os_error());
                 }
@@ -65,7 +72,7 @@ pub mod altstack {
                     ss_flags: 0,
                 };
 
-                let result = unsafe { sigaltstack(&ss, ptr::null_mut()) };
+                let result = unsafe { sigaltstack(&raw const ss, ptr::null_mut()) };
                 if result != 0 {
                     return Err(io::Error::last_os_error());
                 }
