@@ -186,3 +186,6 @@ pub mod error;
 
 #[doc(hidden)]
 pub use hostfxr_sys::dlopen2;
+
+/// Module containing additional utilities. (currently unix-only)
+pub mod utils;

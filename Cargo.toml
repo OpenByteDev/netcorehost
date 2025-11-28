@@ -28,6 +28,7 @@ widestring = { version = "1.2", features = ["std"], default-features = false }
 
 [target.'cfg(not(windows))'.dependencies]
 cstr = { version = "0.2", default-features = false }
+libc = { version = "0.2", default-features = false, optional = true }
 
 [dev-dependencies]
 trybuild = "1.0"
@@ -37,11 +38,15 @@ widestring = "1.2"
 rusty-fork = "0.3"
 path-absolutize = "3.1"
 
+[target.'cfg(not(windows))'.dev-dependencies]
+libc = { version = "0.2", default-features = false }
+
 [features]
-default = ["nethost-download", "net10_0"]
+default = ["nethost-download", "net10_0", "utils"]
 nethost-download = ["nethost", "nethost-sys/download-nuget"]
 nethost = ["nethost-sys"]
 nightly = []
+utils = ["libc"]
 doc-cfg = []
 netcore1_0 = ["hostfxr-sys/netcore1_0"]
 netcore2_0 = ["hostfxr-sys/netcore2_0", "netcore1_0"]

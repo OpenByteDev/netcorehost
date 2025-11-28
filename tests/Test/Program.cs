@@ -30,5 +30,12 @@ namespace Test {
         }
 
         public static int Main() => Hello(default, default);
+
+        class Foo { public int bar; }
+        [UnmanagedCallersOnly]
+        public static void Throw() {
+            Foo foo = null!;
+            foo.bar = 42;
+        }
     } 
 }
