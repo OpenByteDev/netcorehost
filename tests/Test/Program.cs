@@ -6,7 +6,7 @@ namespace Test {
     public static class Program {
         [ModuleInitializer]
         internal static void Init() {
-            Console.WriteLine("C# Module Loaded");
+            Console.WriteLine("Test DLL Loaded");
             Console.WriteLine($"Running under .NET {Environment.Version}");
         }
 
