@@ -62,5 +62,5 @@ latest = ["hostfxr-sys/latest", "net10_0"]
 
 # Prevent downloading nethost library when building on docs.rs.
 [package.metadata.docs.rs]
-features = ["nethost", "latest", "doc-cfg", "nightly"]
+features = ["nethost", "latest", "doc-cfg", "nightly", "utils"]
 no-default-features = true
