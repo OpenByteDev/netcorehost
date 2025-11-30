@@ -38,7 +38,7 @@ jobs:
     env:
       NETCOREHOST_TEST_NETCORE_VERSION: net${{ matrix.dotnet }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Uninstall .NET SDKs
       run: ./.github/scripts/uninstall-dotnet-${{ matrix.os }}
@@ -52,7 +52,7 @@ jobs:
       run: dotnet --info
         
     - name: Install latest ${{ matrix.toolchain }}
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@master
       with:
           target: ${{ matrix.target }}
           toolchain: ${{ matrix.toolchain }}
@@ -74,10 +74,10 @@ jobs:
         target: ["aarch64-unknown-linux-gnu", "armv7-unknown-linux-gnueabihf"]
           
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Install latest ${{ matrix.toolchain }}
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@master
       with:
           target: ${{ matrix.target }}
           toolchain: ${{ matrix.toolchain }}
@@ -96,9 +96,9 @@ jobs:
         toolchain: ["beta"]
         example: ["run-app", "run-app-with-args", "call-managed-function", "passing-parameters", "return-string-from-managed"]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Install latest ${{ matrix.toolchain }}
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@master
       with:
           toolchain: ${{ matrix.toolchain }}
     - name: Build .NET project for '${{ matrix.example }}'
@@ -115,11 +115,9 @@ jobs:
           - os: ubuntu
           - os: windows
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Install latest nightly
-      uses: dtolnay/rust-toolchain@stable
-      with:
-          toolchain: nightly
+      uses: dtolnay/rust-toolchain@nightly
     - name: Generate documentation
       run: cargo doc --all-features
     - name: Install cargo-deadlinks
@@ -135,12 +133,11 @@ jobs:
           - os: ubuntu
           - os: windows
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install latest nightly
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@nightly
         with:
-            toolchain: nightly
-            components: clippy
+          components: clippy
             
       - name: Clippy check
         run: cargo clippy --all-features
@@ -153,11 +150,10 @@ jobs:
           - os: ubuntu
           - os: windows
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Install latest nightly
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@nightly
       with:
-          toolchain: nightly
           components: rustfmt
           
     - name: Format check
