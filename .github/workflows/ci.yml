@@ -100,7 +100,7 @@ jobs:
     - name: Install latest ${{ matrix.toolchain }}
       uses: dtolnay/rust-toolchain@master
       with:
-          toolchain: ${{ matrix.toolchain }}
+        toolchain: ${{ matrix.example == 'call-native-function' && 'nightly' || matrix.toolchain }}
     - name: Build .NET project for '${{ matrix.example }}'
       working-directory: ./examples/${{ matrix.example }}/ExampleProject
       run: dotnet build 
