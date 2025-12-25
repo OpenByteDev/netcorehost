@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 
 namespace ExampleProject {
@@ -11,12 +12,14 @@ namespace ExampleProject {
             return rusty_increment(n);
         }
 
+        [SupportedOSPlatform("windows")]
         [UnmanagedCallersOnly]
         public static int IndirectIncrement2(int n) {
             return rusty_increment(n);
         }
 
-        [DllImport("call-native-function.exe")]
+        [SupportedOSPlatform("windows")]
+        [DllImport("call-native-function.exe", ExactSpelling = true)]
         public static extern int rusty_increment(int n); 
     }
 }

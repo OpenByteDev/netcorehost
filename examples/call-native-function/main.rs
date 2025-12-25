@@ -23,6 +23,7 @@ fn main() {
             pdcstr!("IndirectIncrement1"),
         )
         .unwrap();
+    #[cfg(windows)]
     let increment2 = delegate_loader
         .get_function_with_unmanaged_callers_only::<fn(i32) -> i32>(
             pdcstr!("ExampleProject.Program, ExampleProject"),
@@ -31,5 +32,6 @@ fn main() {
         .unwrap();
 
     assert_eq!(2, increment1(1));
+    #[cfg(windows)]
     assert_eq!(3, increment2(2));
 }
