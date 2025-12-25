@@ -1,4 +1,5 @@
 #![warn(unsafe_op_in_unsafe_fn)]
+// See also call-native-function example
 
 use core::slice;
 use std::{
