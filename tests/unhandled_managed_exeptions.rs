@@ -20,7 +20,7 @@ macro_rules! function_name {
         type_name_of(f)
             .rsplit("::")
             .find(|&part| part != "f" && part != "{{closure}}")
-            .expect("faled to get function name")
+            .expect("failed to get function name")
     }};
 }
 
