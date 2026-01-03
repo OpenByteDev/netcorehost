@@ -112,6 +112,7 @@ pub enum LoadHostfxrError {
 }
 
 const unsafe fn maybe_uninit_slice_assume_init_ref<T>(slice: &[MaybeUninit<T>]) -> &[T] {
+    // not yet stable as const
     #[cfg(feature = "nightly")]
     unsafe {
         slice.assume_init_ref()

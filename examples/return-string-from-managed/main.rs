@@ -1,4 +1,5 @@
 #![warn(unsafe_op_in_unsafe_fn)]
+// See also call-native-function example
 
 use core::slice;
 use std::{
@@ -72,7 +73,6 @@ fn print_string_from_csharp_using_unmanaged_alloc(delegate_loader: &AssemblyDele
         .unwrap();
     FREE_H_GLOBAL
         .set(free_h_global)
-        .ok()
         .expect("string interop already init");
 
     // actual usage
@@ -131,7 +131,6 @@ fn print_string_from_csharp_using_gc_handle(delegate_loader: &AssemblyDelegateLo
         .unwrap();
     FREE_GC_HANDLE_STRING
         .set(free_gc_handle_string)
-        .ok()
         .expect("string interop already init");
 
     let get_string_data_offset = delegate_loader
@@ -172,7 +171,7 @@ impl GcHandleString {
         let unmarked_ptr = (self.0 as usize & !1usize) as *const *const u16;
         let string_ptr = unsafe { *unmarked_ptr };
         let string_data_offset = *STRING_DATA_OFFSET.get().expect("string interop not init");
-        return unsafe { string_ptr.byte_add(string_data_offset) }.cast::<u16>();
+        unsafe { string_ptr.byte_add(string_data_offset) }.cast::<u16>()
     }
     pub fn len(&self) -> usize {
         // read the length of the string which is stored in front of the data.

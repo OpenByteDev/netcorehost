@@ -1,0 +1,54 @@
+name: Auto-rerun (Uninstall .NET SDKs failure)
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  rerun_if_uninstall_dotnet_failed:
+    if: >
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.run_attempt < 5
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Decide whether to rerun
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          STEP_NAME: "Uninstall .NET SDKs"
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Fetch jobs + steps for the failed workflow run
+          jobs_json="$(gh api -H "Accept: application/vnd.github+json" \
+            "/repos/${REPO}/actions/runs/${RUN_ID}/jobs?per_page=100")"
+
+          # Check whether the specific step failed
+          if echo "$jobs_json" | jq -e --arg step "$STEP_NAME" '
+              .jobs[].steps[]? | select(.name == $step and .conclusion == "failure")
+            ' >/dev/null; then
+            echo "rerun=true" >> "$GITHUB_OUTPUT"
+            echo "Detected failure in step: $STEP_NAME"
+          else
+            echo "rerun=false" >> "$GITHUB_OUTPUT"
+            echo "No failure in step '$STEP_NAME' detected; not rerunning."
+          fi
+
+      - name: Rerun failed jobs
+        if: steps.decide.outputs.rerun == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        shell: bash
+        run: |
+          gh run rerun "$RUN_ID" -R "$REPO" --failed

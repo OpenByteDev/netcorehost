@@ -25,9 +25,9 @@ macro_rules! function_name {
 }
 
 macro_rules! assert_contains {
-    ($string:expr, $substring:expr $(,)?) => {{
-        let string_ref: &str = &$string;
-        let substring_ref: &str = &$substring;
+    ($string:expr, $substring:expr) => {{
+        let string_ref: &str = &($string);
+        let substring_ref: &str = &($substring);
         assert!(
             string_ref.contains(substring_ref),
             "Expected `{}` to contain `{}`",
@@ -38,9 +38,9 @@ macro_rules! assert_contains {
 }
 
 macro_rules! assert_not_contains {
-    ($string:expr, $substring:expr $(,)?) => {{
-        let string_ref: &str = &$string;
-        let substring_ref: &str = &$substring;
+    ($string:expr, $substring:expr) => {{
+        let string_ref: &str = &($string);
+        let substring_ref: &str = &($substring);
         assert!(
             !string_ref.contains(substring_ref),
             "Expected `{}` NOT to contain `{}`",
@@ -104,6 +104,7 @@ fn altstack_test(
 ) {
     common::setup();
 
+    // Defines the code the forked process will execute
     let body = || {
         configure_altstack();
 
@@ -125,12 +126,13 @@ fn altstack_test(
         unsafe { throw_fn() };
     };
 
+    // Pipe stdout and stderr
     fn configure_child(child: &mut std::process::Command) {
         child.stdout(Stdio::piped());
         child.stderr(Stdio::piped());
     }
 
-    // Define how to supervise the child process
+    // Define how to verifz the output ot the child.
     let supervise = |child: &mut ChildWrapper, _file: &mut std::fs::File| {
         let mut stdout = String::new();
         child

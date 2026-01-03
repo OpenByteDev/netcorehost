@@ -38,7 +38,7 @@ jobs:
     env:
       NETCOREHOST_TEST_NETCORE_VERSION: net${{ matrix.dotnet }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Uninstall .NET SDKs
       run: ./.github/scripts/uninstall-dotnet-${{ matrix.os }}
@@ -52,7 +52,7 @@ jobs:
       run: dotnet --info
         
     - name: Install latest ${{ matrix.toolchain }}
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@master
       with:
           target: ${{ matrix.target }}
           toolchain: ${{ matrix.toolchain }}
@@ -64,30 +64,22 @@ jobs:
     - name: Test
       run: cargo test --target ${{ matrix.target }} --all-targets --no-fail-fast --no-default-features --features "nethost-download $("net" + "${{ matrix.dotnet }}".replace(".", "_"))" -- --nocapture
       shell: pwsh  
-      
-  cross:
+
+  arm-build:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         toolchain: ["beta"]
         target: ["aarch64-unknown-linux-gnu", "armv7-unknown-linux-gnueabihf"]
-          
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Install latest ${{ matrix.toolchain }}
-      uses: dtolnay/rust-toolchain@stable
-      with:
-          target: ${{ matrix.target }}
-          toolchain: ${{ matrix.toolchain }}
-          
-    - name: Install cross
-      # temporary fix, see cross-rs/cross#1561
-      run: RUSTFLAGS="" cargo install cross --git https://github.com/cross-rs/cross
-          
-    - name: Build
-      run: cross build --target ${{ matrix.target }}
+      - uses: actions/checkout@v6
+      - name: Install latest rust nightly for ${{ matrix.target }}
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: ${{ matrix.target }}
+      - name: Check main crate
+        run: cargo check --target ${{ matrix.target }} --all-features
         
   examples:
     runs-on: ubuntu-latest
@@ -96,17 +88,58 @@ jobs:
         toolchain: ["beta"]
         example: ["run-app", "run-app-with-args", "call-managed-function", "passing-parameters", "return-string-from-managed"]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Install latest ${{ matrix.toolchain }}
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@master
       with:
-          toolchain: ${{ matrix.toolchain }}
+        toolchain: ${{ matrix.toolchain }}
     - name: Build .NET project for '${{ matrix.example }}'
       working-directory: ./examples/${{ matrix.example }}/ExampleProject
       run: dotnet build 
     - name: Run example '${{ matrix.example }}'
       run: cargo run --example ${{ matrix.example }}
-
+  
+  nightly-examples:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        toolchain: ["nightly"]
+        example: ["call-native-function"]
+    steps:
+    - uses: actions/checkout@v6
+    - name: Install latest ${{ matrix.toolchain }}
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.toolchain }}
+    - name: Build .NET project for '${{ matrix.example }}'
+      working-directory: ./examples/${{ matrix.example }}/ExampleProject
+      run: dotnet build 
+    - name: Run example '${{ matrix.example }}'
+      env:
+        RUSTFLAGS: -Z export-executable-symbols
+      run: cargo run --example ${{ matrix.example }}
+      
+  hack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install latest nightly
+        uses: dtolnay/rust-toolchain@nightly
+      - name: cargo install cargo-hack
+        uses: taiki-e/install-action@cargo-hack
+      - name: cargo hack
+        run: cargo hack --feature-powerset check
+        
+  machete:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install latest nightly
+        uses: dtolnay/rust-toolchain@nightly
+      - name: cargo install cargo-machete
+        uses: taiki-e/install-action@cargo-machete
+      - run: cargo machete
+        
   documentation:
     runs-on: ${{ matrix.os }}-latest
     strategy:
@@ -115,11 +148,9 @@ jobs:
           - os: ubuntu
           - os: windows
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Install latest nightly
-      uses: dtolnay/rust-toolchain@stable
-      with:
-          toolchain: nightly
+      uses: dtolnay/rust-toolchain@nightly
     - name: Generate documentation
       run: cargo doc --all-features
     - name: Install cargo-deadlinks
@@ -135,12 +166,11 @@ jobs:
           - os: ubuntu
           - os: windows
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install latest nightly
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@nightly
         with:
-            toolchain: nightly
-            components: clippy
+          components: clippy
             
       - name: Clippy check
         run: cargo clippy --all-features
@@ -153,11 +183,10 @@ jobs:
           - os: ubuntu
           - os: windows
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Install latest nightly
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@nightly
       with:
-          toolchain: nightly
           components: rustfmt
           
     - name: Format check
