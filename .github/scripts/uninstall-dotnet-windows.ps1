@@ -32,7 +32,24 @@ while (-not (Test-Path $uninstallToolPath) -and ($retry -lt $maxRetries)) {
 }
 if ($retry -eq $maxRetries) {
     Write-Error "Uninstall tool was not found after $maxRetries seconds."
-    Get-Content -Path "log.txt" | Write-Host
+    if (Test-Path "log.txt") { Get-Content -Path "log.txt" | Write-Host }
+
+    Write-Host "Expected: $uninstallToolPath"
+    Write-Host "extractPath: $extractPath"
+    Write-Host "extractPath exists? $(Test-Path $extractPath)"
+
+    Write-Host "Top-level contents of extractPath:"
+    if (Test-Path $extractPath) {
+        Get-ChildItem -Path $extractPath -Force -ErrorAction SilentlyContinue |
+            Select-Object FullName | Out-String | Write-Host
+    }
+
+    Write-Host "Searching for dotnet-core-uninstall.exe under extractPath (diagnostic only):"
+    if (Test-Path $extractPath) {
+        Get-ChildItem -Path $extractPath -Recurse -Filter "dotnet-core-uninstall.exe" -Force -ErrorAction SilentlyContinue |
+            Select-Object FullName | Out-String | Write-Host
+    }
+
     exit 1
 }
 
