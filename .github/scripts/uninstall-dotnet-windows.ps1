@@ -31,7 +31,7 @@ while (-not (Test-Path $uninstallToolPath) -and ($retry -lt $maxRetries)) {
     $retry++
 }
 if ($retry -eq $maxRetries) {
-    Write-Error "Uninstall tool was not found after $maxRetries seconds."
+    Write-Host "Uninstall tool was not found after $maxRetries seconds."
     if (Test-Path "log.txt") { Get-Content -Path "log.txt" | Write-Host }
 
     Write-Host "Expected: $uninstallToolPath"
