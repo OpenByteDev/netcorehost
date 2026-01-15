@@ -1,6 +1,6 @@
 use std::{fmt::Debug, ops::Deref};
 
-pub use fn_ptr::{FnPtr, UntypedFnPtr as RawFnPtr};
+pub use fn_ptr::{abi, FnPtr, UntypedFnPtr as RawFnPtr};
 
 /// A wrapper around a managed function pointer.
 pub struct ManagedFunction<F: ManagedFnPtr>(pub(crate) F);
@@ -23,15 +23,5 @@ impl<F: ManagedFnPtr> Deref for ManagedFunction<F> {
 }
 
 /// Trait representing a managed function pointer.
-pub trait ManagedFnPtr: fn_ptr::FnPtr + fn_ptr::HasAbi<{ fn_ptr::abi!("system") }> {}
-
-impl<T: fn_ptr::FnPtr + fn_ptr::HasAbi<{ fn_ptr::abi!("system") }>> ManagedFnPtr for T {}
-
-#[macro_export]
-#[doc(hidden)]
-macro_rules! __as_managed {
-    ($t:ty) => {
-        ::fn_ptr::with_abi!(::fn_ptr::Abi::System, $t)
-    };
-}
-pub(crate) use __as_managed as as_managed;
+pub trait ManagedFnPtr: FnPtr<Abi = abi!("system")> {}
+impl<T: FnPtr<Abi = abi!("system")>> ManagedFnPtr for T {}

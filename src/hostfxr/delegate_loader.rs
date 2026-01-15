@@ -6,11 +6,12 @@ use crate::{
     error::{HostingError, HostingResult, HostingSuccess},
     pdcstring::{PdCStr, PdCString},
 };
+use fn_ptr::{abi::System, WithAbi};
 use num_enum::TryFromPrimitive;
 use std::{convert::TryFrom, mem::MaybeUninit, path::Path, ptr};
 use thiserror::Error;
 
-use super::{as_managed, FnPtr, ManagedFunction, RawFnPtr, SharedHostfxrLibrary};
+use super::{FnPtr, ManagedFunction, RawFnPtr, SharedHostfxrLibrary};
 
 #[cfg(feature = "net5_0")]
 use crate::bindings::hostfxr::{get_function_pointer_fn, UNMANAGED_CALLERS_ONLY_METHOD};
@@ -128,13 +129,13 @@ impl DelegateLoader {
     ///    Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
     ///  * `delegate_type_name`:
     ///    Assembly qualified delegate type name for the method signature.
-    pub fn load_assembly_and_get_function<F: FnPtr>(
+    pub fn load_assembly_and_get_function<F: FnPtr + WithAbi<System>>(
         &self,
         assembly_path: &PdCStr,
         type_name: &PdCStr,
         method_name: &PdCStr,
         delegate_type_name: &PdCStr,
-    ) -> Result<ManagedFunction<as_managed!(F)>, GetManagedFunctionError> {
+    ) -> Result<ManagedFunction<<F as WithAbi<System>>::F>, GetManagedFunctionError> {
         Self::validate_assembly_path(assembly_path)?;
         let function = unsafe {
             self.load_assembly_and_get_function_pointer_raw(
@@ -145,7 +146,7 @@ impl DelegateLoader {
             )
         }?;
         Ok(ManagedFunction(unsafe {
-            <as_managed!(F)>::from_ptr(function)
+            <<F as WithAbi<System>>::F>::from_ptr(function)
         }))
     }
 
@@ -201,12 +202,14 @@ impl DelegateLoader {
     /// [UnmanagedCallersOnly]: <https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute>
     #[cfg(feature = "net5_0")]
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net5_0")))]
-    pub fn load_assembly_and_get_function_with_unmanaged_callers_only<F: FnPtr>(
+    pub fn load_assembly_and_get_function_with_unmanaged_callers_only<
+        F: FnPtr + WithAbi<System>,
+    >(
         &self,
         assembly_path: &PdCStr,
         type_name: &PdCStr,
         method_name: &PdCStr,
-    ) -> Result<ManagedFunction<as_managed!(F)>, GetManagedFunctionError> {
+    ) -> Result<ManagedFunction<<F as WithAbi<System>>::F>, GetManagedFunctionError> {
         Self::validate_assembly_path(assembly_path)?;
         let function = unsafe {
             self.load_assembly_and_get_function_pointer_raw(
@@ -217,7 +220,7 @@ impl DelegateLoader {
             )
         }?;
         Ok(ManagedFunction(unsafe {
-            <as_managed!(F)>::from_ptr(function)
+            <<F as WithAbi<System>>::F>::from_ptr(function)
         }))
     }
 
@@ -233,12 +236,12 @@ impl DelegateLoader {
     ///    Assembly qualified delegate type name for the method signature.
     #[cfg(feature = "net5_0")]
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net5_0")))]
-    pub fn get_function<F: FnPtr>(
+    pub fn get_function<F: FnPtr + WithAbi<System>>(
         &self,
         type_name: &PdCStr,
         method_name: &PdCStr,
         delegate_type_name: &PdCStr,
-    ) -> Result<ManagedFunction<as_managed!(F)>, GetManagedFunctionError> {
+    ) -> Result<ManagedFunction<<F as WithAbi<System>>::F>, GetManagedFunctionError> {
         let function = unsafe {
             self.get_function_pointer_raw(
                 type_name.as_ptr(),
@@ -247,7 +250,7 @@ impl DelegateLoader {
             )
         }?;
         Ok(ManagedFunction(unsafe {
-            <as_managed!(F)>::from_ptr(function)
+            <<F as WithAbi<System>>::F>::from_ptr(function)
         }))
     }
 
@@ -285,11 +288,11 @@ impl DelegateLoader {
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     #[cfg(feature = "net5_0")]
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net5_0")))]
-    pub fn get_function_with_unmanaged_callers_only<F: FnPtr>(
+    pub fn get_function_with_unmanaged_callers_only<F: FnPtr + WithAbi<System>>(
         &self,
         type_name: &PdCStr,
         method_name: &PdCStr,
-    ) -> Result<ManagedFunction<as_managed!(F)>, GetManagedFunctionError> {
+    ) -> Result<ManagedFunction<<F as WithAbi<System>>::F>, GetManagedFunctionError> {
         let function = unsafe {
             self.get_function_pointer_raw(
                 type_name.as_ptr(),
@@ -298,7 +301,7 @@ impl DelegateLoader {
             )
         }?;
         Ok(ManagedFunction(unsafe {
-            <as_managed!(F)>::from_ptr(function)
+            <<F as WithAbi<System>>::F>::from_ptr(function)
         }))
     }
 }
@@ -338,12 +341,12 @@ impl AssemblyDelegateLoader {
     ///    Name of the method on the `type_name` to find. The method must be static and must match the signature of `delegate_type_name`.
     ///  * `delegate_type_name`:
     ///    Assembly qualified delegate type name for the method signature.
-    pub fn get_function<F: FnPtr>(
+    pub fn get_function<F: FnPtr + WithAbi<System>>(
         &self,
         type_name: &PdCStr,
         method_name: &PdCStr,
         delegate_type_name: &PdCStr,
-    ) -> Result<ManagedFunction<as_managed!(F)>, GetManagedFunctionError> {
+    ) -> Result<ManagedFunction<<F as WithAbi<System>>::F>, GetManagedFunctionError> {
         self.loader.load_assembly_and_get_function::<F>(
             self.assembly_path.as_ref(),
             type_name,
@@ -393,11 +396,11 @@ impl AssemblyDelegateLoader {
     /// [`UnmanagedCallersOnly`]: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedcallersonlyattribute
     #[cfg(feature = "net5_0")]
     #[cfg_attr(feature = "doc-cfg", doc(cfg(feature = "net5_0")))]
-    pub fn get_function_with_unmanaged_callers_only<F: FnPtr>(
+    pub fn get_function_with_unmanaged_callers_only<F: FnPtr + WithAbi<System>>(
         &self,
         type_name: &PdCStr,
         method_name: &PdCStr,
-    ) -> Result<ManagedFunction<as_managed!(F)>, GetManagedFunctionError> {
+    ) -> Result<ManagedFunction<<F as WithAbi<System>>::F>, GetManagedFunctionError> {
         self.loader
             .load_assembly_and_get_function_with_unmanaged_callers_only::<F>(
                 self.assembly_path.as_ref(),
