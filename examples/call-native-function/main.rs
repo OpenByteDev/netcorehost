@@ -2,7 +2,7 @@
 
 use netcorehost::{nethost, pdcstr};
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "system" fn rusty_increment(n: i32) -> i32 {
     println!("Called rusty increment with {n}");
     n + 1

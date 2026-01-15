@@ -10,8 +10,8 @@
 /// See <https://github.com/OpenByteDev/netcorehost/issues/38> for more details.
 pub mod altstack {
     use libc::{
-        mmap, sigaltstack, stack_t, MAP_ANON, MAP_FAILED, MAP_PRIVATE, PROT_READ, PROT_WRITE,
-        SS_DISABLE,
+        MAP_ANON, MAP_FAILED, MAP_PRIVATE, PROT_READ, PROT_WRITE, SS_DISABLE, mmap, sigaltstack,
+        stack_t,
     };
     use std::{io, mem::MaybeUninit, ptr};
 

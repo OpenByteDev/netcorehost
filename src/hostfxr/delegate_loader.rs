@@ -6,7 +6,7 @@ use crate::{
     error::{HostingError, HostingResult, HostingSuccess},
     pdcstring::{PdCStr, PdCString},
 };
-use fn_ptr::{abi::System, WithAbi};
+use fn_ptr::{WithAbi, abi::System};
 use num_enum::TryFromPrimitive;
 use std::{convert::TryFrom, mem::MaybeUninit, path::Path, ptr};
 use thiserror::Error;
@@ -14,7 +14,7 @@ use thiserror::Error;
 use super::{FnPtr, ManagedFunction, RawFnPtr, SharedHostfxrLibrary};
 
 #[cfg(feature = "net5_0")]
-use crate::bindings::hostfxr::{get_function_pointer_fn, UNMANAGED_CALLERS_ONLY_METHOD};
+use crate::bindings::hostfxr::{UNMANAGED_CALLERS_ONLY_METHOD, get_function_pointer_fn};
 
 /// A pointer to a function with the default signature.
 pub type ManagedFunctionWithDefaultSignature = ManagedFunction<component_entry_point_fn>;

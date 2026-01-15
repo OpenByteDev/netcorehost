@@ -1,6 +1,6 @@
 use crate::{
     bindings::hostfxr::{
-        hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t, PATH_LIST_SEPARATOR,
+        PATH_LIST_SEPARATOR, hostfxr_resolve_sdk2_flags_t, hostfxr_resolve_sdk2_result_key_t,
     },
     error::{HostingError, HostingResult},
     hostfxr::{AppOrHostingResult, Hostfxr},

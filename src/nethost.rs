@@ -1,5 +1,5 @@
 use crate::{
-    bindings::{nethost::get_hostfxr_parameters, MAX_PATH},
+    bindings::{MAX_PATH, nethost::get_hostfxr_parameters},
     error::{HostingError, HostingResult, HostingSuccess},
     hostfxr::Hostfxr,
     pdcstring::{self, PdCStr, PdUChar},

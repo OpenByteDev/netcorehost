@@ -8,7 +8,7 @@ use netcorehost::{
     nethost, pdcstr,
     utils::altstack::{self, State},
 };
-use rusty_fork::{fork, rusty_fork_id, ChildWrapper, ExitStatusWrapper};
+use rusty_fork::{ChildWrapper, ExitStatusWrapper, fork, rusty_fork_id};
 use std::{io::Read, process::Stdio};
 
 macro_rules! function_name {

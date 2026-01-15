@@ -1,6 +1,6 @@
 use std::{fmt::Debug, ops::Deref};
 
-pub use fn_ptr::{abi, FnPtr, UntypedFnPtr as RawFnPtr};
+pub use fn_ptr::{FnPtr, UntypedFnPtr as RawFnPtr, abi};
 
 /// A wrapper around a managed function pointer.
 pub struct ManagedFunction<F: ManagedFnPtr>(pub(crate) F);
