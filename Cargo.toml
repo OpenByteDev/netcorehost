@@ -7,9 +7,9 @@ repository = "https://github.com/OpenByteDev/netcorehost"
 documentation = "https://docs.rs/netcorehost"
 license = "MIT"
 authors = ["OpenByte <development.openbyte@gmail.com>"]
-categories = ["api-bindings", "external-ffi-bindings"]
 edition = "2024"
-keywords = ["nethost", "hostfxr", "dotnet", "bindings", "coreclr"]
+categories = ["api-bindings", "development-tools::ffi"]
+keywords = ["nethost", "hostfxr", "dotnet", "coreclr", ".net"]
 
 [dependencies]
 num_enum = { version = "0.7", default-features = false }
