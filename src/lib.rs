@@ -1,6 +1,7 @@
 #![cfg_attr(feature = "nightly", feature(try_trait_v2))]
 #![cfg_attr(feature = "doc-cfg", feature(doc_cfg))]
-#![warn(clippy::pedantic, clippy::cargo, unsafe_op_in_unsafe_fn, missing_docs)]
+#![cfg_attr(feature = "doc-cfg", allow(unused_features))]
+#![warn(clippy::pedantic, clippy::cargo, missing_docs)]
 #![allow(
     clippy::missing_safety_doc,
     clippy::missing_errors_doc,
