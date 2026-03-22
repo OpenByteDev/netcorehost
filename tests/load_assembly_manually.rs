@@ -4,7 +4,6 @@ use netcorehost::{nethost, pdcstr};
 use rusty_fork::rusty_fork_test;
 use std::fs;
 
-#[path = "common.rs"]
 mod common;
 
 rusty_fork_test! {

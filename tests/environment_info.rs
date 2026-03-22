@@ -11,7 +11,6 @@ use std::{
     str::FromStr,
 };
 
-#[path = "common.rs"]
 mod common;
 
 #[test]

@@ -4,7 +4,6 @@ use netcorehost::{hostfxr::Hostfxr, nethost, pdcstr};
 use rusty_fork::rusty_fork_test;
 use std::cell::Cell;
 
-#[path = "common.rs"]
 mod common;
 
 fn cause_error(hostfxr: &Hostfxr) {

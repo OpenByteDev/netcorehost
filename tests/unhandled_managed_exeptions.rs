@@ -1,7 +1,6 @@
 #![cfg(all(feature = "netcore3_0", feature = "utils", unix))]
 // see https://github.com/OpenByteDev/netcorehost/issues/38
 
-#[path = "common.rs"]
 mod common;
 
 use netcorehost::{

@@ -5,7 +5,6 @@ use std::sync::Arc;
 use netcorehost::nethost;
 use rusty_fork::rusty_fork_test;
 
-#[path = "common.rs"]
 mod common;
 
 rusty_fork_test! {

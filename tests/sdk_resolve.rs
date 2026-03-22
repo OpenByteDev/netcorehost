@@ -4,7 +4,6 @@ use std::{
     process::Command,
 };
 
-#[path = "common.rs"]
 mod common;
 
 #[test]
