@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 #[cfg(feature = "nightly")]
-use std::ops::{ControlFlow, FromResidual, Try, Residual};
+use std::ops::{ControlFlow, FromResidual, Residual, Try};
 
 use crate::bindings;
 use derive_more::{Deref, Display, From};
