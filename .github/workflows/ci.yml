@@ -38,7 +38,7 @@ jobs:
     env:
       NETCOREHOST_TEST_NETCORE_VERSION: net${{ matrix.dotnet }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Uninstall .NET SDKs
       run: ./.github/scripts/uninstall-dotnet-${{ matrix.os }}
@@ -73,7 +73,7 @@ jobs:
         toolchain: ["beta"]
         target: ["aarch64-unknown-linux-gnu", "armv7-unknown-linux-gnueabihf"]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install latest rust nightly for ${{ matrix.target }}
         uses: dtolnay/rust-toolchain@nightly
         with:
@@ -88,7 +88,7 @@ jobs:
         toolchain: ["beta"]
         example: ["run-app", "run-app-with-args", "call-managed-function", "passing-parameters", "return-string-from-managed"]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Install latest ${{ matrix.toolchain }}
       uses: dtolnay/rust-toolchain@master
       with:
@@ -106,7 +106,7 @@ jobs:
         toolchain: ["nightly"]
         example: ["call-native-function"]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Install latest ${{ matrix.toolchain }}
       uses: dtolnay/rust-toolchain@master
       with:
@@ -122,7 +122,7 @@ jobs:
   hack:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install latest nightly
         uses: dtolnay/rust-toolchain@nightly
       - name: cargo install cargo-hack
@@ -133,7 +133,7 @@ jobs:
   machete:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install latest nightly
         uses: dtolnay/rust-toolchain@nightly
       - name: cargo install cargo-machete
@@ -148,7 +148,7 @@ jobs:
           - os: ubuntu
           - os: windows
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Install latest nightly
       uses: dtolnay/rust-toolchain@nightly
     - name: Generate documentation
@@ -166,7 +166,7 @@ jobs:
           - os: ubuntu
           - os: windows
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install latest nightly
         uses: dtolnay/rust-toolchain@nightly
         with:
@@ -183,7 +183,7 @@ jobs:
           - os: ubuntu
           - os: windows
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Install latest nightly
       uses: dtolnay/rust-toolchain@nightly
       with:
