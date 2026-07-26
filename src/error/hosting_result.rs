@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 #[cfg(feature = "nightly")]
-use std::ops::{ControlFlow, FromResidual, Try};
+use std::ops::{ControlFlow, FromResidual, Try, Residual};
 
 use crate::bindings;
 use derive_more::{Deref, Display, From};
@@ -695,4 +695,9 @@ impl From<HostingError> for u32 {
     fn from(code: HostingError) -> Self {
         code.value()
     }
+}
+
+#[cfg(feature = "nightly")]
+impl Residual<HostingSuccess> for HostingError {
+    type TryType = HostingResult;
 }

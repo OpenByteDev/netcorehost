@@ -1,4 +1,4 @@
-#![cfg_attr(feature = "nightly", feature(try_trait_v2))]
+#![cfg_attr(feature = "nightly", feature(try_trait_v2, try_trait_v2_residual))]
 #![cfg_attr(feature = "doc-cfg", feature(doc_cfg))]
 #![cfg_attr(feature = "doc-cfg", allow(unused_features))]
 #![warn(clippy::pedantic, clippy::cargo, missing_docs)]
