@@ -23,7 +23,7 @@
 //! ## Running an application
 //! The example below will setup the runtime, load `Test.dll` and run its `Main` method:
 //! ```rust
-//! # #[path = "../tests/common.rs"]
+//! # #[path = "../tests/common/mod.rs"]
 //! # mod common;
 //! # common::setup();
 //! # use netcorehost::{nethost, pdcstr};
@@ -61,7 +61,7 @@
 //!
 //! **Rust**
 //! ```rust
-//! # #[path = "../tests/common.rs"]
+//! # #[path = "../tests/common/mod.rs"]
 //! # mod common;
 //! # common::setup();
 //! # use netcorehost::{nethost, pdcstr};
@@ -99,7 +99,7 @@
 //!
 //! **Rust**
 //! ```rust
-//! # #[path = "../tests/common.rs"]
+//! # #[path = "../tests/common/mod.rs"]
 //! # mod common;
 //! # common::setup();
 //! # use netcorehost::{nethost, pdcstr};
@@ -136,7 +136,7 @@
 //!
 //! **Rust**
 //! ```rust
-//! # #[path = "../tests/common.rs"]
+//! # #[path = "../tests/common/mod.rs"]
 //! # mod common;
 //! # common::setup();
 //! # use netcorehost::{nethost, pdcstr};
